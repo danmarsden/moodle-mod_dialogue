@@ -1,4 +1,4 @@
-<?PHP //$Id: backuplib.php,v 1.1 2003/10/02 15:53:20 moodler Exp $
+<?PHP //$Id: backuplib.php,v 1.1 2003/10/02 16:21:02 moodler Exp $
     //This php script contains all the stuff to backup/restore
     //dialogue mods
 

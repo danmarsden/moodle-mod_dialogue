@@ -1,4 +1,4 @@
-<?PHP  // $Id: dialogues.php,v 1.1 2003/10/02 15:53:20 moodler Exp $
+<?PHP  // $Id: dialogues.php,v 1.1 2003/10/02 16:21:02 moodler Exp $
 
 /*************************************************
 	ACTIONS handled are:

@@ -1,4 +1,4 @@
-<?PHP // $Id: lib.php,v 1.1 2003/10/02 15:53:20 moodler Exp $
+<?PHP // $Id: lib.php,v 1.1 2003/10/02 16:21:02 moodler Exp $
 
 $DIALOGUE_DAYS = array (0 => 0, 7 => 7, 14 => 14, 30 => 30, 150 => 150, 365 => 365 );
 

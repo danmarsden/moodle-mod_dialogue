@@ -1,4 +1,4 @@
-<?PHP // $Id: version.php,v 1.1 2003/10/02 15:53:20 moodler Exp $
+<?PHP // $Id: version.php,v 1.1 2003/10/02 16:21:02 moodler Exp $
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Code fragment to define the module version etc.

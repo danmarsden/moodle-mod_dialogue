@@ -1,4 +1,4 @@
-<?PHP  // $Id: view.php,v 1.1 2003/10/02 15:53:20 moodler Exp $
+<?PHP  // $Id: view.php,v 1.1 2003/10/02 16:21:02 moodler Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
