@@ -1,4 +1,4 @@
-<?PHP  // $Id: dialogues.php,v 1.1 2003/10/02 16:21:02 moodler Exp $
+<?PHP  // $Id: dialogues.php,v 1.2 2003/10/04 15:50:03 rkingdon Exp $
 
 /*************************************************
 	ACTIONS handled are:
@@ -97,7 +97,6 @@
 	/******************* insert dialogue entries ******************************/
 	elseif ($action == 'insertentries' ) {
 
-		echo "<script>window.close('popup');</script>\n";
 		$timenow = time();
 		$n = 0;
 		// get all the open conversations for this user
