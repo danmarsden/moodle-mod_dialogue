@@ -1,4 +1,4 @@
-<?PHP //$Id: backuplib.php,v 1.1 2003/10/02 16:21:02 moodler Exp $
+<?PHP //$Id: backuplib.php,v 1.2 2003/10/05 19:10:23 rkingdon Exp $
     //This php script contains all the stuff to backup/restore
     //dialogue mods
 
@@ -45,6 +45,7 @@
                 fwrite ($bf,full_tag("INTRO",4,false,$dialogue->intro));
                 fwrite ($bf,full_tag("DELETEAFTER",4,false,$dialogue->deleteafter));
                 fwrite ($bf,full_tag("DIALOGUETYPE",4,false,$dialogue->dialoguetype));
+                fwrite ($bf,full_tag("MULTIPLECONVERSATIONS",4,false,$dialogue->multipleconversations));
                 fwrite ($bf,full_tag("MAILDEFAULT",4,false,$dialogue->maildefault));
                 fwrite ($bf,full_tag("TIMEMODIFIED",4,false,$dialogue->timemodified));
 
@@ -84,6 +85,7 @@
                 fwrite ($bf,full_tag("CLOSED",6,false,$conversation->closed));
                 fwrite ($bf,full_tag("CTYPE",6,false,$conversation->ctype));
                 fwrite ($bf,full_tag("FORMAT",6,false,$conversation->format));
+                fwrite ($bf,full_tag("SUBJECT",6,false,$conversation->subject));
                 //End entry
                 $status =fwrite ($bf,end_tag("CONVERSATION",5,true));
             }

@@ -1,4 +1,4 @@
-<?PHP // $Id: dialogue.php,v 1.1 2003/10/02 15:53:20 moodler Exp $
+<?PHP // $Id: dialogue.php,v 1.2 2003/10/05 19:10:23 rkingdon Exp $
 
 #------------------------------------------------------------
 $string['modulename'] = "Dialogue";
@@ -7,6 +7,7 @@ $string['modulenameplural'] = "Dialogues";
 
 
 $string['addmynewentries'] = "Add my New Entries";
+$string['allowmultiple'] = "Allow more than one Dialogue with the same person";
 $string['allowstudentdialogues'] = "Allow Student-to-Student Dialogues";
 $string['confirmclosure'] = "You are about to close a dialogue with \$a. Closed dialogues cannot be reopened. If you close this dialogue you can view it but not add to it, and you will have to start another dialogue to contnue &quot;talking&quot; this person.<br /><br />Are you sure you want to close this dialogue?";
 $string['close'] = "Close";
@@ -24,30 +25,39 @@ $string['dialoguemailhtml'] = "\$a->userfrom has posted a new entry in your
 dialogue entry for '<i>\$a->dialogue</i>'<br /><br />
 You can see it appended to your <a href=\\\"\$a->url\\\">dialogue</a>.";
 $string['dialoguename'] = "Dialogue name";
-$string['dialoguesawaitingreply'] = "Dialogues awaiting reply from you";
-$string['dialoguesawaitingreplyfromother'] = "Dialogues awaiting reply from the other person";
-$string['dialoguestarted'] = "Dialogue started with \$a";
+
+$string['dialogueopened'] = "Dialogue opened with \$a";
 $string['dialoguewith'] = "Dialogue with \$a";
 $string['of'] = "of";
 $string['everybody'] = "Everybody";
 $string['open'] = "Open";
 $string['lastentry'] = "Last Entry";
-$string['listcloseddialogues'] = "List Closed Dialogues";
 $string['maildefault'] = "Mail Default";
 $string['namehascloseddialogue'] = "\$a has closed dialogue";
 $string['newdialogueentries'] = "New dialogue entries";
 $string['newentry'] = "New Entry";
+$string['noavailablepeople'] = "There is no one available to have a Dialogue with.";
 $string['nopersonchosen'] = "No Person Chosen";
+$string['notextentered'] = "No Text Entered";
 $string['notstarted'] = "You have not started this dialogue yet";
 $string['numberofentries'] = "Number of entries";
 $string['numberofentriesadded'] = "Number of entries added: \$a";
 $string['onwrote'] = "On \$a wrote";
 $string['onyouwrote'] = "On \$a you wrote";
+$string['open'] = "Open";
+$string['openadialoguewith'] = "Open a Dialogue with";
+$string['opendialogue'] = "Open Dialogue";
+$string['pane0'] = "Open a Dialogue";
+$string['pane1'] = "\$a Dialogues awaiting Replies from you";
+$string['pane1one'] = "1 Dialogue awaiting a Reply from you";
+$string['pane2'] = "\$a Dialogues awaiting Replies from the other person";
+$string['pane2one'] = "1 Dialogue awaiting a Reply from the other person";
+$string['pane3'] = "\$a Closed Dialogues";
+$string['pane3one'] = "1 Closed Dialogue";
 $string['sendmailmessages'] = "Send Mail Messages about my new entries";
 $string['status'] = "Status";
-$string['startdialogue'] = "Start Dialogue";
-$string['startadialoguewith'] = "Start a Dialogue with";
 $string['studenttostudent'] = "Student to Student";
+$string['subject'] = "Subject";
 $string['teachertostudent'] = "Teacher to Student";
 $string['typefirstentry'] = "Type the first entry here";
 $string['typefollowup'] = "Type follow-up here";

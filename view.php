@@ -1,4 +1,4 @@
-<?PHP  // $Id: view.php,v 1.1 2003/10/02 16:21:02 moodler Exp $
+<?PHP  // $Id: view.php,v 1.2 2003/10/05 19:10:23 rkingdon Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
@@ -64,30 +64,102 @@
 	/************ view **************************************************/
 	elseif ($action == 'view') {
 	
-		echo "<center>\n";
 		print_simple_box( text_to_html($dialogue->intro) , "center");
 		echo "<br />";
-		if ($names = dialogue_get_available_users($dialogue)) {
-			print_simple_box_start("center");
-			echo "<center>";
-			echo "<form name=\"startform\" method=\"post\" action=\"dialogues.php\">\n";
-			echo "<input type=\"hidden\" name=\"id\"value=\"$cm->id\">\n";
-			echo "<input type=\"hidden\" name=\"action\" value=\"opendialogue\">\n";
-			echo "<b>".get_string("startadialoguewith", "dialogue")." : </b>";
-			choose_from_menu($names, "recipientid");
-			echo " <input type=\"submit\" value=\"".get_string("startdialogue","dialogue")."\">\n";
-			echo "</form>\n";
-			echo "</center>";
-			print_simple_box_end();
-		}
-		
-		// print active conversations, first those requiring a reply, then the others.
-		dialogue_list_conversations($dialogue, $USER);
-		if (dialogue_count_closed($dialogue, $USER)) {
-			$options = array ("id" => "$cm->id", "action" => "listclosed");
-            echo "<center><br />";
-			print_single_button("dialogues.php", $options, get_string("listcloseddialogues","dialogue"));
-            echo "</center>";
+		// get some stats
+        $countneedingrepliesself = dialogue_count_needing_replies_self($dialogue, $USER);
+        $countneedingrepliesother = dialogue_count_needing_replies_other($dialogue, $USER);
+        $countclosed = dialogue_count_closed($dialogue, $USER);
+
+        // set the pane if it's in a GET or POST
+        if (isset($_REQUEST['pane'])) {
+            $pane = $_REQUEST['pane'];
+        } else {
+            // set default pane
+            $pane = 0;
+            if ($countneedingrepliesother) {
+                $pane = 2;
+           }
+            if ($countneedingrepliesself) {
+                $pane =1;
+            }
+        }
+        
+        // set up tab table
+        $tabs->names[0] = get_string("pane0", "dialogue");
+        if ($countneedingrepliesself == 1) {
+            $tabs->names[1] = get_string("pane1one", "dialogue");
+        } else {
+            $tabs->names[1] = get_string("pane1", "dialogue", $countneedingrepliesself);
+        }
+        if ($countneedingrepliesother == 1) {
+            $tabs->names[2] = get_string("pane2one", "dialogue");
+        } else {
+            $tabs->names[2] = get_string("pane2", "dialogue", $countneedingrepliesother);
+        } 
+        if ($countclosed == 1) {
+            $tabs->names[3] = get_string("pane3one", "dialogue");
+        } else {
+            $tabs->names[3] = get_string("pane3", "dialogue", $countclosed);
+        }
+
+        $tabs->urls[0] = "view.php?id=$cm->id&pane=0";
+        $tabs->urls[1] = "view.php?id=$cm->id&pane=1";
+        $tabs->urls[2] = "view.php?id=$cm->id&pane=2";
+        $tabs->urls[3] = "view.php?id=$cm->id&pane=3";
+        $tabs->highlight = $pane;
+        dialogue_print_tabbed_heading($tabs);
+        echo "<br/><center>\n";
+		switch ($pane) {
+            case 0: 
+                if ($names = dialogue_get_available_users($dialogue)) {
+		        	print_simple_box_start("center");
+        			echo "<center>";
+		        	echo "<form name=\"startform\" method=\"post\" action=\"dialogues.php\">\n";
+        			echo "<input type=\"hidden\" name=\"id\"value=\"$cm->id\">\n";
+		        	echo "<input type=\"hidden\" name=\"action\" value=\"openconversation\">\n";
+        			echo "<table border=\"0\"><tr>\n";
+                    echo "<td align=\"right\"><b>".get_string("openadialoguewith", "dialogue").
+                        " : </b></td>\n";
+        			echo "<td>";
+                    choose_from_menu($names, "recipientid");
+                    echo "</td></tr>\n";
+                    echo "<tr><td align=\"right\"><b>".get_string("subject", "dialogue")." : </b></td>\n";
+                    echo "<td><input type=\"text\" size=\"50\" maxsize=\"100\" name=\"subject\" 
+                        value=\"\"></td></tr>\n";
+        			echo "<tr><td colspan=\"2\" align=\"center\" valign=\"top\"><i>".
+                        get_string("typefirstentry", "dialogue")."</i></td></tr>\n";
+        			echo "<tr><td valign=\"top\" align=\"right\">\n";
+		        	helpbutton("writing", get_string("helpwriting"), "dialogue", true, true);
+        			echo "<br />";
+        			$showemoticon = false;
+		        	if ($showemoticon) {
+				        emoticonhelpbutton("replies", "firstentry");
+	        		}
+			        echo "</td><td>\n";
+			        echo "<textarea name=\"firstentry\" rows=\"5\" cols=\"60\" wrap=\"virtual\">";
+        			echo "</textarea>\n";
+		        	echo "</td></tr>";
+        			echo "<tr><td colspan=\"2\" align=\"center\"><input type=\"submit\" value=\"".
+                        get_string("opendialogue","dialogue")."\"></td></tr>\n";
+        			echo "</table></form>\n";
+		        	echo "</center>";
+        			print_simple_box_end();
+		        } else {
+                    print_heading(get_string("noavailablepeople", "dialogue"));
+                    print_continue("view.php?id=$cm->id");
+                }
+                break;
+            case 1:
+                // print active conversations requiring a reply
+        	    dialogue_list_conversations_self($dialogue, $USER);
+                break;
+            case 2:
+                // print active conversations requiring a reply from the other person.
+        	    dialogue_list_conversations_other($dialogue, $USER);
+                break;
+            case 3:
+		        dialogue_list_conversations_closed($dialogue, $USER);
 		}
 	}
 		

@@ -1,4 +1,4 @@
-dialogue<?PHP //$Id: restorelib.php,v 1.1 2003/10/02 16:21:02 moodler Exp $
+dialogue<?PHP //$Id: restorelib.php,v 1.2 2003/10/05 19:10:23 rkingdon Exp $
     //This php script contains all the stuff to backup/restore
     //dialogue mods
 
@@ -49,6 +49,7 @@ dialogue<?PHP //$Id: restorelib.php,v 1.1 2003/10/02 16:21:02 moodler Exp $
             $dialogue->intro = backup_todb($info['MOD']['#']['INTRO']['0']['#']);
             $dialogue->deleteafter = backup_todb($info['MOD']['#']['DELETEAFTER']['0']['#']);
             $dialogue->dialoguetype = backup_todb($info['MOD']['#']['DIALOGUETYPE']['0']['#']);
+            $dialogue->multipleconversations = backup_todb($info['MOD']['#']['MULTIPLECONVERSATIONS']['0']['#']);
             $dialogue->maildefault = backup_todb($info['MOD']['#']['MAILDEFAULT']['0']['#']);
             $dialogue->timemodified = backup_todb($info['MOD']['#']['TIMEMODIFIED']['0']['#']);
 
@@ -115,12 +116,13 @@ dialogue<?PHP //$Id: restorelib.php,v 1.1 2003/10/02 16:21:02 moodler Exp $
             //Now, build the dialogue_ENTRIES record structure
             $conversation->dialogue = $new_dialogue_id;
             $conversation->userid = backup_todb($conversation_info['#']['USERID']['0']['#']);
-            $conversation->recipientid = backup_todb($conversation_info['#']['MODIFIED']['0']['#']);
-            $conversation->lastid = backup_todb($conversation_info['#']['TEXT']['0']['#']);
-            $conversation->timemodified = backup_todb($conversation_info['#']['FORMAT']['0']['#']);
-            $conversation->closed = backup_todb($conversation_info['#']['RATING']['0']['#']);
-            $conversation->ctype = backup_todb($conversation_info['#']['COMMENT']['0']['#']);
-            $conversation->format = backup_todb($conversation_info['#']['TEACHER']['0']['#']);
+            $conversation->recipientid = backup_todb($conversation_info['#']['RECIPIENTID']['0']['#']);
+            $conversation->lastid = backup_todb($conversation_info['#']['LASTID']['0']['#']);
+            $conversation->timemodified = backup_todb($conversation_info['#']['TIMEMODIFIED']['0']['#']);
+            $conversation->closed = backup_todb($conversation_info['#']['CLOSED']['0']['#']);
+            $conversation->ctype = backup_todb($conversation_info['#']['CTYPE']['0']['#']);
+            $conversation->format = backup_todb($conversation_info['#']['FORMAT']['0']['#']);
+            $conversation->subject = backup_todb($conversation_info['#']['SUBJECT']['0']['#']);
             //We have to recode the userid and recipientid fields
             $user = backup_getid($restore->backup_unique_code,"user",$conversation->userid);
             if ($user) {

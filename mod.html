@@ -20,6 +20,9 @@
     if (!isset($form->dialoguetype)) {
         $form->dialoguetype = 0;
     }
+    if (!isset($form->multipleconversations)) {
+        $form->multipleconversations = 0;
+    }
     if (!isset($form->maildefault)) {
         $form->maildefault = 0;
     }
@@ -69,6 +72,18 @@
         $options[2] = get_string("everybody", "dialogue");
         choose_from_menu($options, "dialoguetype", $form->dialoguetype, "");
         helpbutton("dialoguetype", get_string("typeofdialogue", "dialogue"), "dialogue");
+    ?>
+    </td>
+</tr>
+
+<tr>
+    <td align=right><P><B><? print_string("allowmultiple", "dialogue") ?>:</B></P></TD>
+    <td>
+    <?PHP 
+        unset($options);
+        $options[0] = get_string("no"); $options[1] = get_string("yes");
+        choose_from_menu($options, "multipleconversations", $form->multipleconversations, "");
+        helpbutton("multiple", get_string("allowmultiple", "dialogue"), "dialogue");
     ?>
     </td>
 </tr>

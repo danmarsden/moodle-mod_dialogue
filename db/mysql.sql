@@ -25,6 +25,7 @@ CREATE TABLE prefix_dialogue (
   course int(10) unsigned NOT NULL default '0',
   deleteafter smallint(5) unsigned NOT NULL default '14',
   dialoguetype tinyint(3) NOT NULL default '0',
+  multipleconversations tinyint(3) NOT NULL default '0',
   maildefault tinyint(3) NOT NULL default '0',
   timemodified int(10) unsigned NOT NULL default '0',
   name varchar(255) default NULL,
@@ -47,6 +48,7 @@ CREATE TABLE prefix_dialogue_conversations (
   closed tinyint(3) NOT NULL default '0',
   ctype tinyint(3) NOT NULL default '0',
   format tinyint(2) NOT NULL default '0',
+  subject varchar(100) not null default '',
   PRIMARY KEY  (id),
   KEY (dialogueid),
   KEY (timemodified)
