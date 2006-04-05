@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.6 2006/04/05 09:56:15 thepurpleblob Exp $
+<?php  // $Id: dialogues.php,v 1.7 2006/04/05 10:23:21 thepurpleblob Exp $
 
 /*************************************************
     ACTIONS handled are:
@@ -19,7 +19,7 @@
     require_once("locallib.php");
 
     $id = required_param('id',PARAM_INT);
-    $action = required_param('id',PARAM_ALPHA);
+    $action = required_param('action',PARAM_ALPHA);
 
     if (! $cm = get_record("course_modules", "id", $id)) {
         error("Course Module ID was incorrect");
