@@ -1,4 +1,4 @@
-<?php  // $Id: view.php,v 1.5 2006/04/05 09:56:15 thepurpleblob Exp $
+<?php  // $Id: view.php,v 1.6 2006/04/05 13:59:50 thepurpleblob Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
@@ -136,8 +136,8 @@
                 if ($names = dialogue_get_available_users($dialogue)) {
                     print_simple_box_start("center");
                     echo "<form name=\"startform\" method=\"post\" action=\"dialogues.php\">\n";
-                    echo "<input type=\"hidden\" name=\"id\"value=\"$cm->id\"/ />\n";
-                    echo "<input type=\"hidden\" name=\"action\" value=\"openconversation\"/ />\n";
+                    echo "<input type=\"hidden\" name=\"id\"value=\"$cm->id\" />\n";
+                    echo "<input type=\"hidden\" name=\"action\" value=\"openconversation\" />\n";
                     echo "<table align=\"center\" border=\"0\"><tr>\n";
                     echo "<td align=\"right\"><b>".get_string("openadialoguewith", "dialogue").
                         " : </b></td>\n";
