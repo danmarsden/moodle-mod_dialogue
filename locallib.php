@@ -1,4 +1,4 @@
-<?php  // $Id: locallib.php,v 1.1 2005/07/17 02:51:51 moodler Exp $
+<?php  // $Id: locallib.php,v 1.2 2006/04/05 10:42:24 thepurpleblob Exp $
 
 /// Library of extra functions for the dialogue module
 
@@ -350,7 +350,7 @@ function dialogue_list_conversations_closed($dialogue) {
 //////////////////////////////////////////////////////////////////////////////////////
 function dialogue_list_conversations_other($dialogue) {
 // list the conversations of the current user awaiting response from the other person
-    global $THEME, $USER;
+    global $USER;
     
     if (!$course = get_record("course", "id", $dialogue->course)) {
         error("Course is misconfigured");
@@ -411,7 +411,7 @@ function dialogue_list_conversations_other($dialogue) {
 //////////////////////////////////////////////////////////////////////////////////////
 function dialogue_list_conversations_self($dialogue) {
 // list open conversations of the current user awaiting their reply
-    global $THEME, $USER;
+    global $USER;
     
     if (! $course = get_record("course", "id", $dialogue->course)) {
         error("Course is misconfigured");
@@ -444,7 +444,7 @@ function dialogue_list_conversations_self($dialogue) {
             }
             echo "<table align=\"center\" border=\"1\" cellspacing=\"0\" valign=\"top\" cellpadding=\"4\" 
                 width=\"100%\">\n";
-            echo "<tr><td bgcolor=\"$THEME->cellheading2\" valign=\"top\">\n";
+            echo "<tr><td valign=\"top\">\n";
             if ($conversation->userid == $USER->id) {
                 if (!$otheruser = get_record("user", "id", $conversation->recipientid)) {
                     error("User not found");
@@ -458,7 +458,7 @@ function dialogue_list_conversations_self($dialogue) {
             $picture = print_user_picture($otheruser->id, $course->id, $otheruser->picture, false, true);
             echo $picture." <b>".get_string("dialoguewith", "dialogue", fullname($otheruser)).
                 "</b></td>";
-            echo "<td bgcolor=\"$THEME->cellheading2\"><i>".clean_text($conversation->subject)."&nbsp;</i><br />\n";
+            echo "<td><i>".clean_text($conversation->subject)."&nbsp;</i><br />\n";
             echo "<div align=\"right\">\n";
             if (!$conversation->subject) {
                 // conversation does not have a subject, show add subject link
@@ -487,7 +487,7 @@ function dialogue_list_conversations_self($dialogue) {
                         echo "</td></tr>\n";
                     }
                     else {
-                        echo "<tr><td colspan=\"2\" bgcolor=\"$THEME->body\">\n";
+                        echo "<tr><td colspan=\"2\">\n";
                         echo text_to_html("<font size=\"1\">".get_string("onwrote", "dialogue", 
                                userdate($entry->timecreated)." ".$otheruser->firstname).
                                ":</font><br />".clean_text($entry->text));
@@ -528,7 +528,7 @@ function dialogue_list_conversations_self($dialogue) {
 //////////////////////////////////////////////////////////////////////////////////////
 function dialogue_print_conversation($dialogue, $conversation) {
 // print a conversation and allow a new entry
-    global $THEME, $USER;
+    global $USER;
     
     if (! $course = get_record("course", "id", $dialogue->course)) {
         error("Course is misconfigured");
@@ -546,10 +546,10 @@ function dialogue_print_conversation($dialogue, $conversation) {
     echo "<input type=\"hidden\" name=\"pane\" value=\"2\" />\n";
 
     $showbutton = true;
-    print_simple_box_start("center", "", $THEME->cellcontent2);
+    print_simple_box_start("center", "");
     echo "<table align=\"center\" border=\"1\" cellspacing=\"0\" valign=\"top\" cellpadding=\"4\" 
         width=\"100%\">\n";
-    echo "<tr><td bgcolor=\"$THEME->cellheading2\" valign=\"top\">\n";
+    echo "<tr><td>\n";
     if ($conversation->userid == $USER->id) {
         if (!$otheruser = get_record("user", "id", $conversation->recipientid)) {
             error("User not found");
@@ -563,7 +563,7 @@ function dialogue_print_conversation($dialogue, $conversation) {
     $picture = print_user_picture($otheruser->id, $course->id, $otheruser->picture, false, true);
     echo $picture." <b>".get_string("dialoguewith", "dialogue", fullname($otheruser)).
         "</b></td>";
-    echo "<td bgcolor=\"$THEME->cellheading2\"><i>".clean_text($conversation->subject)."&nbsp;</i><br />\n";
+    echo "<td><i>".clean_text($conversation->subject)."&nbsp;</i><br />\n";
     echo "<div align=\"right\">\n";
     if (!$conversation->subject) {
         // conversation does not have a subject, show add subject link
@@ -585,7 +585,7 @@ function dialogue_print_conversation($dialogue, $conversation) {
                             userdate($entry->timecreated)).":</font><br />".clean_text($entry->text));
             }
             else {
-                echo "<tr><td colspan=\"2\" bgcolor=\"$THEME->body\">\n";
+                echo "<tr><td colspan=\"2\">\n";
                 echo text_to_html("<font size=\"1\">".get_string("onwrote", "dialogue", 
                             userdate($entry->timecreated)." ".$otheruser->firstname).":</font><br />".
                         clean_text($entry->text));
@@ -627,7 +627,7 @@ function dialogue_print_tabbed_heading($tabs) {
 //      $tabs->width     is an percentage of the page (defualts to 80%)
 //      $tabs->cellpadding    padding on each cell (defaults to 5)
 
-    global $CFG, $THEME;
+    global $CFG;
     
     if (isset($tabs->names)) {
         foreach ($tabs->names as $key => $name) {
@@ -677,9 +677,9 @@ function dialogue_print_tabbed_heading($tabs) {
                 $wrapping = "";
             }
             if ($key == $tabs->highlight) {
-                echo "<td valign=top class=\"generaltabselected\" $alignment $width $wrapping bgcolor=\"$THEME->cellheading2\">$tab</td>\n";
+                echo "<td valign=top class=\"generaltabselected\" $alignment $width $wrapping>$tab</td>\n";
             } else {
-                echo "<td valign=top class=\"generaltab\" $alignment $width $wrapping bgcolor=\"$THEME->cellheading\">$tab</td>\n";
+                echo "<td valign=top class=\"generaltab\" $alignment $width $wrapping>$tab</td>\n";
             }
         echo "<td  class=\"generaltablecell\">".
             "<img width=\"10\" src=\"$CFG->wwwroot/pix/spacer.gif\" alt=\"\" /></td>\n";
@@ -691,7 +691,7 @@ function dialogue_print_tabbed_heading($tabs) {
     // bottom stripe
     $ncells = count($tabs->names)*2 +1;
     $height = 2;
-    echo "<tr><td colspan=\"$ncells\" bgcolor=\"$THEME->cellheading2\">".
+    echo "<tr><td colspan=\"$ncells\" class=\"generaltab\">".
         "<img height=\"$height\" src=\"$CFG->wwwroot/pix/spacer.gif\" alt=\"\" /></td></tr>\n";
     echo "</table>\n";
     // print_simple_box_end();
@@ -703,7 +703,7 @@ function dialogue_print_tabbed_heading($tabs) {
 
 //////////////////////////////////////////////////////////////////////////////////////
 function dialogue_show_conversation($dialogue, $conversation) {
-    global $THEME, $USER;
+    global $USER;
     
     if (! $course = get_record("course", "id", $dialogue->course)) {
         error("Course is misconfigured");
@@ -717,7 +717,7 @@ function dialogue_show_conversation($dialogue, $conversation) {
     echo "<table border=\"1\" cellspacing=\"0\" valign=\"top\" cellpadding=\"4\" width=\"100%\">\n";
         
     echo "<tr>";
-    echo "<td bgcolor=\"$THEME->cellheading2\" valign=\"top\">\n";
+    echo "<td valign=\"top\">\n";
     if ($conversation->userid == $USER->id) {
         if (!$otheruser = get_record("user", "id", $conversation->recipientid)) {
             error("User not found");
@@ -731,7 +731,7 @@ function dialogue_show_conversation($dialogue, $conversation) {
     $picture = print_user_picture($otheruser->id, $course->id, $otheruser->picture, false, true);
     echo $picture." <b>".get_string("dialoguewith", "dialogue", fullname($otheruser)).
         "</b></td>";
-    echo "<td bgcolor=\"$THEME->cellheading2\" valign=\"top\"><i>".clean_text($conversation->subject)."&nbsp;</i></td></tr>";
+    echo "<td valign=\"top\"><i>".clean_text($conversation->subject)."&nbsp;</i></td></tr>";
 
     if ($entries = get_records_select("dialogue_entries", "conversationid = $conversation->id", "id")) {
         foreach ($entries as $entry) {
@@ -743,7 +743,7 @@ function dialogue_show_conversation($dialogue, $conversation) {
                 echo "</td></tr>\n";
             }
             else {
-                echo "<tr><td  colspan=\"2\" bgcolor=\"$THEME->body\">\n";
+                echo "<tr><td  colspan=\"2\" >\n";
                 echo text_to_html("<font size=\"1\">".get_string("onwrote", "dialogue", 
                     userdate($entry->timecreated)." ".$otheruser->firstname).":</font><br />".clean_text($entry->text));
                 echo "</td></tr>\n";
@@ -759,7 +759,6 @@ function dialogue_show_conversation($dialogue, $conversation) {
 //////////////////////////////////////////////////////////////////////////////////////
 function dialogue_show_other_conversations($dialogue, $conversation) {
 // prints the other CLOSED conversations for this pair of users
-    global $THEME;
     
     if (! $course = get_record("course", "id", $dialogue->course)) {
         error("Course is misconfigured");
@@ -797,11 +796,11 @@ function dialogue_show_other_conversations($dialogue, $conversation) {
                     echo "<table align=\"center\" border=\"1\" cellspacing=\"0\" valign=\"top\" cellpadding=\"4\"
                          width=\"100%\">\n";
                     echo "<tr>";
-                    echo "<td bgcolor=\"$THEME->cellheading2\" valign=\"top\">\n";
+                    echo "<td valign=\"top\">\n";
                     // print_user_picture($otheruser->id, $course->id, $otheruser->picture);
                     echo "<b>".get_string("dialoguewith", "dialogue", 
                         fullname($otheruser))."</b></td>";
-                    echo "<td bgcolor=\"$THEME->cellheading2\" valign=\"top\"><i>".clean_text($otherconversation->subject)."&nbsp;</i></td></tr>";
+                    echo "<td valign=\"top\"><i>".clean_text($otherconversation->subject)."&nbsp;</i></td></tr>";
                     if ($entries = get_records_select("dialogue_entries", 
                             "conversationid = $otherconversation->id", "id")) {
                         foreach ($entries as $entry) {
@@ -812,7 +811,7 @@ function dialogue_show_other_conversations($dialogue, $conversation) {
                                 echo "</td></tr>\n";
                             }
                             else {
-                                echo "<tr><td  colspan=\"2\" bgcolor=\"$THEME->body\">\n";
+                                echo "<tr><td  colspan=\"2\">\n";
                                 echo text_to_html("<font size=\"1\">".get_string("onwrote", "dialogue", 
                                     userdate($entry->timecreated)." ".$otheruser->firstname).
                                     ":</font><br />".clean_text($entry->text));
