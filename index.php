@@ -1,4 +1,4 @@
-<?php // $Id: index.php,v 1.5 2006/04/05 09:56:14 thepurpleblob Exp $
+<?php // $Id: index.php,v 1.6 2006/04/05 13:48:00 thepurpleblob Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
@@ -16,8 +16,8 @@
     $strdialogue = get_string("modulename", "dialogue");
     $strdialogues = get_string("modulenameplural", "dialogue");
     $strname = get_string("name");
-    $stropendialogues = get_string("open", "dialogue")." ".$strdialogues;
-    $strcloseddialogues = get_string("closed", "dialogue")." ".$strdialogues;
+    $stropendialogues = get_string("opendialogues", "dialogue");
+    $strcloseddialogues = get_string("closeddialogues", "dialogue");
 
     print_header_simple("$strdialogues", "", "$strdialogues", 
                  "", "", true, "", navmenu($course));
