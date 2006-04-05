@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.5 2005/07/17 02:51:51 moodler Exp $
+<?php  // $Id: dialogues.php,v 1.6 2006/04/05 09:56:15 thepurpleblob Exp $
 
 /*************************************************
     ACTIONS handled are:
@@ -18,7 +18,8 @@
     require_once("lib.php");
     require_once("locallib.php");
 
-    require_variable($id);    // Course Module ID
+    $id = required_param('id',PARAM_INT);
+    $action = required_param('id',PARAM_ALPHA);
 
     if (! $cm = get_record("course_modules", "id", $id)) {
         error("Course Module ID was incorrect");
@@ -45,9 +46,6 @@
                  "<a href=\"index.php?id=$course->id\">$strdialogues</a> ->
                   <a hre=\"view.php?id=$cm->id\">$dialogue->name</a>",
                   "", "", true);
-
-
-    require_variable($action); // need something to do!
 
     // vet conversation id, if present
     if (!empty($_REQUEST['cid'])) {

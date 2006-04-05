@@ -1,10 +1,10 @@
-<?php // $Id: index.php,v 1.4 2005/07/17 02:51:51 moodler Exp $
+<?php // $Id: index.php,v 1.5 2006/04/05 09:56:14 thepurpleblob Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
     require_once("locallib.php");
 
-    require_variable($id);   // course
+    $id = required_param('id',PARAM_INT);
 
     if (!$course = get_record("course", "id", $id)) {
         error("Course ID is incorrect");
