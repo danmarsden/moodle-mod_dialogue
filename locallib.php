@@ -1,4 +1,4 @@
-<?php  // $Id: locallib.php,v 1.2 2006/04/05 10:42:24 thepurpleblob Exp $
+<?php  // $Id: locallib.php,v 1.3 2006/04/05 14:13:02 thepurpleblob Exp $
 
 /// Library of extra functions for the dialogue module
 
@@ -215,6 +215,10 @@ global $USER;
         foreach ($users as $otheruser) {
             // ...exclude self and ...
             if ($USER->id != $otheruser->id) {
+                // if teacher is hidden then do not show
+                if ($otheruser->authority == 0) {
+                    continue;
+                }
                 // ...if groupmode is SEPARATEGROUPS then exclude teachers not in student's group
                 if ($groupid and (groupmode($course, $cm) == SEPARATEGROUPS)) {
                     if (!ismember($groupid, $otheruser->id)) {
