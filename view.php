@@ -1,13 +1,16 @@
-<?php  // $Id: view.php,v 1.6 2006/04/05 13:59:50 thepurpleblob Exp $
+<?php  // $Id: view.php,v 1.7 2006/04/11 10:19:09 thepurpleblob Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
     require_once("locallib.php");
 
-    $id = required_param('id',PARAM_INT);
-    $action = optional_param('action','',PARAM_ALPHA);
+    $params = new stdClass();
+    $params->id = required_param('id',PARAM_INT);
+    $params->action = optional_param('action','',PARAM_ALPHA);
+    $params->pane = optional_param('pane',-1,PARAM_INT);
+    $params->group = optional_param('group',-1,PARAM_INT);
 
-    if (! $cm = get_record("course_modules", "id", $id)) {
+    if (! $cm = get_record("course_modules", "id", $params->id)) {
         error("Course Module ID was incorrect");
     }
 
@@ -42,26 +45,26 @@
 
     if (!isguest()) { // it's a teacher or student
         if (!$cm->visible and isstudent($course->id)) {
-            $action = 'notavailable';
+            $params->action = 'notavailable';
         }
-        if (empty($action)) {
-            $action = 'view';
+        if (empty($params->action)) {
+            $params->action = 'view';
         }
     }
     else { // it's a guest, oh no!
-        $action = 'notavailable';
+        $params->action = 'notavailable';
     }
 
 
 
 /*********************** dialogue not available (for gusets mainly)***********************/
-    if ($action == 'notavailable') {
+    if ($params->action == 'notavailable') {
         print_heading(get_string("notavailable", "dialogue"));
     }
 
 
     /************ view **************************************************/
-    elseif ($action == 'view') {
+    elseif ($params->action == 'view') {
 
         print_simple_box(format_text($dialogue->intro), 'center', '70%', '', 5, 'generalbox', 'intro');
         echo "<br />";
@@ -70,23 +73,19 @@
         $countneedingrepliesother = dialogue_count_needing_replies_other($dialogue, $USER);
         $countclosed = dialogue_count_closed($dialogue, $USER);
 
-        // set the pane if it's in a GET or POST
-        if (isset($_REQUEST['pane'])) {
-            $pane = $_REQUEST['pane'];
-        } else {
-            // set default pane
-            $pane = 0;
+        // set the default pane if not specified 
+        if ($params->pane<0) {
             if ($countneedingrepliesother) {
-                $pane = 2;
+                $params->pane = 2;
            }
             if ($countneedingrepliesself) {
-                $pane =1;
+                $params->pane =1;
             }
         }
 
         // override pane setting if teacher has changed group
-        if (isset($_GET['group'])) {
-            $pane = 0;
+        if ($params->group > -1) {
+            $params->pane = 0;
         }
 
         // set up tab table
@@ -111,17 +110,17 @@
         $tabs->urls[1] = "view.php?id=$cm->id&amp;pane=1";
         $tabs->urls[2] = "view.php?id=$cm->id&amp;pane=2";
         $tabs->urls[3] = "view.php?id=$cm->id&amp;pane=3";
-        $tabs->highlight = $pane;
+        $tabs->highlight = $params->pane;
         dialogue_print_tabbed_heading($tabs);
         echo "<br />\n";
 
 
-        switch ($pane) {
+        switch ($params->pane) {
             case 0:
                 if (isteacher($course->id)) {
                     /// Check to see if groups are being used in this dialogue
                     /// and if so, set $currentgroup to reflect the current group
-                    $changegroup = isset($_GET['group']) ? $_GET['group'] : -1;  // Group change requested?
+                    $changegroup = $params->group;  // Group change requested?
                     $groupmode = groupmode($course, $cm);   // Groups are being used?
                     $currentgroup = get_and_set_current_group($course, $groupmode, $changegroup);
 
@@ -181,7 +180,7 @@
 
     /*************** no man's land **************************************/
     else {
-        error("Fatal Error: Unknown Action: ".$action."\n");
+        error("Fatal Error: Unknown Action: ".$params->action."\n");
     }
 
     print_footer($course);
