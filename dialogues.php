@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.8 2006/04/11 10:19:09 thepurpleblob Exp $
+<?php  // $Id: dialogues.php,v 1.9 2006/04/18 13:59:33 thepurpleblob Exp $
 
 /*************************************************
     ACTIONS handled are:
@@ -219,7 +219,7 @@
                     $conversation->recipientid = $recipient->id;
                     $conversation->lastid = $USER->id; // this USER is adding an entry too
                     $conversation->timemodified = time();
-                    $conversation->subject = $param->subject; // may be blank
+                    $conversation->subject = $params->subject; // may be blank
                     if (!$conversation->id = insert_record("dialogue_conversations", $conversation)) {
                         error("Open dialogue: Could not insert dialogue record!");
                     }
