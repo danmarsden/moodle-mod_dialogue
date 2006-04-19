@@ -1,4 +1,4 @@
-<?php // $Id: migrate2utf8.php,v 1.1 2006/04/19 10:51:52 thepurpleblob Exp $
+<?php // $Id: migrate2utf8.php,v 1.2 2006/04/19 14:59:10 thepurpleblob Exp $
 function migrate2utf8_dialogue_name($recordid){
     global $CFG, $globallang;
 
@@ -39,7 +39,7 @@ function migrate2utf8_dialogue_name($recordid){
     return $result;
 }
 
-function migrate2utf8_forum_intro($recordid){
+function migrate2utf8_dialogue_intro($recordid){
     global $CFG, $globallang;
 
     $result = false;
