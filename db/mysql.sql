@@ -80,8 +80,6 @@ CREATE TABLE prefix_dialogue_entries (
 # Data for the table `log_display`
 #
 
-INSERT INTO prefix_log_display SET
-  module='dialogue', 
-  action='view',
-  mtable= 'dialogue',
-  field= 'name';
+INSERT INTO prefix_log_display 
+  (module,action,mtable,field) VALUES
+  ('dialogue','view','dialogue','name');
