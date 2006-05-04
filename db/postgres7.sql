@@ -80,5 +80,6 @@ CREATE INDEX prefix_dialogue_entries_userid_idx ON prefix_dialogue_entries (user
 # Data for the table log_display
 #
 
-INSERT INTO prefix_log_display VALUES ('dialogue', 'view', 'dialogue', 'name');
-
+INSERT INTO prefix_log_display 
+  (module,action,mtable,field) VALUES
+  ('dialogue','view','dialogue','name');
