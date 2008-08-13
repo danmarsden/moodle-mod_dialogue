@@ -1,4 +1,4 @@
-<?php //$Id: backuplib.php,v 1.4 2005/07/17 02:51:51 moodler Exp $
+<?php //$Id: backuplib.php,v 1.5 2008/08/13 04:54:10 deeknow Exp $
     //This php script contains all the stuff to backup/restore
     //dialogue mods
 
@@ -15,7 +15,12 @@
     //                        |
     //                        |
     //                 dialogue_entries 
-    //     (UL,pk->id, fk->dialogueid,conversationid)     
+    //     (UL,pk->id, fk->dialogueid,conversationid)
+    //                        |
+    //                        |
+    //                        |
+    //                  dialogue_read
+    //   (UL,pk->id, fk->entryid,userid,conversationid)     
     //
     // Meaning: pk->primary key field of the table
     //          fk->foreign key to link with parent
@@ -36,30 +41,41 @@
         $dialogues = get_records ("dialogue","course",$preferences->backup_course,"id");
         if ($dialogues) {
             foreach ($dialogues as $dialogue) {
-                //Start mod
-                fwrite ($bf,start_tag("MOD",3,true));
-                //Print dialogue data
-                fwrite ($bf,full_tag("ID",4,false,$dialogue->id));
-                fwrite ($bf,full_tag("MODTYPE",4,false,"dialogue"));
-                fwrite ($bf,full_tag("NAME",4,false,$dialogue->name));
-                fwrite ($bf,full_tag("INTRO",4,false,$dialogue->intro));
-                fwrite ($bf,full_tag("DELETEAFTER",4,false,$dialogue->deleteafter));
-                fwrite ($bf,full_tag("DIALOGUETYPE",4,false,$dialogue->dialoguetype));
-                fwrite ($bf,full_tag("MULTIPLECONVERSATIONS",4,false,$dialogue->multipleconversations));
-                fwrite ($bf,full_tag("MAILDEFAULT",4,false,$dialogue->maildefault));
-                fwrite ($bf,full_tag("TIMEMODIFIED",4,false,$dialogue->timemodified));
-
-                //if we've selected to backup users info, then execute backup_dialogue_conversations
-                if ($preferences->mods["dialogue"]->userinfo) {
-                    $status = backup_dialogue_conversations($bf,$preferences,$dialogue->id);
-                }
-                //End mod
-                $status =fwrite ($bf,end_tag("MOD",3,true));
+                $status = dialogue_backup_one_mod($bf, $preferences, $dialogue);
             }
         }
         return $status;
     }
 
+    function dialogue_backup_one_mod($bf, $preferences, $dialogue) {
+        
+        if (is_numeric($dialogue)) {
+            $dialogue = get_record('dialogue','id',$dialogue);
+        }
+        
+        //Start mod
+        fwrite ($bf,start_tag("MOD",3,true));
+        //Print dialogue data
+        fwrite ($bf,full_tag("ID",4,false,$dialogue->id));
+        fwrite ($bf,full_tag("MODTYPE",4,false,"dialogue"));
+        fwrite ($bf,full_tag("NAME",4,false,$dialogue->name));
+        fwrite ($bf,full_tag("INTRO",4,false,$dialogue->intro));
+        fwrite ($bf,full_tag("DELETEAFTER",4,false,$dialogue->deleteafter));
+        fwrite ($bf,full_tag("DIALOGUETYPE",4,false,$dialogue->dialoguetype));
+        fwrite ($bf,full_tag("MULTIPLECONVERSATIONS",4,false,$dialogue->multipleconversations));
+        fwrite ($bf,full_tag("MAILDEFAULT",4,false,$dialogue->maildefault));
+        fwrite ($bf,full_tag("TIMEMODIFIED",4,false,$dialogue->timemodified));
+        fwrite ($bf,full_tag("EDITTIME",4,false,$dialogue->edittime));
+
+        //if we've selected to backup users info, then execute backup_dialogue_conversations
+        if ($preferences->mods["dialogue"]->userinfo) {
+            $status = backup_dialogue_conversations($bf,$preferences,$dialogue->id);
+        }
+        //End mod
+        $status =fwrite ($bf,end_tag("MOD",3,true));
+        return($status);
+    }
+    
     //Backup dialogue_conversations contents (executed from dialogue_backup_mods)
     function backup_dialogue_conversations ($bf,$preferences,$dialogue) {
 
@@ -87,10 +103,13 @@
                 fwrite ($bf,full_tag("CTYPE",6,false,$conversation->ctype));
                 fwrite ($bf,full_tag("FORMAT",6,false,$conversation->format));
                 fwrite ($bf,full_tag("SUBJECT",6,false,$conversation->subject));
+                fwrite ($bf,full_tag("GROUPID",6,false,$conversation->groupid));
+                fwrite ($bf,full_tag("GROUPING",6,false,$conversation->grouping));
                
                 //if we've selected to backup users info, then execute backup_dialogue_entries
                 if ($preferences->mods["dialogue"]->userinfo) {
                     $status = backup_dialogue_entries($bf,$preferences,$conversation->id);
+                    $status = backup_dialogue_read ($bf,$preferences,$conversation->id);
                 }
                 //End entry
                 $status =fwrite ($bf,end_tag("CONVERSATION",5,true));
@@ -124,6 +143,9 @@
                 fwrite ($bf,full_tag("TIMECREATED",6,false,$entry->timecreated));
                 fwrite ($bf,full_tag("MAILED",6,false,$entry->mailed));
                 fwrite ($bf,full_tag("TEXT",6,false,$entry->text));
+                fwrite ($bf,full_tag("RECIPIENTID",6,false,$entry->recipientid));
+                fwrite ($bf,full_tag("ATTACHMENT",6,false,$entry->attachment));
+                fwrite ($bf,full_tag("TIMEMODIFIED",6,false,$entry->timemodified));
                 //End entry
                 $status =fwrite ($bf,end_tag("ENTRY",5,true));
             }
@@ -133,6 +155,32 @@
         return $status;
     }
  
+    function backup_dialogue_read ($bf,$preferences,$conversationid) {
+        global $CFG;
+        
+        $status = true;
+        
+        $dialogue_reads = get_records('dialogue_read', 'conversationid', $conversationid, 'id');
+        
+        if ($dialogue_reads) {
+            //Write start tag
+            $status =fwrite ($bf,start_tag("READS",4,true));
+            
+            foreach($dialogue_reads as $read) {
+                $status = fwrite($bf, start_tag('READ', 5, true));
+                fwrite ($bf,full_tag("ID",6,false,$read->id));
+                fwrite ($bf,full_tag("ENTRYID",6,false,$read->entryid));
+                fwrite ($bf,full_tag("USERID",6,false,$read->userid));
+                fwrite ($bf,full_tag("FIRSTREAD",6,false,$read->firstread));
+                fwrite ($bf,full_tag("LASTREAD",6,false,$read->lastread));
+                fwrite ($bf,full_tag("CONVERSATIONID",6,false,$read->conversationid));
+                $status =fwrite ($bf,end_tag("READ",5,true));
+            }
+            $status =fwrite ($bf,end_tag("READS",4,true));
+        }
+        return($status);
+    }
+    
    ////Return an array of info (name,value)
    function dialogue_check_backup_mods($course,$user_data=false,$backup_unique_code) {
         //First the course data

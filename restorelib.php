@@ -1,4 +1,4 @@
-<?php //$Id: restorelib.php,v 1.4 2005/07/17 02:51:51 moodler Exp $
+<?php //$Id: restorelib.php,v 1.5 2008/08/13 04:54:10 deeknow Exp $
     //This php script contains all the stuff to backup/restore
     //dialogue mods
 
@@ -52,6 +52,7 @@
             $dialogue->multipleconversations = backup_todb($info['MOD']['#']['MULTIPLECONVERSATIONS']['0']['#']);
             $dialogue->maildefault = backup_todb($info['MOD']['#']['MAILDEFAULT']['0']['#']);
             $dialogue->timemodified = backup_todb($info['MOD']['#']['TIMEMODIFIED']['0']['#']);
+            $dialogue->edittime = backup_todb($info['MOD']['#']['EDITTIME']['0']['#']);
 
             //The structure is equal to the db, so insert the dialogue
             $newid = insert_record ("dialogue",$dialogue);
@@ -113,7 +114,10 @@
                 $conversation->ctype = backup_todb($conversation_info['#']['CTYPE']['0']['#']);
                 $conversation->format = backup_todb($conversation_info['#']['FORMAT']['0']['#']);
                 $conversation->subject = backup_todb($conversation_info['#']['SUBJECT']['0']['#']);
-                //We have to recode the userid and recipientid fields
+                $conversation->groupid = backup_todb($conversation_info['#']['GROUPID']['0']['#']);
+                $conversation->grouping = backup_todb($conversation_info['#']['GROUPING']['0']['#']);
+                
+                //We have to recode the userid and recipientid groupid grouping fields
                 $user = backup_getid($restore->backup_unique_code,"user",$conversation->userid);
                 if ($user) {
                     $conversation->userid = $user->new_id;
@@ -122,7 +126,11 @@
                 if ($user) {
                     $conversation->recipientid = $user->new_id;
                 }
-
+                $group = backup_getid($restore->backup_unique_code, 'group', $conversation->groupid);
+                if ($group) {
+                    $conversation->groupid = $group->new_id;
+                }
+                
                 //The structure is equal to the db, so insert the dialogue_conversation
                 $newid = insert_record ("dialogue_conversations",$conversation);
 
@@ -144,6 +152,8 @@
                         //Restore dialogue_entries
                         $status = dialogue_entries_restore($new_dialogue_id, $newid,$conversation_info,
                                 $restore);
+                        $status = dialogue_read_restore($new_dialogue_id, $newid,$conversation_info,
+                                $restore);                             
                     }
                 } else {
                     $status = false;
@@ -184,6 +194,8 @@
                 $entry->timecreated = backup_todb($entry_info['#']['TIMECREATED']['0']['#']);
                 $entry->mailed = backup_todb($entry_info['#']['MAILED']['0']['#']);
                 $entry->text = backup_todb($entry_info['#']['TEXT']['0']['#']);
+                $entry->attachment = backup_todb($entry_info['#']['ATTACHMENT']['0']['#']);
+                $entry->timemodified = backup_todb($entry_info['#']['TIMEMODIFIED']['0']['#']);
 
                 //We have to recode the userid field
                 $user = backup_getid($restore->backup_unique_code,"user",$entry->userid);
@@ -216,4 +228,63 @@
         return $status;
     }
 
+    
+    //This function restores the dialogue_read
+    function dialogue_read_restore($new_dialogue_id, $new_conversation_id,$info,$restore) {
+
+        global $CFG;
+
+        $status = true;
+
+        //Get the entries array
+        if (isset($info['#']['READS']['0']['#']['READ'])) {
+            $reads = $info['#']['READS']['0']['#']['READ'];
+
+            //Iterate over reads
+            for($i = 0; $i < sizeof($reads); $i++) {
+                $read_info = $reads[$i];
+
+                //We'll need this later!!
+                $oldid = backup_todb($read_info['#']['ID']['0']['#']);
+                $olduserid = backup_todb($read_info['#']['USERID']['0']['#']);
+
+                //Now, build the dialogue_ENTRIES record structure
+                $read->entryid = backup_todb($read_info['#']['ENTRYID']['0']['#']);
+                $read->conversationid = $new_conversation_id;
+                $read->userid = backup_todb($read_info['#']['USERID']['0']['#']);
+                $read->firstread = backup_todb($read_info['#']['FIRSTREAD']['0']['#']);
+                $read->lastread = backup_todb($read_info['#']['LASTREAD']['0']['#']);
+
+                //We have to recode the userid field
+                $user = backup_getid($restore->backup_unique_code,"user",$read->userid);
+                if ($user) {
+                    $entry->userid = $user->new_id;
+                }
+                //We have to recode the entryid field
+                $entry = backup_getid($restore->backup_unique_code,"dialogue_entry",$read->entryid);
+                if ($entry) {
+                    $read->entryid = $entry->new_id;
+                }
+
+                //The structure is equal to the db, so insert the dialogue_entry
+                $newid = insert_record ("dialogue_read",$read);
+
+                //Do some output
+                if (($i+1) % 50 == 0) {
+                    echo ".";
+                    if (($i+1) % 1000 == 0) {
+                        echo "<br />";
+                    }
+                    backup_flush(300);
+                }
+                if (!$newid) {
+                    $status = false;
+                }
+            }
+        }
+
+        return $status;
+    }
+    
+    
 ?>

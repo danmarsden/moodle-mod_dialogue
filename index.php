@@ -1,4 +1,4 @@
-<?php // $Id: index.php,v 1.6 2006/04/05 13:48:00 thepurpleblob Exp $
+<?php // $Id: index.php,v 1.7 2008/08/13 04:54:10 deeknow Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
@@ -19,7 +19,10 @@
     $stropendialogues = get_string("opendialogues", "dialogue");
     $strcloseddialogues = get_string("closeddialogues", "dialogue");
 
-    print_header_simple("$strdialogues", "", "$strdialogues", 
+    $navlinks = array(array('name' => $strdialogues, 'link' => '', 'type' => 'activity' ));
+    $navigation = build_navigation($navlinks);
+    
+    print_header_simple("$strdialogues", "", $navigation, 
                  "", "", true, "", navmenu($course));
 
 
@@ -28,6 +31,8 @@
         die;
     }
 
+    $hascapviewall = has_capability('mod/dialogue:viewall', get_context_instance(CONTEXT_COURSE, $course->id));
+    
     $timenow = time();
 
     $table->head  = array ($strname, $stropendialogues, $strcloseddialogues);
@@ -39,7 +44,7 @@
            error("Course Module ID was incorrect");
        }
        $table->data[] = array ("<a href=\"view.php?id=$cm->id\">$dialogue->name</a>",
-                dialogue_count_open($dialogue, $USER), dialogue_count_closed($dialogue, $USER));
+                dialogue_count_open($dialogue, $USER), dialogue_count_closed($dialogue, $USER, $hascapviewall));
     }
     echo "<br />";
     print_table($table);
