@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.10 2008/08/13 04:54:10 deeknow Exp $
+<?php  // $Id: dialogues.php,v 1.9.10.1 2009/03/25 21:23:32 deeknow Exp $
 
 /*************************************************
     ACTIONS handled are:

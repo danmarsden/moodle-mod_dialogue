@@ -1,4 +1,4 @@
-<?php // $Id: lib.php,v 1.5 2008/08/13 04:54:10 deeknow Exp $
+<?php // $Id: lib.php,v 1.4.10.1 2009/03/25 21:23:33 deeknow Exp $
 
 $DIALOGUE_DAYS = array (0 => 0, 7 => 7, 14 => 14, 30 => 30, 150 => 150, 365 => 365 );
 
