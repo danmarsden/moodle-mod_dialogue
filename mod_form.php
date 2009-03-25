@@ -53,6 +53,8 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->addElement('text', 'edittime', get_string("edittime", "dialogue"), array('size'=>'4'));
         $mform->setType('edittime', PARAM_INT);
         $mform->setDefault('edittime', 30);
+        $mform->addRule('edittime', null, 'maxlength', 5, 'client');
+        $mform->addRule('edittime', null, 'numeric', null, 'client');
         $mform->setHelpButton('edittime', array('edittime', get_string("edittime", "dialogue"), 'dialogue', 'edittime'));
         $mform->setAdvanced('edittime');
         
