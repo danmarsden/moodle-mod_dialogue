@@ -1,9 +1,13 @@
-<?php  // $Id: locallib.php,v 1.3.10.1 2009/03/25 21:23:33 deeknow Exp $
+<?php  // $Id: locallib.php,v 1.3.10.2 2009/03/25 22:40:52 deeknow Exp $
 
 /// Library of extra functions for the dialogue module
 
 // SQL FUNCTIONS ///////////////////////////////////////////////////////////////////
 
+
+define ('DIALOGUETYPE_TEACHERSTUDENT', 0);
+define ('DIALOGUETYPE_STUDENTSTUDENT', 1);
+define ('DIALOGUETYPE_EVERYONE', 2);
 
 //////////////////////////////////////////////////////////////////////////////////////
 function dialogue_count_closed($dialogue, $user, $viewall=false) {
@@ -37,21 +41,21 @@ function dialogue_get_available_users($dialogue, $context, $editconversationid) 
     
     
     switch ($dialogue->dialoguetype) {
-        case 0 : // teacher to student
+        case DIALOGUETYPE_TEACHERSTUDENT : // teacher to student
             if ($hascapmanage) {
                 return dialogue_get_available_students($dialogue, $context, $editconversationid);
             }
             else {
-                return dialogue_get_available_teachers($dialogue,  $editconversationid);
+                return dialogue_get_available_teachers($dialogue,  $context, $editconversationid);
             }
-        case 1: // student to student
-            if (!$hascapmanage && $hascapopen) {
+        case DIALOGUETYPE_STUDENTSTUDENT: // student to student
+            if (! $hascapmanage && $hascapopen) {
                 return dialogue_get_available_students($dialogue, $context, $editconversationid);
             }
             else {
                 return;
             }
-        case 2: // everyone
+        case DIALOGUETYPE_EVERYONE: // everyone
             if ($teachers = dialogue_get_available_teachers($dialogue, $context, $editconversationid)) {
                 foreach ($teachers as $userid=>$name) {
                     $names[$userid] = $name;
@@ -82,10 +86,17 @@ global $USER, $CFG;
         error("Course Module ID was incorrect");
     }
 
-    $groupid = groups_get_activity_group($cm, true);
+    // get the list of teachers (actually, those who have dialogue:manage capability)
+    $teachers = array();
+    if ($users = get_users_by_capability($context, 'mod/dialogue:manage', '', null, null, null, null, null, null,null,false)) {
+        foreach ($users as $user) {
+            $teachers[$user->id] = 1;
+        }
+    }
 
+    $groupid = groups_get_activity_group($cm, true);
     // add current group before list of students if it's the teacher
-    if (isteacher($course->id) and groups_get_activity_groupmode($cm)) {
+    if ($teachers[$USER->id] and groups_get_activity_groupmode($cm)) {
         // show teacher their current group
         if ($groupid) {
             if (!$group = get_record("groups", "id", $groupid)) {
@@ -97,6 +108,8 @@ global $USER, $CFG;
         }
         $gnames["spacer"] = "------------";
     }
+
+
     // get the students on this course (default sort order)...
     if ($users = get_users_by_capability($context, 'mod/dialogue:participate', null, null, null, null, null, null, null,null,false)) {
         if (!empty($CFG->enablegroupings) && !empty($cm->groupingid) && !empty($users)) {
@@ -110,18 +123,26 @@ global $USER, $CFG;
         foreach ($users as $otheruser) {
             // ...exclude self and...
             if ($USER->id != $otheruser->id) {
+
+                // ...if not a student (eg co-teacher, teacher) then exclude from students list
+                if ($teachers[$otheruser->id] == 1) {
+                    continue;
+                }
+
                 // ...if teacher and groups then exclude students not in the current group
-                if (isteacher($course->id) and groupmode($course, $cm) and $groupid) {
+                if ($teachers[$USER->id] and groupmode($course, $cm) and $groupid) {
                     if (!ismember($groupid, $otheruser->id)) {
                         continue;
                     }
                 }
+
                 // ...if student and groupmode is SEPARATEGROUPS then exclude students not in student's group
-                if (isstudent($course->id) and (groupmode($course, $cm) == SEPARATEGROUPS)) {
+                if (!$teachers[$USER->id] and (groupmode($course, $cm) == SEPARATEGROUPS)) {
                     if (!ismember($groupid, $otheruser->id)) {
                         continue;
                     }
                 }
+
                 // ... and any already in any open conversations unless multiple conversations allowed
                 if ($dialogue->multipleconversations or count_records_select("dialogue_conversations", 
                         "dialogueid = $dialogue->id AND id != $editconversationid AND 
@@ -152,20 +173,32 @@ global $USER, $CFG;
 
 
 //////////////////////////////////////////////////////////////////////////////////////
-function dialogue_get_available_teachers($dialogue, $editconversationid = 0) {
-    global $USER;
-   
+function dialogue_get_available_teachers($dialogue, $context, $editconversationid = 0) {
+    global $USER, $CFG;
+    $canseehidden = has_capability('moodle/role:viewhiddenassigns', $context);
     if (! $course = get_record("course", "id", $dialogue->course)) {
         error("Course is misconfigured");
         }
     if (! $cm = get_coursemodule_from_instance("dialogue", $dialogue->id, $course->id)) {
         error("Course Module ID was incorrect");
     }
-
-    $groupid = get_current_group($course->id);
-    // get the teachers on this course (default sort order)...
-    if ($users = get_course_teachers($course->id)) {
-        // $names[0] = "-----------------------";
+    // get the list of teachers (actually, those who have dialogue:manage capability)
+    $hiddenTeachers = array();
+    if ($users = get_users_by_capability($context, 'mod/dialogue:manage', '', null, null, null, null, null, null,true,null)) {
+        foreach ($users as $user) {
+            $userRoles = get_user_roles($context, $user->id, true);
+            foreach ($userRoles as $role) {
+                if ($role->hidden == 1) {
+                    $hiddenTeachers[$user->id] = 1;
+                    break;
+                }
+            }
+        }
+        $canSeeHidden = false;
+        if (has_capability('moodle/role:viewhiddenassigns', $context)) {
+            $canSeeHidden = true;
+        }
+        $groupid = get_current_group($course->id);
         foreach ($users as $otheruser) {
             // ...exclude self and ...
             if ($USER->id != $otheruser->id) {
@@ -174,6 +207,9 @@ function dialogue_get_available_teachers($dialogue, $editconversationid = 0) {
                     if (!ismember($groupid, $otheruser->id)) {
                         continue;
                     }
+                }
+                if (!$canSeeHidden && array_key_exists($otheruser->id, $hiddenTeachers) && ($hiddenTeachers[$otheruser->id] == 1)) {
+                    continue;
                 }
                 // ...any already in open conversations unless multiple conversations allowed 
                 if ($dialogue->multipleconversations or count_records_select("dialogue_conversations", 
@@ -276,7 +312,7 @@ function dialogue_list_conversations_closed($dialogue) {
 function dialogue_print_conversation($dialogue, $conversation) {
 // print a conversation and allow a new entry
     global $USER, $CFG;
-    
+
     if (! $course = get_record("course", "id", $dialogue->course)) {
         error("Course is misconfigured");
     }
