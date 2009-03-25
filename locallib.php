@@ -1,4 +1,4 @@
-<?php  // $Id: locallib.php,v 1.3.10.2 2009/03/25 22:40:52 deeknow Exp $
+<?php  // $Id: locallib.php,v 1.3.10.3 2009/03/25 22:52:43 deeknow Exp $
 
 /// Library of extra functions for the dialogue module
 
@@ -96,16 +96,15 @@ global $USER, $CFG;
 
     $groupid = groups_get_activity_group($cm, true);
     // add current group before list of students if it's the teacher
-    if ($teachers[$USER->id] and groups_get_activity_groupmode($cm)) {
+    if ($teachers[$USER->id]) {
         // show teacher their current group
         if ($groupid) {
             if (!$group = get_record("groups", "id", $groupid)) {
                 error("Dialogue get available students: group not found");
             }
             $gnames["g$groupid"] = $group->name;
-        } else { // all participants
-            $gnames["g0"] = get_string("allparticipants");
         }
+        $gnames["g0"] = get_string("allparticipants");
         $gnames["spacer"] = "------------";
     }
 
