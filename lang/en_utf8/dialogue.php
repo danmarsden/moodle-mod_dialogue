@@ -1,4 +1,4 @@
-<?php // $Id: dialogue.php,v 1.1 2008/08/13 04:54:11 deeknow Exp $ 
+<?php // $Id: dialogue.php,v 1.2 2009/03/25 23:20:46 deeknow Exp $ 
       // dialogue.php - created with Moodle 1.7 beta + (2006101003)
 
 
@@ -11,6 +11,8 @@ $string['close'] = 'Close';
 $string['closed'] = 'Closed';
 $string['closeddialogues'] = 'Closed Dialogues';
 $string['confirmclosure'] = '<p>You are about to close a dialogue with $a. Closed dialogues cannot be reopened. If you close this dialogue you can view it but not add to it, and you will have to start another dialogue to contnue &quot;talking&quot; this person.<br /><br />Are you sure you want to close this dialogue?';
+$string['configtrackreadentries'] = 'Set to \'yes\' if you want to track read/unread for each user.';
+$string['trackdialogue'] = 'Track unread entries';
 $string['deleteafter'] = 'Delete Closed Dialogues after (Days)';
 $string['dialogueclosed'] = 'Dialogue Closed';
 $string['dialogueintro'] = 'Dialogue Introduction';
@@ -87,6 +89,8 @@ $string['currentattachment'] = 'Current attachment: ';
 $string['deleteattachment'] = 'Delete attachment';
 $string['updated'] = '(Updated on, $a)';
 $string['unread'] = 'Unread entries';
+$string['unreadnumber'] = '$a unread entries';
+$string['unreadone'] = '1 unread entry';
 $string['posts'] = 'posts';
 $string['noentry'] = 'No entries';
 ?>
