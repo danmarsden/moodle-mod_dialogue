@@ -1,7 +1,6 @@
-<?php // $Id: lib.php,v 1.4.10.1 2009/03/25 21:23:33 deeknow Exp $
+<?php // $Id: lib.php,v 1.4.10.2 2009/03/25 23:23:08 deeknow Exp $
 
 $DIALOGUE_DAYS = array (0 => 0, 7 => 7, 14 => 14, 30 => 30, 150 => 150, 365 => 365 );
-
 
 // STANDARD MODULE FUNCTIONS /////////////////////////////////////////////////////////
 
@@ -637,6 +636,37 @@ function dialogue_count_unread_entries($dialogueid, $userid, $cm) {
             WHERE r.id IS NULL AND c.closed = 0 AND c.dialogueid = $dialogueid $whereuser ";
 
     return(count_records_sql($sql));
+}
+
+/**
+ * Determine if a user can track dialogue entries. Checks the site dialogue
+ * activity setting and the user's personal preference for trackForums
+ * which is a similar requirement/preference so we treat them as equals.
+ * This is closely modelled on similar function from course/lib.php
+ *
+ * @param mixed $userid The user object to check for (optional).
+ * @return boolean
+ */
+function dialogue_can_track_dialogue($user=false) {
+    global $USER, $CFG;
+
+    // return unless enabled at site level
+    if (empty($CFG->dialogue_trackreadentries)) {
+        return false;
+    }
+
+    // default to logged if no user passed as param
+    if ($user === false) {
+        $user = $USER;
+    }
+
+    // dont allow guests to track
+    if (isguestuser($user) or empty($user->id)) {
+        return false;
+    }
+
+    // finally if user has trackForums set then allow tracking
+    return true && !empty($user->trackforums);
 }
 
 ?>
