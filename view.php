@@ -1,4 +1,4 @@
-<?php  // $Id: view.php,v 1.7.10.2 2009/03/25 22:40:53 deeknow Exp $
+<?php  // $Id: view.php,v 1.7.10.3 2009/04/25 09:46:24 skodak Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
@@ -11,7 +11,7 @@
     $params->pane = optional_param('pane',-1,PARAM_INT);
     $params->group = optional_param('group',-1,PARAM_INT);
 
-    if (! $cm = get_record("course_modules", "id", $params->id)) {
+    if (! $cm = get_coursemodule_from_id('dialogue', $params->id)) {
         error("Course Module ID was incorrect");
     }
 

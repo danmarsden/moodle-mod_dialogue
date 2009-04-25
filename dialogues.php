@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.9.10.2 2009/04/25 09:41:25 skodak Exp $
+<?php  // $Id: dialogues.php,v 1.9.10.3 2009/04/25 09:46:24 skodak Exp $
 
 /*************************************************
     ACTIONS handled are:
@@ -34,7 +34,7 @@
     $params->deleteattachment = optional_param('deleteattachment', 0, PARAM_INT);
     $params->cancel = optional_param('cancel', '', PARAM_ALPHA);
 
-    if (! $cm = get_record("course_modules", "id", $params->id)) {
+    if (! $cm = get_coursemodule_from_id('dialogue', $params->id)) {
         error("Course Module ID was incorrect");
     }
 
