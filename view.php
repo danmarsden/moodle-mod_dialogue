@@ -1,4 +1,4 @@
-<?php  // $Id: view.php,v 1.7.10.9 2009/04/25 11:32:38 skodak Exp $
+<?php  // $Id: view.php,v 1.7.10.10 2009/04/25 11:47:06 skodak Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
@@ -29,9 +29,6 @@
     $hascapmanage      = has_capability('mod/dialogue:manage', $context);
 
     add_to_log($course->id, "dialogue", "view", "view.php?id=$cm->id", $dialogue->id, $cm->id);
-
-    // set up some general variables
-    $usehtmleditor = can_use_html_editor();
 
     $strdialogue = get_string("modulename", "dialogue");
     $strdialogues = get_string("modulenameplural", "dialogue");
