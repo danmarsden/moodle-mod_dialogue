@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.9.10.3 2009/04/25 09:46:24 skodak Exp $
+<?php  // $Id: dialogues.php,v 1.9.10.4 2009/04/25 10:04:02 skodak Exp $
 
 /*************************************************
     ACTIONS handled are:
@@ -46,7 +46,7 @@
         error("Course module dialogue is incorrect");
     }
 
-    require_login($course->id, false, $cm);
+    require_login($course, false, $cm);
     
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
 
@@ -78,8 +78,9 @@
         redirect('view.php?id='.$params->id.'&pane=1', null, 0);
     }
 
-    /************** close conversation ************************************/
+
     if ($params->action == 'closeconversation') {
+/************** close conversation ************************************/
         if (empty($params->cid)) {
             error("Close dialogue: Missing conversation id");
         }
@@ -92,12 +93,10 @@
 
         add_to_log($course->id, "dialogue", "closed", "view.php?id=$cm->id", "$params->cid");
         redirect("view.php?id=$cm->id&amp;pane={$params->pane}", get_string("dialogueclosed", "dialogue"));
-    }
 
-
-    /****************** confirm close ************************************/
-    elseif ($params->action == 'confirmclose' ) {
-
+    } else if ($params->action == 'confirmclose' ) {
+/****************** confirm close ************************************/
+        
         if (empty($params->cid)) {
             error("Confirm Close: conversation id missing");
         }
@@ -119,11 +118,9 @@
         notice_yesno(get_string("confirmclosure", "dialogue", fullname($user)),
              "dialogues.php?action=closeconversation&amp;id=$cm->id&amp;cid=$conversation->id&amp;pane={$params->pane}",
              "view.php?id=$cm->id&amp;pane={$params->pane}");
-    }
-
-    /****************** get subject ************************************/
-    elseif ($params->action == 'getsubject' ) {
-
+    } else if ($params->action == 'getsubject' ) {
+/****************** get subject ************************************/
+        
         if (empty($params->cid)) {
             error("Confirm Close: conversation id missing");
         }
@@ -140,12 +137,10 @@
         echo "<tr><td colspan=\"2\" align=\"center\"><input type=\"submit\" value=\"".
             get_string("addsubject", "dialogue")."\" /></td></tr>\n";
         echo "</table></form>\n";
-    }
 
-
-    /****************** insert conversation entries ******************************/
-    elseif ($params->action == 'insertentries' ) {
-
+    } else if ($params->action == 'insertentries' ) {
+/****************** insert conversation entries ******************************/
+        
         $timenow = time();
         $n = 0;
         // get all the open conversations for this user
@@ -202,19 +197,17 @@
         $a->edittime = $dialogue->edittime;
         redirect("view.php?id=$cm->id&amp;pane={$params->pane}", get_string("numberofentriesadded",
                     "dialogue", $a));
-    }
 
-    /****************** list closed conversations *********************************/
-    elseif ($params->action == 'listclosed') {
+    } else if ($params->action == 'listclosed') {
+/****************** list closed conversations *********************************/
 
         print_simple_box( text_to_html($dialogue->intro) , "center");
         echo "<br />";
 
         dialogue_list_closed_conversations($dialogue);
-    }
 
-    /****************** open conversation ************************************/
-    elseif ($params->action == 'openconversation' ) {
+    } else if ($params->action == 'openconversation' ) {
+/****************** open conversation ************************************/
 
         $timenow = time();
         
@@ -324,22 +317,18 @@
                 redirect("view.php?id=$cm->id", get_string("dialogueopened", "dialogue",  $a));
             }
         }
-    }
 
-
-    /****************** print dialogue (allowing new entry)********************/
-    elseif ($params->action == 'printdialogue') {
+    } else if ($params->action == 'printdialogue') {
+/****************** print dialogue (allowing new entry)********************/
 
         print_simple_box( text_to_html($dialogue->intro) , "center");
         echo "<br />";
 
         dialogue_print_conversation($dialogue, $conversation);
-    }
 
-
-    /****************** show dialogues ****************************************/
-    elseif ($params->action == 'showdialogues') {
-
+    } else if ($params->action == 'showdialogues') {
+/****************** show dialogues ****************************************/
+        
         if (!$conversation = get_record("dialogue_conversations", "id", $params->cid)) {
             error("Show Dialogue: can not get conversation record");
         }
@@ -348,11 +337,9 @@
         echo "<br />";
 
         dialogue_print_conversation($dialogue, $conversation);
-    }
 
-
-    /****************** update subject ****************************************/
-    elseif ($params->action == 'updatesubject') {
+    } else if ($params->action == 'updatesubject') {
+/****************** update subject ****************************************/
 
         if (!$conversation = get_record("dialogue_conversations", "id", $params->cid)) {
             error("Update Subject: can not get conversation record");
@@ -364,10 +351,9 @@
             error("Update subject: could not update conversation record");
         }
         redirect("view.php?id=$cm->id&amp;pane={$params->pane}", get_string("subjectadded", "dialogue"));
-    }
-    
-    /****************** edit a reply ****************************************/
-    elseif ($params->action == 'editreply') {
+
+    } else if ($params->action == 'editreply') {
+/****************** edit a reply ****************************************/
 
         $entry = get_record('dialogue_entries', 'id', $params->entryid);
         
@@ -398,10 +384,9 @@
                                'action' => 'editreply',
                                "reply{$entry->conversationid}" => $entry->text));
         $mform->display();
-    }    
-    
-    /****************** edit a conversation ****************************************/
-    elseif ($params->action == 'editconversation') {
+
+    } else if ($params->action == 'editconversation') {
+/****************** edit a conversation ****************************************/
 
         $entry = get_record('dialogue_entries', 'id', $params->entryid);
         $conversation = get_record('dialogue_conversations', 'id', $entry->conversationid);
@@ -436,11 +421,9 @@
                                    'action' => 'editconversation'));
             $mform->display();
         }
-    }
 
-
-    /*************** no man's land **************************************/
-    else {
+    } else {
+/*************** no man's land **************************************/
         error("Fatal Error: Unknown Action: ".$params->action."\n");
     }
 

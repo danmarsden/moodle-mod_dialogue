@@ -1,4 +1,4 @@
-<?php // $Id: index.php,v 1.6.10.1 2009/03/25 21:23:32 deeknow Exp $
+<?php // $Id: index.php,v 1.6.10.2 2009/04/25 10:04:02 skodak Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
@@ -10,7 +10,7 @@
         error("Course ID is incorrect");
     }
 
-    require_login($course->id);
+    require_login($course);
     add_to_log($course->id, "dialogue", "view all", "index.php?id=$course->id", "");
 
     $strdialogue = get_string("modulename", "dialogue");

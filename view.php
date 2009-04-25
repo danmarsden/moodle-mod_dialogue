@@ -1,4 +1,4 @@
-<?php  // $Id: view.php,v 1.7.10.7 2009/04/25 09:59:24 skodak Exp $
+<?php  // $Id: view.php,v 1.7.10.8 2009/04/25 10:04:02 skodak Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
@@ -23,7 +23,7 @@
         error("Course module is incorrect");
     }
 
-    require_login($course->id, false, $cm);
+    require_login($course, false, $cm);
 
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     $hascapopen = has_capability('mod/dialogue:open', $context);
