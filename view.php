@@ -1,4 +1,4 @@
-<?php  // $Id: view.php,v 1.7.10.3 2009/04/25 09:46:24 skodak Exp $
+<?php  // $Id: view.php,v 1.7.10.4 2009/04/25 09:55:53 skodak Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
@@ -55,14 +55,10 @@
     // ...and if necessary set default action
 
     if ($hascapparticipate) { // it's a teacher or student
-        if (!$cm->visible and !$hascapmanage) {
-            $params->action = 'notavailable';
-        }
         if (empty($params->action)) {
             $params->action = 'view';
         }
-    }
-    else { // it's a guest, oh no!
+    } else { // it's a guest, oh no!
         $params->action = 'notavailable';
     }
 
