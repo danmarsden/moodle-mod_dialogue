@@ -1,4 +1,4 @@
-<?php  // $Id: view.php,v 1.7.10.5 2009/04/25 09:58:28 skodak Exp $
+<?php  // $Id: view.php,v 1.7.10.6 2009/04/25 09:59:06 skodak Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
@@ -32,10 +32,6 @@
     $hascapmanage = has_capability('mod/dialogue:manage', $context);
 
     add_to_log($course->id, "dialogue", "view", "view.php?id=$cm->id", $dialogue->id, $cm->id);
-
-    if (! $cw = get_record("course_sections", "id", $cm->section)) {
-        error("Course module is incorrect");
-    }
 
     // set up some general variables
     $usehtmleditor = can_use_html_editor();
