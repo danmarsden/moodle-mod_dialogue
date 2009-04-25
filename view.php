@@ -1,4 +1,4 @@
-<?php  // $Id: view.php,v 1.7.10.6 2009/04/25 09:59:06 skodak Exp $
+<?php  // $Id: view.php,v 1.7.10.7 2009/04/25 09:59:24 skodak Exp $
 
     require_once("../../config.php");
     require_once("lib.php");
@@ -148,7 +148,7 @@
         }
 
     } else {
-    /*************** no man's land **************************************/
+/*************** no man's land **************************************/
         error("Fatal Error: Unknown Action: ".$params->action."\n");
     }
 
