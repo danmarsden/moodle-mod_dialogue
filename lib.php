@@ -1,4 +1,4 @@
-<?php // $Id: lib.php,v 1.4.10.2 2009/03/25 23:23:08 deeknow Exp $
+<?php // $Id: lib.php,v 1.4.10.3 2009/04/25 09:41:49 skodak Exp $
 
 $DIALOGUE_DAYS = array (0 => 0, 7 => 7, 14 => 14, 30 => 30, 150 => 150, 365 => 365 );
 
@@ -198,7 +198,7 @@ function dialogue_cron () {
                     }
 
                     $entry = array_pop($entry);
-                    $srcentry = clone $entry;
+                    $srcentry = clone($entry);
                     unset($entry->id);
                     $entry->conversationid = $conversationid;
                     $entry->timecreated = $conversation->timemodified;

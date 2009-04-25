@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.9.10.1 2009/03/25 21:23:32 deeknow Exp $
+<?php  // $Id: dialogues.php,v 1.9.10.2 2009/04/25 09:41:25 skodak Exp $
 
 /*************************************************
     ACTIONS handled are:
@@ -290,7 +290,7 @@
                         copy($srcdir.'/'.$entry->attachment, $dstdir.'/'.$entry->attachment);
                         set_field("dialogue_entries", "attachment", $entry->attachment, "id", $entry->id);
                     } elseif ($entry->attachment = dialogue_add_attachment($entry, 'attachment', $messages)) {
-                        $srcattachment = clone $entry;
+                        $srcattachment = clone($entry);
                         set_field("dialogue_entries", "attachment", $entry->attachment, "id", $entry->id);
                     }
                     
