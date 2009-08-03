@@ -1,4 +1,11 @@
-<?php // $Id: index.php,v 1.6.10.3 2009/04/25 11:44:23 skodak Exp $
+<?php // $Id: index.php,v 1.6.10.4 2009/08/03 03:06:31 deeknow Exp $
+
+/**
+ * This page lists all the instances of Dialogue in a particular course
+ * 
+ * @package dialogue
+ * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
+ */
 
     require_once('../../config.php');
     require_once('lib.php');

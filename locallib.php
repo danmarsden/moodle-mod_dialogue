@@ -1,4 +1,4 @@
-<?php  // $Id: locallib.php,v 1.3.10.3 2009/03/25 22:52:43 deeknow Exp $
+<?php  // $Id: locallib.php,v 1.3.10.4 2009/08/03 03:06:31 deeknow Exp $
 
 /// Library of extra functions for the dialogue module
 
@@ -124,7 +124,7 @@ global $USER, $CFG;
             if ($USER->id != $otheruser->id) {
 
                 // ...if not a student (eg co-teacher, teacher) then exclude from students list
-                if ($teachers[$otheruser->id] == 1) {
+                if (isset($teachers[$otheruser->id]) && $teachers[$otheruser->id] == 1) {
                     continue;
                 }
 

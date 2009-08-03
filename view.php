@@ -1,4 +1,11 @@
-<?php  // $Id: view.php,v 1.7.10.10 2009/04/25 11:47:06 skodak Exp $
+<?php  // $Id: view.php,v 1.7.10.11 2009/08/03 03:06:31 deeknow Exp $
+
+/**
+ * This page prints a particular instance of Dialogue
+ * 
+ * @package dialogue
+ * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
+ */
 
     require_once("../../config.php");
     require_once("lib.php");

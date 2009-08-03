@@ -1,4 +1,12 @@
-<?php  // $Id: dialogue_open_form.php,v 1.1.2.2 2009/03/25 21:23:32 deeknow Exp $
+<?php  // $Id: dialogue_open_form.php,v 1.1.2.3 2009/08/03 03:06:30 deeknow Exp $
+
+/**
+ * This page builds a Dialogue Open form when called from view.php or dialogues.php
+ * 
+ * This class extends moodleform overriding the definition() method only
+ * @package dialogue
+ * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
+ */
 
 require_once($CFG->libdir.'/formslib.php');
 
@@ -8,29 +16,27 @@ class mod_dialogue_open_form extends moodleform {
 
         global $CFG, $COURSE;
         
-        $this->set_upload_manager(new upload_manager('attachment', true, false, $COURSE, false, 0, true, true));
+        $this->set_upload_manager(new upload_manager('attachment', true, false,$COURSE, false, 0, true, true));
         
         $mform =& $this->_form;
-        
         
         $names = (array)$this->_customdata['names'];
         $names = array('' => get_string('select').'...')+$names;
         
         $mform->addElement('header', 'general', '');//fill in the data depending on page params
-        $mform->addElement('select', 'recipientid', get_string("openadialoguewith", "dialogue"), $names);
+        $mform->addElement('select', 'recipientid',get_string('openadialoguewith', 'dialogue'), $names);
         $mform->addRule('recipientid', get_string('required'), 'required', null, 'client');
         
-        $mform->addElement('text', 'subject', get_string("subject", "dialogue"), 'size="48"');
+        $mform->addElement('text', 'subject', get_string('subject', 'dialogue'), 'size="48"');
         $mform->setType('subject', PARAM_TEXT);
         $mform->addRule('subject', get_string('required'), 'required', null, 'client');
         
-        $mform->addElement('htmleditor', 'firstentry',  get_string("typefirstentry", "dialogue"), array('cols'=>80, 'rows'=>20));
+        $mform->addElement('htmleditor', 'firstentry',get_string('typefirstentry', 'dialogue'),array('cols'=>80, 'rows'=>20));
         $mform->setType('firstentry', PARAM_CLEANHTML);
         $mform->addRule('firstentry', get_string('required'), 'required', null, 'client');
-        $mform->setHelpButton('firstentry', array('reading', 'writing', 'questions', 'richtext'), false, 'editorhelpbutton');
+        $mform->setHelpButton('firstentry',array('reading', 'writing', 'questions', 'richtext'),false, 'editorhelpbutton');
         
         $mform->addElement('file', 'attachment', get_string('attachment', 'dialogue'));
-        
         
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
@@ -44,7 +50,7 @@ class mod_dialogue_open_form extends moodleform {
         $mform->addElement('hidden', 'action');
         $mform->setType('action', PARAM_TEXT);
         
-        $this->add_action_buttons(true, get_string("opendialogue","dialogue"));
+        $this->add_action_buttons(true, get_string('opendialogue','dialogue'));
     }
 }
 ?>
