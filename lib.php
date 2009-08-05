@@ -1,5 +1,5 @@
 <?php
-// $Id: lib.php,v 1.4.10.5 2009/08/05 05:06:56 deeknow Exp $
+// $Id: lib.php,v 1.4.10.6 2009/08/05 05:31:41 deeknow Exp $
 
 /**
  * Library of functions for the Dialogue module
@@ -219,10 +219,12 @@ function dialogue_cron() {
             begin_sql();
 
             course_setup($newuser['courseid']);
-            if ($conversation = get_record('dialogue_conversations', 'grouping',
-                                           $newuser['grouping'])) {
+            if ($conversations = get_records('dialogue_conversations', 'grouping',
+                                           $newuser['grouping'], 'id', '*', 0, 1)) {
+                $conversation = array_pop($conversations);  // we only need one to get the common field values
                 if ($entry = get_records('dialogue_entries', 'conversationid', 
                                          $conversation->id, 'id', '*', 0, 1)) {
+                                            
                     unset ($conversation->id);
                     $conversation->recipientid = $newuser['userid'];
                     $conversation->lastrecipientid = $newuser['userid'];
