@@ -1,4 +1,4 @@
-<?php  // $Id: view.php,v 1.7.10.11 2009/08/03 03:06:31 deeknow Exp $
+<?php  // $Id: view.php,v 1.7.10.12 2009/08/05 05:06:56 deeknow Exp $
 
 /**
  * This page prints a particular instance of Dialogue
@@ -41,11 +41,11 @@
     $strdialogues = get_string("modulenameplural", "dialogue");
 
     $navlinks = array(array('name' => $strdialogues, 'link' => "index.php?id=$course->id", 'type' => 'activity'),
-                      array('name' => $dialogue->name, 'link' => '', 'type' => 'activityinstance')
+                      array('name' => format_string($dialogue->name), 'link' => '', 'type' => 'activityinstance')
                      );
     $navigation = build_navigation($navlinks);
 
-    print_header_simple("$dialogue->name", "", $navigation,
+    print_header_simple(format_string($dialogue->name), "", $navigation,
                  "", "", true,
                   update_module_button($cm->id, $course->id, $strdialogue), navmenu($course, $cm));
 

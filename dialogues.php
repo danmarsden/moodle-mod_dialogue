@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.9.10.5 2009/08/03 03:06:31 deeknow Exp $
+<?php  // $Id: dialogues.php,v 1.9.10.6 2009/08/05 05:06:56 deeknow Exp $
 
 /**
  * Displays conversations/posts that are part of a dialogue module instance
@@ -10,8 +10,9 @@
  *  insertentries
  *  openconversation
  *  printdialogue
- *  showdialogues
  *  updatesubject
+ *  editreply
+ *  editconversation
  * 
  * @package dialogue
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
@@ -61,15 +62,16 @@
 
     // ... print the header and...
     $navlinks = array(array('name' => $strdialogues, 'link' => "index.php?id=$course->id", 'type' => 'activity' ),
-                      array('name' => $dialogue->name, 'link' => "view.php?id=$cm->id", 'type' => 'activityinstance')
+                      array('name' => format_string($dialogue->name), 'link' => "view.php?id=$cm->id", 'type' => 'activityinstance')
                      );
     $navigation = build_navigation($navlinks);                     
-    print_header_simple($dialogue->name, '',$navigation, '', '', true);
+    print_header_simple(format_string($dialogue->name), '',$navigation, '', '', true);
 
     // vet conversation id, if present
-    if (!empty($params->cid)) {
+    if (! empty($params->cid)) {
         if ($conversation = get_record('dialogue_conversations', 'id', $params->cid)) {
-            if ($conversation->userid <> $USER->id and $conversation->recipientid <> $USER->id and !has_capability('mod/dialogue:viewall', $context)) {
+            if ($conversation->userid <> $USER->id and $conversation->recipientid <> $USER->id 
+                and ! has_capability('mod/dialogue:viewall', $context)) {
                 error('Dialogue id incorrect');
             }
         } else {
@@ -86,10 +88,10 @@
         if (empty($params->cid)) {
             error('Close dialogue: Missing conversation id');
         }
-        if (!set_field('dialogue_conversations', 'closed', 1, 'id', $params->cid)) {
+        if (! set_field('dialogue_conversations', 'closed', 1, 'id', $params->cid)) {
             error('Close dialogue: unable to set closed');
         }
-        if (!set_field('dialogue_conversations', 'lastid', $USER->id, 'id', $params->cid)) {
+        if (! set_field('dialogue_conversations', 'lastid', $USER->id, 'id', $params->cid)) {
             error('Close dialogue: unable to set lastid');
         }
 
@@ -102,24 +104,25 @@
         if (empty($params->cid)) {
             error('Confirm Close: conversation id missing');
         }
-        if (!$conversation = get_record('dialogue_conversations', 'id', $params->cid)) {
+        if (! $conversation = get_record('dialogue_conversations', 'id', $params->cid)) {
             error('Confirm close: cannot get conversation record');
         }
         require_capability('mod/dialogue:close', $context);
         
         if ($conversation->userid == $USER->id) {
-            if (!$user = get_record('user', 'id', $conversation->recipientid)) {
+            if (! $user = get_record('user', 'id', $conversation->recipientid)) {
                 error('Confirm Close: cannot get recipient record');
             }
         }
         else {
-            if (!$user = get_record('user', 'id', $conversation->userid)) {
+            if (! $user = get_record('user', 'id', $conversation->userid)) {
                 error('Confirm Close: cannot get user record');
             }
         }
         notice_yesno(get_string('confirmclosure', 'dialogue', fullname($user)),
              "dialogues.php?action=closeconversation&amp;id=$cm->id&amp;cid=$conversation->id&amp;pane={$params->pane}",
              "view.php?id=$cm->id&amp;pane={$params->pane}");
+
     } else if ($params->action == 'getsubject' ) {
 /****************** get subject ************************************/
         
@@ -152,10 +155,9 @@
                 $stripped_text = '';
                 
                 if (isset($_POST[$textarea_name])) {
-                    $stripped_text = clean_text($_POST[$textarea_name], FORMAT_MOODLE);
+                    $stripped_text = clean_param($_POST[$textarea_name], PARAM_CLEANHTML);
                 }
 
-              //echo "<pre>$textarea_name  $stripped_text"; die;
                 if ($stripped_text) {
                     unset($item);
                     $item->dialogueid = $dialogue->id;
@@ -164,24 +166,24 @@
                     $item->timecreated = $timenow;
                     $item->timemodified = $item->timecreated;
                     // reverse the dialogue mail default
-                    $item->mailed = !$dialogue->maildefault;
+                    $item->mailed = ! $dialogue->maildefault;
                     
                     $item->text = $stripped_text;
-                    if (!$item->id = insert_record('dialogue_entries', $item)) {
+                    if (! $item->id = insert_record('dialogue_entries', $item)) {
                         error('Insert Entries: Could not insert dialogue record!');
                     }
-                    if (!set_field('dialogue_conversations', 'lastid', $USER->id, 'id', $conversation->id)) {
+                    if (! set_field('dialogue_conversations', 'lastid', $USER->id, 'id', $conversation->id)) {
                         error('Insert Dialogue Entries: could not set lastid');
                     }
-                    if (!set_field('dialogue_conversations', 'lastrecipientid', $conversation->lastid, 'id', $conversation->id)) {
+                    if (! set_field('dialogue_conversations', 'lastrecipientid', $conversation->lastid, 'id', $conversation->id)) {
                         error('Insert Dialogue Entries: could not set lastid');
                     }
-                    if (!set_field('dialogue_conversations', 'timemodified', $timenow, 'id',
+                    if (! set_field('dialogue_conversations', 'timemodified', $timenow, 'id',
                             $conversation->id)) {
                         error('Insert Dialogue Entries: could not set lastid');
                     }
                     // reset seenon time
-                    if (!set_field('dialogue_conversations', 'seenon', 0, 'id',
+                    if (! set_field('dialogue_conversations', 'seenon', 0, 'id',
                             $conversation->id)) {
                         error('Insert Dialogue Entries: could not reset seenon');
                     }
@@ -200,13 +202,6 @@
         redirect("view.php?id=$cm->id&amp;pane={$params->pane}", get_string('numberofentriesadded',
                     'dialogue', $a));
 
-    } else if ($params->action == 'listclosed') {
-/****************** list closed conversations *********************************/
-
-        print_simple_box( text_to_html($dialogue->intro) , 'center');
-        echo '<br />';
-
-        dialogue_list_closed_conversations($dialogue);
 
     } else if ($params->action == 'openconversation' ) {
 /****************** open conversation ************************************/
@@ -220,7 +215,7 @@
                 $groupid = intval(substr($params->recipientid, 1));
                 $sql = "SELECT MAX(grouping)+1 AS grouping from {$CFG->prefix}dialogue_conversations";
                 $grouping = get_field_sql($sql);
-                if (!$grouping) {
+                if (! $grouping) {
                     $grouping = 1;
                 }
                  
@@ -258,7 +253,7 @@
                     $conversation->groupid = $groupid;
                     $conversation->grouping = $grouping;
                     
-                    if (!$conversation->id = insert_record('dialogue_conversations', $conversation)) {
+                    if (! $conversation->id = insert_record('dialogue_conversations', $conversation)) {
                         error('Open dialogue: Could not insert dialogue record!');
                     }
                     add_to_log($course->id, 'dialogue', 'open', "view.php?id=$cm->id", $dialogue->id);
@@ -272,9 +267,9 @@
                     $entry->timecreated = $timenow;
                     $entry->timemodified = $timenow;
                     // reverse the dialogue default value
-                    $entry->mailed = !$dialogue->maildefault;
+                    $entry->mailed = ! $dialogue->maildefault;
                     $entry->text = addslashes($params->firstentry);
-                    if (!$entry->id = insert_record('dialogue_entries', $entry)) {
+                    if (! $entry->id = insert_record('dialogue_entries', $entry)) {
                         error('Insert Entries: Could not insert dialogue record!');
                     }
                     add_to_log($course->id, 'dialogue', 'add entry', "view.php?id=$cm->id", $entry->id);
@@ -302,7 +297,7 @@
             }
             if (isset($groupid)) {
                 if ($groupid) { // a real group
-                    if (!$group = get_record('groups', 'id', $groupid)) {
+                    if (! $group = get_record('groups', 'id', $groupid)) {
                         error('Dialogue open conversation: Group not found');
                     }
                     redirect("view.php?id=$cm->id", get_string('dialogueopened', 'dialogue', $group->name));
@@ -311,7 +306,7 @@
                                 get_string('allparticipants')));
                 }
             } else {
-                if (!$user =  get_record('user', 'id', $conversation->recipientid)) {
+                if (! $user =  get_record('user', 'id', $conversation->recipientid)) {
                     error('Open dialogue: user record not found');
                 }
                 $a->name = fullname($user);
@@ -323,33 +318,22 @@
     } else if ($params->action == 'printdialogue') {
 /****************** print dialogue (allowing new entry)********************/
 
-        print_simple_box( text_to_html($dialogue->intro) , 'center');
+        print_simple_box(format_text($dialogue->intro), 'center');
         echo '<br />';
 
         dialogue_print_conversation($dialogue, $conversation);
 
-    } else if ($params->action == 'showdialogues') {
-/****************** show dialogues ****************************************/
-        
-        if (!$conversation = get_record('dialogue_conversations', 'id', $params->cid)) {
-            error('Show Dialogue: can not get conversation record');
-        }
-
-        print_simple_box( text_to_html($dialogue->intro) , 'center');
-        echo '<br />';
-
-        dialogue_print_conversation($dialogue, $conversation);
 
     } else if ($params->action == 'updatesubject') {
 /****************** update subject ****************************************/
 
-        if (!$conversation = get_record('dialogue_conversations', 'id', $params->cid)) {
+        if (! $conversation = get_record('dialogue_conversations', 'id', $params->cid)) {
             error('Update Subject: can not get conversation record');
         }
 
         if (empty($params->subject)) {
             redirect("view.php?id=$cm->id&amp;pane={$params->pane}", get_string('nosubject', 'dialogue'));
-        } elseif (!set_field('dialogue_conversations', 'subject', $params->subject, 'id', $params->cid)) {
+        } elseif (! set_field('dialogue_conversations', 'subject', $params->subject, 'id', $params->cid)) {
             error('Update subject: could not update conversation record');
         }
         redirect("view.php?id=$cm->id&amp;pane={$params->pane}", get_string('subjectadded', 'dialogue'));
@@ -393,7 +377,7 @@
         $entry = get_record('dialogue_entries', 'id', $params->entryid);
         $conversation = get_record('dialogue_conversations', 'id', $entry->conversationid);
         
-        if (!empty($params->firstentry)) {
+        if (! empty($params->firstentry)) {
 
             
             set_field('dialogue_entries', 'text', addslashes($params->firstentry), 'id', $entry->id);

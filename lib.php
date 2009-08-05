@@ -1,5 +1,5 @@
 <?php
-// $Id: lib.php,v 1.4.10.4 2009/08/03 03:06:31 deeknow Exp $
+// $Id: lib.php,v 1.4.10.5 2009/08/05 05:06:56 deeknow Exp $
 
 /**
  * Library of functions for the Dialogue module
@@ -104,12 +104,12 @@ function dialogue_cron() {
 
             $dialogueinfo = new object();
             $dialogueinfo->userfrom = fullname($userfrom);
-            $dialogueinfo->dialogue = $dialogue->name;
+            $dialogueinfo->dialogue = format_string($dialogue->name);
             $dialogueinfo->url = "$CFG->wwwroot/mod/dialogue/view.php?id=$cm->id";
 
-            $postsubject = "$course->shortname: $strdialogues: $dialogue->name: ".
-            get_string('newentry', 'dialogue');
-            $posttext = "$course->shortname -> $strdialogues -> $dialogue->name\n";
+            $postsubject = "$course->shortname: $strdialogues: $dialogueinfo->dialogue: ".
+                                         get_string('newentry', 'dialogue');
+            $posttext = "$course->shortname -> $strdialogues -> $dialogueinfo->dialogue\n";
             $posttext .= "---------------------------------------------------------------------\n";
             $posttext .= get_string('dialoguemail', 'dialogue', $dialogueinfo)." \n";
             $posttext .= "---------------------------------------------------------------------\n";
@@ -117,7 +117,7 @@ function dialogue_cron() {
                 $posthtml = "<p><font face=\"sans-serif\">".
                 "<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->".
                 "<a href=\"$CFG->wwwroot/mod/dialogue/index.php?id=$course->id\">dialogues</a> ->".
-                "<a href=\"$CFG->wwwroot/mod/dialogue/view.php?id=$cm->id\">$dialogue->name</a></font></p>";
+                "<a href=\"$CFG->wwwroot/mod/dialogue/view.php?id=$cm->id\">" . $dialogueinfo->dialogue . "</a></font></p>";
                 $posthtml .= "<hr /><font face=\"sans-serif\">";
                 $posthtml .= '<p>'.get_string('dialoguemailhtml', 'dialogue', $dialogueinfo).'</p>';
                 $posthtml .= "</font><hr />";
@@ -289,10 +289,10 @@ function dialogue_print_recent_activity($course, $viewfullnames, $timestart) {
     global $CFG;
     // have a look for new entries
     $addentrycontent = false;
+    $tempmod = new object();         // Create a temp valid module structure (only need courseid, moduleid)
+    $tempmod->course = $course->id;
     if ($logs = dialogue_get_add_entry_logs($course, $timestart)) {
         // got some, see if any belong to a visible module
-        $tempmod = new object();         // Create a temp valid module structure (only need courseid, moduleid)
-        $tempmod->course = $course->id;
         foreach ($logs as $log) {
             $tempmod->id = $log->dialogueid;
             //Obtain the visible property from the instance
@@ -322,7 +322,6 @@ function dialogue_print_recent_activity($course, $viewfullnames, $timestart) {
         // got some, see if any belong to a visible module
         foreach ($logs as $log) {
             // Create a temp valid module structure (only need courseid, moduleid)
-            $tempmod->course = $course->id;
             $tempmod->id = $log->dialogueid;
             //Obtain the visible property from the instance
             if (instance_is_visible('dialogue', $tempmod)) {
@@ -335,7 +334,6 @@ function dialogue_print_recent_activity($course, $viewfullnames, $timestart) {
             print_headline(get_string('opendialogueentries', 'dialogue').':');
             foreach ($logs as $log) {
                 //Create a temp valid module structure (only need courseid, moduleid)
-                $tempmod->course = $course->id;
                 $tempmod->id = $log->dialogueid;
                 $user = get_record('user', 'id', $log->userid);
                 //Obtain the visible property from the instance
