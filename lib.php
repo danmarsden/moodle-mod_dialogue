@@ -1,5 +1,5 @@
 <?php
-// $Id: lib.php,v 1.4.10.6 2009/08/05 05:31:41 deeknow Exp $
+// $Id: lib.php,v 1.4.10.7 2009/08/19 23:36:43 deeknow Exp $
 
 /**
  * Library of functions for the Dialogue module
@@ -567,8 +567,10 @@ function dialogue_get_add_entry_logs($course, $timestart) {
  * @param   object  $user
  * @param   string  $condition to be included in WHERE clause to be used in sql
  * @param   string  $order by clause to be used in sql
+ * @param   int     $groupid    of the group to filter conversations by (default: 0)
+ * @return  array   recordset of conversations
  */
-function dialogue_get_conversations($dialogue, $user, $condition = '', $order = '') {
+function dialogue_get_conversations($dialogue, $user, $condition='', $order='', $groupid=0) {
     global $CFG, $COURSE;
 
     if (! $cm = get_coursemodule_from_instance('dialogue', $dialogue->id, $COURSE->id)) {
@@ -585,6 +587,16 @@ function dialogue_get_conversations($dialogue, $user, $condition = '', $order = 
     } else {
         $whereuser = ' AND (c.userid = '.$user->id.' OR c.recipientid = '.$user->id.') ';
     }
+    // ULPGC ecastro enforce groups use
+    if($groupid) {
+        $members = groups_get_members($groupid, 'u.id');
+        if($members) {
+            $list = '( '.implode(', ', array_keys($members)).' )';
+        } else {
+            $list = '( 0 ) ';
+        }
+        $whereuser .= " AND (c.userid IN $list OR c.recipientid IN $list )";
+    }
 
     $sql = "SELECT c.*, COUNT(e.id) AS total, COUNT(r.id) as readings ".
            "FROM {$CFG->prefix}dialogue_conversations c ".
@@ -593,8 +605,20 @@ function dialogue_get_conversations($dialogue, $user, $condition = '', $order = 
            "WHERE c.dialogueid = $dialogue->id $whereuser $condition ".
            "GROUP BY c.id, c.userid, c.dialogueid, c.recipientid, c.lastid, c.lastrecipientid, c.timemodified, c.closed, c.seenon, c.ctype, c.format, c.subject, c.groupid, c.grouping ".
            "ORDER BY $order ";
-
-    return get_records_sql($sql);
+    $conversations = get_records_sql($sql);
+    
+    // if we have a groupid we only want conversations where both recipient AND user are in that group
+    if($groupid) {
+        $memberids = array_keys($members);
+        $groupconversations = array();
+        foreach ($conversations as $conversation) {
+            if (in_array($conversation->userid,$memberids) && in_array($conversation->recipientid,$memberids)) { 
+                $groupconversations[$conversation->id] = $conversation;
+            }
+        }
+        $conversations = $groupconversations;
+    }
+    return $conversations;
 }
 
 

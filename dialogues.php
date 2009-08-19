@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.9.10.6 2009/08/05 05:06:56 deeknow Exp $
+<?php  // $Id: dialogues.php,v 1.9.10.7 2009/08/19 23:36:43 deeknow Exp $
 
 /**
  * Displays conversations/posts that are part of a dialogue module instance
@@ -62,7 +62,8 @@
 
     // ... print the header and...
     $navlinks = array(array('name' => $strdialogues, 'link' => "index.php?id=$course->id", 'type' => 'activity' ),
-                      array('name' => format_string($dialogue->name), 'link' => "view.php?id=$cm->id", 'type' => 'activityinstance')
+                      array('name' => format_string($dialogue->name), 'link' => "view.php?id=$cm->id", 'type' => 'activityinstance'),
+                      array('name' => $strdialogue, 'link' => "view.php?id=$cm->id", 'type' => 'activityinstance')
                      );
     $navigation = build_navigation($navlinks);                     
     print_header_simple(format_string($dialogue->name), '',$navigation, '', '', true);
@@ -79,7 +80,7 @@
         }
     }
     if ($params->cancel) {
-        redirect('view.php?id='.$params->id.'&pane=1', null, 0);
+        redirect('view.php?id='.$params->id.'&pane='.DIALOGUEPANE_CURRENT, null, 0);
     }
 
 

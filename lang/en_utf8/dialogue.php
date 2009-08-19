@@ -1,4 +1,4 @@
-<?php // $Id: dialogue.php,v 1.1.2.3 2009/03/25 23:23:09 deeknow Exp $ 
+<?php // $Id: dialogue.php,v 1.1.2.4 2009/08/19 23:36:44 deeknow Exp $ 
       // dialogue.php - created with Moodle 1.7 beta + (2006101003)
 
 
@@ -59,7 +59,8 @@ $string['opendialogue'] = 'Submit dialogue';
 $string['opendialogueentries'] = 'Open dialogue entries';
 $string['opendialogues'] = 'Open Dialogues';
 $string['pane0'] = 'Open a Dialogue';
-$string['pane1'] = 'Current dialogues';
+$string['pane1'] = '$a Current Open Dialogues';
+$string['pane1one'] = 'One Open Dialogue';
 $string['pane3'] = '$a Closed Dialogues';
 $string['pane3one'] = '1 Closed Dialogue';
 $string['seen'] = 'Seen $a ago';
@@ -81,8 +82,8 @@ $string['otherdialogues'] = 'Other dialogues';
 $string['replyupdated'] = 'Reply updated';
 $string['dialogue:open'] = 'Open';
 $string['dialogue:participate'] = 'Participate';
-$string['dialogue:manage'] = 'Manage';                                  
-$string['dialogue:viewall'] = 'View any dialogue';                                    
+$string['dialogue:manage'] = 'Manage';
+$string['dialogue:viewall'] = 'View any dialogue';
 $string['dialogue:participateany'] = 'Participate in any dialogue';
 $string['dialogue:close'] = 'Close';
 $string['currentattachment'] = 'Current attachment: ';
