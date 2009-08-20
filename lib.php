@@ -1,5 +1,5 @@
 <?php
-// $Id: lib.php,v 1.4.10.7 2009/08/19 23:36:43 deeknow Exp $
+// $Id: lib.php,v 1.4.10.8 2009/08/20 05:02:08 deeknow Exp $
 
 /**
  * Library of functions for the Dialogue module
@@ -279,6 +279,25 @@ function dialogue_cron() {
 
     return true;
 }
+
+
+/**
+ * Return a list of 'view' actions to be reported on in the participation reports
+ * @return  array   of view action labels
+ */
+function dialogue_get_view_actions() {
+    return array('view');
+}
+
+
+/**
+ * Return a list of 'post' actions to be reported on in the participation reports
+ * @return  array   of post action labels
+ */
+function dialogue_get_post_actions() {
+    return array('add entry','edit_entry','open');
+}
+
 
 /**
  * Prints any recent dialogue activity since a given time
