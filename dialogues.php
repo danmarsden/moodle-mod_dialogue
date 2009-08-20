@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.9.10.7 2009/08/19 23:36:43 deeknow Exp $
+<?php  // $Id: dialogues.php,v 1.9.10.8 2009/08/20 04:08:07 deeknow Exp $
 
 /**
  * Displays conversations/posts that are part of a dialogue module instance
@@ -149,12 +149,13 @@
         
         $timenow = time();
         $n = 0;
+        $foundid = 0; // so we can display the entry after posting it
         // get all the open conversations for this user
         if ($conversations = dialogue_get_conversations($dialogue, $USER, 'closed = 0')) {
             foreach ($conversations as $conversation) {
                 $textarea_name = "reply$conversation->id";
                 $stripped_text = '';
-                
+                // check if a post variable named with this conversation id, use the text from it in a new entry 
                 if (isset($_POST[$textarea_name])) {
                     $stripped_text = clean_param($_POST[$textarea_name], PARAM_CLEANHTML);
                 }
@@ -193,6 +194,7 @@
                         set_field('dialogue_entries', 'attachment', $item->attachment, 'id', $item->id);
                     }
                     $n++;
+                    $foundid = $conversation->id;
                     dialogue_mark_conversation_read($conversation->id, $USER->id);
                 }
             }
@@ -200,7 +202,7 @@
 
         $a->number = $n;
         $a->edittime = $dialogue->edittime;
-        redirect("view.php?id=$cm->id&amp;pane={$params->pane}", get_string('numberofentriesadded',
+        redirect("dialogues.php?id=$cm->id&amp;action=printdialogue&amp;cid=$foundid", get_string('numberofentriesadded',
                     'dialogue', $a));
 
 
@@ -292,7 +294,11 @@
                 $a = new stdClass();
                 $a->edittime = $dialogue->edittime;
                 $a->number = $n;
-                redirect("view.php?id=$cm->id", get_string('numberofentriesadded', 'dialogue', $a));
+                if ($n > 1) { // return to dialogue page if more than one recipent 
+                    redirect("view.php?id=$cm->id", get_string('numberofentriesadded', 'dialogue', $a));
+                } else { // if only one recipent show the new conversation with them
+                    redirect("dialogues.php?id=$cm->id&amp;action=printdialogue&amp;cid=$conversation->id", get_string('numberofentriesadded', 'dialogue', $a));
+                }
             } else {
                 redirect("view.php?id=$cm->id", get_string('noavailablepeople', 'dialogue'));
             }
