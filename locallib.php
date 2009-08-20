@@ -1,4 +1,4 @@
-<?php  // $Id: locallib.php,v 1.3.10.6 2009/08/19 23:36:43 deeknow Exp $
+<?php  // $Id: locallib.php,v 1.3.10.7 2009/08/20 21:41:06 deeknow Exp $
 
 /**
  * Library of extra functions for the dialogue module not part of the standard add-on module API set
@@ -29,7 +29,7 @@ function dialogue_count_closed($dialogue, $user, $viewall=false, $groupid=0) {
     if ($viewall) {
         $userwhere = '';
     } else {
-        $userwhere = "(userid = '.$user->id.' OR recipientid = '.$user->id.') AND ";
+        $userwhere = "(userid = '$user->id' OR recipientid = '$user->id') AND ";
     }
     if($groupid) {
         $members = groups_get_members($groupid, 'u.id');
