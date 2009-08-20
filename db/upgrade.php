@@ -1,4 +1,4 @@
-<?php  //$Id: upgrade.php,v 1.1 2008/08/13 04:54:11 deeknow Exp $
+<?php  //$Id: upgrade.php,v 1.2 2009/08/20 02:23:21 deeknow Exp $
 
 function xmldb_dialogue_upgrade($oldversion=0) {
 

@@ -1,4 +1,4 @@
-<?php //$Id: restorelib.php,v 1.5 2008/08/13 04:54:10 deeknow Exp $
+<?php //$Id: restorelib.php,v 1.6 2009/08/20 02:23:21 deeknow Exp $
     //This php script contains all the stuff to backup/restore
     //dialogue mods
 
@@ -58,7 +58,7 @@
             $newid = insert_record ("dialogue",$dialogue);
 
             //Do some output
-            echo "<li>".get_string("modulename","dialogue")." \"".$dialogue->name."\"</li>";
+            echo "<li>".get_string("modulename","dialogue")." \"".format_string($dialogue->name)."\"</li>";
             backup_flush(300);
 
             if ($newid) {

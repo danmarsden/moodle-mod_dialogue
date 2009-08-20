@@ -1,4 +1,4 @@
-<?php //$Id: backuplib.php,v 1.5 2008/08/13 04:54:10 deeknow Exp $
+<?php //$Id: backuplib.php,v 1.6 2009/08/20 02:23:20 deeknow Exp $
     //This php script contains all the stuff to backup/restore
     //dialogue mods
 
@@ -58,8 +58,8 @@
         //Print dialogue data
         fwrite ($bf,full_tag("ID",4,false,$dialogue->id));
         fwrite ($bf,full_tag("MODTYPE",4,false,"dialogue"));
-        fwrite ($bf,full_tag("NAME",4,false,$dialogue->name));
-        fwrite ($bf,full_tag("INTRO",4,false,$dialogue->intro));
+        fwrite ($bf,full_tag("NAME",4,false,format_string($dialogue->name)));
+        fwrite ($bf,full_tag("INTRO",4,false,format_text($dialogue->intro)));
         fwrite ($bf,full_tag("DELETEAFTER",4,false,$dialogue->deleteafter));
         fwrite ($bf,full_tag("DIALOGUETYPE",4,false,$dialogue->dialoguetype));
         fwrite ($bf,full_tag("MULTIPLECONVERSATIONS",4,false,$dialogue->multipleconversations));

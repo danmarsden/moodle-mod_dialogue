@@ -1,4 +1,4 @@
-<?php  // $Id: locallib.php,v 1.8 2009/08/05 05:13:57 deeknow Exp $
+<?php  // $Id: locallib.php,v 1.9 2009/08/20 02:23:21 deeknow Exp $
 
 /**
  * Library of extra functions for the dialogue module not part of the standard add-on module API set
@@ -12,24 +12,37 @@
 define ('DIALOGUETYPE_TEACHERSTUDENT', 0);
 define ('DIALOGUETYPE_STUDENTSTUDENT', 1);
 define ('DIALOGUETYPE_EVERYONE', 2);
+define ('DIALOGUEPANE_OPEN', 0);
+define ('DIALOGUEPANE_CURRENT', 1);
+define ('DIALOGUEPANE_CLOSED', 3);
 
 /**
  * Count the number of closed conversations in a given dialogue for a given user
  *  
  * @param   object  $dialogue
  * @param   object  $user
- * @param   bool    $viewall if true show count closed records where user is initator or receipient
+ * @param   bool    $viewall if true count all open records, not just those where user is initator or receipient
+ * @param   int     $groupid    filter conversations by recipients in the group specified
  * @return  int     count of the records found
  */
-function dialogue_count_closed($dialogue, $user, $viewall=false) {
-   
+function dialogue_count_closed($dialogue, $user, $viewall=false, $groupid=0) {
     if ($viewall) {
-        $where = 'closed = 1';
+        $userwhere = '';
     } else {
-        $where = '(userid = '.$user->id.' OR recipientid = '.$user->id.') AND closed = 1'; 
+        $userwhere = "(userid = '.$user->id.' OR recipientid = '.$user->id.') AND ";
     }
-    
-    return count_records_select('dialogue_conversations', "dialogueid = $dialogue->id AND $where");
+    if($groupid) {
+        $members = groups_get_members($groupid, 'u.id');
+        if($members) {
+            $list = '( '.implode(', ', array_keys($members)).' )';
+        } else {
+            $list = '( 0 ) ';
+        }
+        $where = " ( userid IN $list AND recipientid IN $list ) AND $userwhere closed = 1";
+    } else {
+        $where = " $userwhere closed = 1";
+    }
+    return count_records_select("dialogue_conversations", "dialogueid = $dialogue->id AND $where ");
 }
 
 
@@ -38,12 +51,28 @@ function dialogue_count_closed($dialogue, $user, $viewall=false) {
  *  
  * @param   object  $dialogue
  * @param   object  $user
+ * @param   bool    $viewall if true count all closed records, not just those where user is initator or receipient
+ * @param   int     $groupid    filter conversations by recipients in the group specified
  * @return  int     count of the records found
  */
-function dialogue_count_open($dialogue, $user) {
-    
-    return count_records_select('dialogue_conversations', "dialogueid = $dialogue->id AND 
-        (userid = $user->id OR recipientid = $user->id) AND closed = 0");
+function dialogue_count_open($dialogue, $user, $viewall=false,  $groupid=0) {
+    if ($viewall) {
+        $userwhere = '';
+    } else {
+        $userwhere = ' (userid='.$user->id.' OR recipientid='.$user->id.') AND ';
+    }
+    if($groupid) {
+        $members = groups_get_members($groupid, 'u.id');
+        if($members) {
+            $list = '( '.implode(', ', array_keys($members)).' )';
+        } else {
+            $list = '( 0 ) ';
+        }
+        $where = " ( userid IN $list AND recipientid IN $list ) AND $userwhere closed = 0";
+    } else {
+        $where = " $userwhere closed = 0";
+    }
+    return count_records_select('dialogue_conversations', "dialogueid = $dialogue->id AND $where ");
 }
 
 
@@ -135,7 +164,7 @@ function dialogue_get_available_students($dialogue, $context, $editconversationi
 
     $groupid = groups_get_activity_group($cm, true);
     // add current group before list of students if it's the teacher
-    if ($teachers[$USER->id]) {
+    if (isset($teachers[$USER->id])) {
         // show teacher their current group
         if ($groupid) {
             if (! $group = get_record('groups', 'id', $groupid)) {
@@ -169,14 +198,14 @@ function dialogue_get_available_students($dialogue, $context, $editconversationi
                 }
 
                 // ...if teacher and groups then exclude students not in the current group
-                if ($teachers[$USER->id] and groupmode($course, $cm) and $groupid) {
+                if (isset($teachers[$USER->id]) and groupmode($course, $cm) and $groupid) {
                     if (! ismember($groupid, $otheruser->id)) {
                         continue;
                     }
                 }
 
                 // ...if student and groupmode is SEPARATEGROUPS then exclude students not in student's group
-                if (! $teachers[$USER->id] and (groupmode($course, $cm) == SEPARATEGROUPS)) {
+                if (! isset($teachers[$USER->id]) and (groupmode($course, $cm) == SEPARATEGROUPS)) {
                     if (! ismember($groupid, $otheruser->id)) {
                         continue;
                     }
@@ -282,92 +311,6 @@ function dialogue_get_available_teachers($dialogue, $context, $editconversationi
 
 
 /**
- * List conversations of the current user that are closed
- * 
- * Called when a user clicks the "Closed Dialogues" tab
- * rendering those out directly as HTML inside a print_table() showing who the
- * conversation was with, what the subject was, how many entries there were and
- * what the most recent post date was   
- * @param   object  $dialogue
- */
-function dialogue_list_conversations_closed($dialogue) {
-
-    global $USER, $CFG;
-  
-    if (! $course = get_record('course', 'id', $dialogue->course)) {
-        error('Course is misconfigured');
-    }
-    if (! $cm = get_coursemodule_from_instance('dialogue', $dialogue->id, $course->id)) {
-        error('Course Module ID was incorrect');
-    }
-    
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-    
-    $dialoguemanagers = array_keys(get_users_by_capability($context, 'mod/dialogue:manage'));
-
-    $timenow = time();
-    $showbutton = false;
-
-    // list the conversations requiring a resonse from this user in full
-    if ($conversations = dialogue_get_conversations($dialogue, $USER, 'closed = 1')) {
-
-        // reorder the conversations by (other) name
-        foreach ($conversations as $conversation) {
-            
-            if (in_array($USER->id, $dialoguemanagers)) {
-                if (! in_array($conversation->userid, $dialoguemanagers)) {
-                    if (! $with = get_record('user', 'id', $conversation->userid)) {
-                        error("User's record not found");
-                    }
-                }
-                else {
-                    if (! $with = get_record('user', 'id', $conversation->recipientid)) {
-                        error("User's record not found");
-                    }                
-                }
-            } else {
-                if ($USER->id != $conversation->userid) {
-                    if (! $with = get_record('user', 'id', $conversation->userid)) {
-                        error("User's record not found");
-                    }
-                }
-                else {
-                    if (! $with = get_record('user', 'id', $conversation->recipientid)) {
-                        error("User's record not found");
-                    }                
-                }
-            }
-            $names[$conversation->id] = fullname($with);
-        }
-        natcasesort($names);
-        
-        print_simple_box_start('center');
-        $table->head = array (get_string('dialoguewith', 'dialogue'), get_string('subject', 'dialogue'),  
-            get_string('numberofentries', 'dialogue'), get_string('lastentry', 'dialogue'));
-        $table->width = '100%';
-        $table->align = array ('left', 'left', 'center', 'left');
-        $table->size = array ('*', '*', '*', '*');
-        $table->cellpadding = 2;
-        $table->cellspacing = 0;
-
-        foreach ($names as $cid=>$name) {
-            if (! $conversation = get_record('dialogue_conversations', 'id', $cid)) {
-                error('Closed conversations: could not find conversation record');
-            }
-            $total = dialogue_count_entries($dialogue, $conversation);
-            
-            $table->data[] = array(
-                "<a href=\"dialogues.php?id=$cm->id&amp;action=printdialogue&amp;cid=$conversation->id\">".
-                "$name</a>",  format_string($conversation->subject), $total,
-                userdate($conversation->timemodified)
-                );
-        }
-        print_table($table);
-        print_simple_box_end();
-    }
-}
-
-/**
  * Print a conversation and allow a new entry
  * 
  * Render out entries for the specified conversation as HTML showing the
@@ -397,7 +340,7 @@ function dialogue_print_conversation($dialogue, $conversation) {
     $mform = new mod_dialogue_reply_form('dialogues.php', array('conversationid' => $conversation->id));
     $mform->set_data(array('id' => $cm->id,
                            'action' => 'insertentries',
-                           'pane' => 2));
+                           'pane' => DIALOGUEPANE_CURRENT));
 
     $showbutton = true;
     print_simple_box_start('center', '');
@@ -434,13 +377,13 @@ function dialogue_print_conversation($dialogue, $conversation) {
     echo "<div align=\"right\">\n";
     if (! $conversation->subject) {
         // conversation does not have a subject, show add subject link
-        echo "<a href=\"dialogues.php?action=getsubject&amp;id=$cm->id&amp;cid=$conversation->id&amp;pane=2\">".
+        echo "<a href=\"dialogues.php?action=getsubject&amp;id=$cm->id&amp;cid=$conversation->id&amp;pane=".DIALOGUEPANE_CURRENT."\">".
             get_string('addsubject', 'dialogue')."</a>\n";
         helpbutton('addsubject', get_string('addsubject', 'dialogue'), 'dialogue');
         echo '&nbsp; | ';
     }
     if (! $conversation->closed && has_capability('mod/dialogue:close', $context)) {
-    echo "<a href=\"dialogues.php?action=confirmclose&amp;id=$cm->id&amp;cid=$conversation->id&amp;pane=2\">".
+    echo "<a href=\"dialogues.php?action=confirmclose&amp;id=$cm->id&amp;cid=$conversation->id&amp;pane=".DIALOGUEPANE_CURRENT."\">".
         get_string('close', 'dialogue')."</a>\n";
         helpbutton('closedialogue', get_string('close', 'dialogue'), 'dialogue');
     }
@@ -468,10 +411,10 @@ function dialogue_print_conversation($dialogue, $conversation) {
                 echo "<tr><td colspan=\"2\" bgcolor=\"#FFFFFF\">\n";
                 if ($canedit) {
                     if ($firstentry) {
-                    	echo "<a href=\"dialogues.php?action=editconversation&amp;id=$cm->id&amp;entryid=$entry->id&amp;pane=2\">".
+                    	echo "<a href=\"dialogues.php?action=editconversation&amp;id=$cm->id&amp;entryid=$entry->id&amp;pane=".DIALOGUEPANE_CURRENT."\">".
                             get_string('edit').'</a>';
                     } else {
-                        echo "<a href=\"dialogues.php?action=editreply&amp;id=$cm->id&amp;entryid=$entry->id&amp;pane=2\">".
+                        echo "<a href=\"dialogues.php?action=editreply&amp;id=$cm->id&amp;entryid=$entry->id&amp;pane=".DIALOGUEPANE_CURRENT."\">".
                             get_string('edit').'</a>';
                     }
                 }
@@ -508,19 +451,24 @@ function dialogue_print_conversation($dialogue, $conversation) {
 
 
 /**
- * List open conversations of the current user awaiting their reply
+ * List conversations of either open or closed type for the current user
  * 
- * Called when a user clicks the "Current Dialogues" tab
+ * Called when a user clicks the "Current Dialogues" or "Closed Dialogues" tabs
  * rendering those out directly as HTML inside a print_table() showing who the
  * conversation is with, what the subject is, how many entries there are, 
  * how many are un-read and what the most recent post date is 
  *  
  * @param   object  $dialogue
+ * @param   int     $groupid    of the group to filter conversations by (default: 0)
+ * @param   string  $type       'open' (default) or 'closed'
+ * @todo    remove the embedded style for 'th', make it a class driven thing in the theme
  */
-function dialogue_list_conversations($dialogue) {
+function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
 
     global $USER, $CFG;
-  
+    $condition = ($type == 'closed') ? " closed='1' " : " closed='0' ";  
+    $tabid = ($type == 'closed') ? 3 : 1;  
+    
     if (! $course = get_record('course', 'id', $dialogue->course)) {
         error('Course is misconfigured');
     }
@@ -532,15 +480,59 @@ function dialogue_list_conversations($dialogue) {
     
     $dialoguemanagers = array_keys(get_users_by_capability($context, 'mod/dialogue:manage'));
    
-    $timenow = time();
-    $showbutton = false;
+    echo '<style>th.header { text-align: left; }</style>';
+    require_once($CFG->libdir.'/tablelib.php');
+    $tablecolumns = array('picture', 'subject', 'fullname', 'total', 'unread', 'lastentry');
+    $tableheaders = array('',
+                            get_string('subject', 'dialogue'),  
+                            get_string('fullname', ''),  
+                            get_string('numberofentries', 'dialogue'), 
+                            get_string('unread', 'dialogue'), 
+                            get_string('lastentry', 'dialogue')
+    );
+    $table = new flexible_table('mod-dialogue-submissions');
+    $table->define_columns($tablecolumns);
+    $table->define_headers($tableheaders);
+    $table->define_baseurl($CFG->wwwroot.'/mod/dialogue/view.php?id='.$cm->id.'&amp;pane='.$tabid);
+    $table->sortable(true, 'subject');
+    $table->collapsible(false);
+    //$table->column_suppress('picture'); // supress multiple subsequent row entries
+    //$table->column_suppress('fullname');
+    $table->set_attribute('cellspacing', '0');
+    $table->set_attribute('id', 'dialogue');
+    $table->set_attribute('class', 'conversations');
+    $table->set_attribute('width', '100%');
+    $table->setup();
 
+    $order = '';    // so we can filter the get_conversations() call later
+    $namesort = ''; // if we want to sort by other calculated fields, e.g. first/last name
+    if ($sort = $table->get_sql_sort('mod-dialogue-submissions')) {
+        $sortparts = explode(',', $sort);
+        $sqlsort = $sortparts[0];
+        if (strpos($sqlsort,'subject') !== false) {
+            $order = $sqlsort;
+        }
+        if (strpos($sqlsort,'total') !== false) {
+            $order = $sqlsort;
+        }
+        if (strpos($sqlsort,'lastentry') !== false) {
+            $order = $sqlsort;
+            $order = str_replace('lastentry','c.timemodified',$order);
+        }
+        if (strpos($sqlsort,'firstname') !== false) {
+            $namesort = $sqlsort;
+        }
+        if (strpos($sqlsort,'lastname') !== false) {
+            $namesort = $sqlsort;
+        }
+        if (strpos($sqlsort,'unread') !== false) {
+            $namesort = $sqlsort;
+        }
+    }
+    
     // list the conversations requiring a resonse from this user in full
-    if ($conversations = dialogue_get_conversations($dialogue, $USER, 'closed = 0 ')) {
-
-        // reorder the conversations by (other) name
+    if ($conversations = dialogue_get_conversations($dialogue, $USER, $condition, $order, $groupid)) {
         foreach ($conversations as $conversation) {
-            
             if (in_array($USER->id, $dialoguemanagers)) {
                 if (! in_array($conversation->userid, $dialoguemanagers)) {
                     if (! $with = get_record('user', 'id', $conversation->userid)) {
@@ -564,42 +556,67 @@ function dialogue_list_conversations($dialogue) {
                     }                
                 }
             }
+            // save sortable field values for each conversation so can sort by them later
             $names[$conversation->id] = fullname($with);
+            $unread[$conversation->id] = $conversation->total-$conversation->readings;
+            $names_firstlast[$conversation->id] = $with->firstname.' '.$with->lastname;
+            $names_lastfirst[$conversation->id] = $with->lastname.' '.$with->firstname;
+            $photos[$conversation->id] = print_user_picture($with, $course->id, true, 0, true);
+            $ids[$conversation->id] = $with->id;
+            
         }
-        natcasesort($names);
-        
-        print_simple_box_start('center');
-        $table = new object();
-        $table->head = array (
-            get_string('dialoguewith', 'dialogue'), 
-            get_string('subject', 'dialogue'),  
-            get_string('numberofentries', 'dialogue'), 
-            get_string('unread', 'dialogue'), 
-            get_string('lastentry', 'dialogue')
-        );
-        $table->width = '100%';
-        $table->align = array ('left', 'left', 'center', 'center', 'left');
-        $table->size = array ('*', '*', '*', '*', '*');
-        $table->cellpadding = 2;
-        $table->cellspacing = 0;
 
-        foreach ($names as $cid=>$name) {
-            $conversation = $conversations[$cid];
-           
-            if ($conversation->total-$conversation->readings > 0) {
-                $unread = '<span class="unread">'.($conversation->total-$conversation->readings).'</span>';
-            } else {
-                $unread = 0;
-            }
-         
-            $table->data[] = array(
-                "<a href=\"dialogues.php?id=$cm->id&amp;action=printdialogue&amp;cid=$conversation->id\">".
-                "$name</a>", format_string($conversation->subject), $conversation->total, $unread,
-                userdate($conversation->timemodified)
-            );
+        // sort an array of conversations based on which field user clicked to sort in the UI
+        $sortedvalues = $names; // default is sort by fullname from above
+        switch ($namesort) {
+        	case 'firstname ASC':
+                $sortedvalues = $names_firstlast;
+                natcasesort($sortedvalues);
+                break;
+            case 'firstname DESC':
+                $sortedvalues = $names_firstlast;
+                natcasesort($sortedvalues);
+                $sortedvalues = array_reverse($sortedvalues,true);
+                break;
+            case 'lastname ASC':
+                $sortedvalues = $names_lastfirst;
+                natcasesort($sortedvalues);
+                break;
+            case 'lastname DESC':
+                $sortedvalues = $names_lastfirst;
+                natcasesort($sortedvalues);
+                $sortedvalues = array_reverse($sortedvalues,true);
+                break;
+            case 'unread ASC':
+                $sortedvalues = $unread;
+                asort($sortedvalues);
+                break;
+            case 'unread DESC':
+                $sortedvalues = $unread;
+                arsort($sortedvalues);
+                break;
         }
-        print_table($table);
-        print_simple_box_end();
+
+        foreach ($sortedvalues as $cid=>$val) {
+            $conversation = $conversations[$cid];
+            if ($unread[$cid] > 0) {
+                $unreadcount = '<span class="unread">'.($unread[$cid]).'</span>';
+            } else {
+                $unreadcount = 0;
+            }
+            $profileurl = "$CFG->wwwroot/user/view.php?id=".$ids[$conversation->id]."&amp;course=$dialogue->course";
+            $entryurl = "$CFG->wwwroot/mod/dialogue/dialogues.php?id=".$cm->id."&amp;action=printdialogue&amp;cid=".$cid;
+            $row = array($photos[$conversation->id], 
+                         "<a href='$entryurl'>".$conversation->subject.'</a>',
+                         "<a href='$profileurl'>".$names[$conversation->id].'</a>',
+                         $conversation->total,
+                         $unreadcount,
+                         userdate($conversation->timemodified)
+                        );
+            $table->add_data($row);
+
+        }
+        $table->print_html();  /// Print the whole table
     }
 }
 
