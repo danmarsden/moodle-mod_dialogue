@@ -1,5 +1,5 @@
 <?php
-// $Id: lib.php,v 1.4.10.8 2009/08/20 05:02:08 deeknow Exp $
+// $Id: lib.php,v 1.4.10.9 2009/08/21 04:59:34 deeknow Exp $
 
 /**
  * Library of functions for the Dialogue module
@@ -625,18 +625,7 @@ function dialogue_get_conversations($dialogue, $user, $condition='', $order='', 
            "GROUP BY c.id, c.userid, c.dialogueid, c.recipientid, c.lastid, c.lastrecipientid, c.timemodified, c.closed, c.seenon, c.ctype, c.format, c.subject, c.groupid, c.grouping ".
            "ORDER BY $order ";
     $conversations = get_records_sql($sql);
-    
-    // if we have a groupid we only want conversations where both recipient AND user are in that group
-    if($groupid) {
-        $memberids = array_keys($members);
-        $groupconversations = array();
-        foreach ($conversations as $conversation) {
-            if (in_array($conversation->userid,$memberids) && in_array($conversation->recipientid,$memberids)) { 
-                $groupconversations[$conversation->id] = $conversation;
-            }
-        }
-        $conversations = $groupconversations;
-    }
+
     return $conversations;
 }
 

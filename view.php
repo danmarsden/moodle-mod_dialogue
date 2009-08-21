@@ -1,4 +1,4 @@
-<?php  // $Id: view.php,v 1.7.10.13 2009/08/19 23:36:43 deeknow Exp $
+<?php  // $Id: view.php,v 1.7.10.14 2009/08/21 04:59:34 deeknow Exp $
 
 /**
  * This page prints a particular instance of Dialogue
@@ -53,19 +53,17 @@
                   update_module_button($cm->id, $course->id, $strdialogue), navmenu($course, $cm));
 
     if (!$hascapparticipate) { // no access
-        print_heading(get_string("notavailable", "dialogue"));
+        notify(get_string("notavailable", "dialogue"));
         print_footer($course);
         die;
     }
 
     groups_print_activity_menu($cm, "view.php?id=$cm->id&amp;pane=$pane");
+
     echo '<br />';
     print_simple_box(format_text($dialogue->intro), 'center', '70%', '', 5, 'generalbox', 'intro');
     echo "<br />";
 
-    /// if groups are being used in this dialogue set $currentgroup to reflect the current group
-    $currentgroup = groups_get_activity_group($cm, true);
-    $groupmode = groups_get_activity_groupmode($cm);
     // get some stats
     $countopen = dialogue_count_open($dialogue, $USER, $hascapviewall, $currentgroup);
     $countclosed = dialogue_count_closed($dialogue, $USER, $hascapviewall, $currentgroup);
@@ -106,10 +104,24 @@
 
     switch ($pane) {
         case 0: // Open dialogue
-            if (!$hascapopen) {
-                print_heading(get_string("opendenied", "dialogue"));
+            if (! $hascapopen) {
+                notify(get_string("notavailable", "dialogue"));
                 print_continue("view.php?id=$cm->id");
                 break;
+            }
+            if ($groupmode && ! $hascapmanage) {
+                if ($group>0) {
+                    $members = groups_get_members($group, 'u.id');
+                    if (! in_array($USER->id, array_keys($members))) {
+                        notify(get_string("cannotadd", "dialogue"));
+                        print_continue("view.php?id=$cm->id");
+                        break;
+                    }
+                } else {
+                        notify(get_string("cannotaddall", "dialogue"));
+                        print_continue("view.php?id=$cm->id");
+                        break;
+                }
             }
             if ($names) {
                 $mform = new mod_dialogue_open_form('dialogues.php', array('names' => $names));
@@ -118,7 +130,7 @@
                 $mform->display();
 
             } else {
-                print_heading(get_string("noavailablepeople", "dialogue"));
+                notify(get_string("noavailablepeople", "dialogue"));
                 print_continue("view.php?id=$cm->id");
             }
             break;
