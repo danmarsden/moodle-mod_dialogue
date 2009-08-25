@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.9.10.9 2009/08/20 05:02:07 deeknow Exp $
+<?php  // $Id: dialogues.php,v 1.9.10.10 2009/08/25 03:08:47 deeknow Exp $
 
 /**
  * Displays conversations/posts that are part of a dialogue module instance
@@ -157,7 +157,7 @@
                 $stripped_text = '';
                 // check if a post variable named with this conversation id, use the text from it in a new entry 
                 if (isset($_POST[$textarea_name])) {
-                    $stripped_text = clean_param($_POST[$textarea_name], PARAM_CLEANHTML);
+                    $stripped_text = clean_param($_POST[$textarea_name], PARAM_CLEAN);
                 }
 
                 if ($stripped_text) {
