@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.9.10.10 2009/08/25 03:08:47 deeknow Exp $
+<?php   // $Id: dialogues.php,v 1.9.10.11 2009/12/16 01:45:32 deeknow Exp $
 
 /**
  * Displays conversations/posts that are part of a dialogue module instance
@@ -200,10 +200,11 @@
             }
         }
 
+        $a = new stdClass();
         $a->number = $n;
         $a->edittime = $dialogue->edittime;
-        redirect("dialogues.php?id=$cm->id&amp;action=printdialogue&amp;cid=$foundid", get_string('numberofentriesadded',
-                    'dialogue', $a));
+        redirect("dialogues.php?id=$cm->id&amp;action=printdialogue&amp;cid=$foundid", 
+                 get_string('numberofentriesadded', 'dialogue', $a));
 
 
     } else if ($params->action == 'openconversation' ) {
@@ -301,24 +302,6 @@
                 }
             } else {
                 redirect("view.php?id=$cm->id", get_string('noavailablepeople', 'dialogue'));
-            }
-            if (isset($groupid)) {
-                if ($groupid) { // a real group
-                    if (! $group = get_record('groups', 'id', $groupid)) {
-                        error('Dialogue open conversation: Group not found');
-                    }
-                    redirect("view.php?id=$cm->id", get_string('dialogueopened', 'dialogue', $group->name));
-                } else { // all participants
-                    redirect("view.php?id=$cm->id", get_string('dialogueopened', 'dialogue',
-                                get_string('allparticipants')));
-                }
-            } else {
-                if (! $user =  get_record('user', 'id', $conversation->recipientid)) {
-                    error('Open dialogue: user record not found');
-                }
-                $a->name = fullname($user);
-                $a->edittime = $dialogue->edittime;
-                redirect("view.php?id=$cm->id", get_string('dialogueopened', 'dialogue',  $a));
             }
         }
 
