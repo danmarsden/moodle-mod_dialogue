@@ -1,4 +1,4 @@
-<?php  // $Id: dialogues.php,v 1.11 2009/08/20 02:23:20 deeknow Exp $
+<?php   // $Id: dialogues.php,v 1.12 2009/12/16 03:21:19 deeknow Exp $
 
 /**
  * Displays conversations/posts that are part of a dialogue module instance
@@ -96,7 +96,7 @@
             error('Close dialogue: unable to set lastid');
         }
 
-        add_to_log($course->id, 'dialogue', 'closed', "view.php?id=$cm->id", $params->cid);
+        add_to_log($course->id, 'dialogue', 'closed', "view.php?id=$cm->id", $params->cid, $cm->id);
         redirect("view.php?id=$cm->id&amp;pane={$params->pane}", get_string('dialogueclosed', 'dialogue'));
 
     } else if ($params->action == 'confirmclose' ) {
@@ -149,14 +149,15 @@
         
         $timenow = time();
         $n = 0;
+        $foundid = 0; // so we can display the entry after posting it
         // get all the open conversations for this user
         if ($conversations = dialogue_get_conversations($dialogue, $USER, 'closed = 0')) {
             foreach ($conversations as $conversation) {
                 $textarea_name = "reply$conversation->id";
                 $stripped_text = '';
-                
+                // check if a post variable named with this conversation id, use the text from it in a new entry 
                 if (isset($_POST[$textarea_name])) {
-                    $stripped_text = clean_param($_POST[$textarea_name], PARAM_CLEANHTML);
+                    $stripped_text = clean_param($_POST[$textarea_name], PARAM_CLEAN);
                 }
 
                 if ($stripped_text) {
@@ -188,20 +189,22 @@
                             $conversation->id)) {
                         error('Insert Dialogue Entries: could not reset seenon');
                     }
-                    add_to_log($course->id, 'dialogue', 'add entry', "view.php?id=$cm->id", $item->id);
+                    add_to_log($course->id, 'dialogue', 'add entry', "view.php?id=$cm->id", $item->id, $cm->id);
                     if ($item->attachment = dialogue_add_attachment($item, 'attachment', $messages)) {
                         set_field('dialogue_entries', 'attachment', $item->attachment, 'id', $item->id);
                     }
                     $n++;
+                    $foundid = $conversation->id;
                     dialogue_mark_conversation_read($conversation->id, $USER->id);
                 }
             }
         }
 
+        $a = new stdClass();
         $a->number = $n;
         $a->edittime = $dialogue->edittime;
-        redirect("view.php?id=$cm->id&amp;pane={$params->pane}", get_string('numberofentriesadded',
-                    'dialogue', $a));
+        redirect("dialogues.php?id=$cm->id&amp;action=printdialogue&amp;cid=$foundid", 
+                 get_string('numberofentriesadded', 'dialogue', $a));
 
 
     } else if ($params->action == 'openconversation' ) {
@@ -257,7 +260,7 @@
                     if (! $conversation->id = insert_record('dialogue_conversations', $conversation)) {
                         error('Open dialogue: Could not insert dialogue record!');
                     }
-                    add_to_log($course->id, 'dialogue', 'open', "view.php?id=$cm->id", $dialogue->id);
+                    add_to_log($course->id, 'dialogue', 'open', "view.php?id=$cm->id", $dialogue->id, $cm->id);
 
                     // now add the entry
                     unset($entry);
@@ -273,7 +276,7 @@
                     if (! $entry->id = insert_record('dialogue_entries', $entry)) {
                         error('Insert Entries: Could not insert dialogue record!');
                     }
-                    add_to_log($course->id, 'dialogue', 'add entry', "view.php?id=$cm->id", $entry->id);
+                    add_to_log($course->id, 'dialogue', 'add entry', "view.php?id=$cm->id", $entry->id, $cm->id);
                     if (isset($srcattachment)) {
                         $entry->attachment = $srcattachment->attachment;
                         $srcdir = dialogue_file_area($srcattachment);
@@ -292,27 +295,13 @@
                 $a = new stdClass();
                 $a->edittime = $dialogue->edittime;
                 $a->number = $n;
-                redirect("view.php?id=$cm->id", get_string('numberofentriesadded', 'dialogue', $a));
+                if ($n > 1) { // return to dialogue page if more than one recipent 
+                    redirect("view.php?id=$cm->id", get_string('numberofentriesadded', 'dialogue', $a));
+                } else { // if only one recipent show the new conversation with them
+                    redirect("dialogues.php?id=$cm->id&amp;action=printdialogue&amp;cid=$conversation->id", get_string('numberofentriesadded', 'dialogue', $a));
+                }
             } else {
                 redirect("view.php?id=$cm->id", get_string('noavailablepeople', 'dialogue'));
-            }
-            if (isset($groupid)) {
-                if ($groupid) { // a real group
-                    if (! $group = get_record('groups', 'id', $groupid)) {
-                        error('Dialogue open conversation: Group not found');
-                    }
-                    redirect("view.php?id=$cm->id", get_string('dialogueopened', 'dialogue', $group->name));
-                } else { // all participants
-                    redirect("view.php?id=$cm->id", get_string('dialogueopened', 'dialogue',
-                                get_string('allparticipants')));
-                }
-            } else {
-                if (! $user =  get_record('user', 'id', $conversation->recipientid)) {
-                    error('Open dialogue: user record not found');
-                }
-                $a->name = fullname($user);
-                $a->edittime = $dialogue->edittime;
-                redirect("view.php?id=$cm->id", get_string('dialogueopened', 'dialogue',  $a));
             }
         }
 
@@ -359,7 +348,7 @@
                 set_field('dialogue_entries', 'attachment', $entry->attachment, 'id', $entry->id);
             }
             
-            add_to_log($course->id, 'dialogue', 'edit entry', "view.php?id=$cm->id", $entry->id);
+            add_to_log($course->id, 'dialogue', 'edit entry', "view.php?id=$cm->id", $entry->id, $cm->id);
             
             redirect("dialogues.php?id=$cm->id&amp;pane={$params->pane}&amp;action=printdialogue&amp;cid={$entry->conversationid}", 
                 get_string('replyupdated', 'dialogue'));
@@ -391,7 +380,7 @@
                 set_field('dialogue_entries', 'attachment', $entry->attachment, 'id', $entry->id);
             }
             
-            add_to_log($course->id, 'dialogue', 'edit entry', "view.php?id=$cm->id", $entry->id);
+            add_to_log($course->id, 'dialogue', 'edit entry', "view.php?id=$cm->id", $entry->id, $cm->id);
             
             redirect("dialogues.php?id=$cm->id&amp;pane={$params->pane}&amp;action=printdialogue&amp;cid={$conversation->id}",
                     get_string('replyupdated', 'dialogue'));

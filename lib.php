@@ -1,5 +1,5 @@
 <?php
-// $Id: lib.php,v 1.7 2009/08/20 02:23:21 deeknow Exp $
+// $Id: lib.php,v 1.8 2009/12/16 03:21:20 deeknow Exp $
 
 /**
  * Library of functions for the Dialogue module
@@ -279,6 +279,25 @@ function dialogue_cron() {
 
     return true;
 }
+
+
+/**
+ * Return a list of 'view' actions to be reported on in the participation reports
+ * @return  array   of view action labels
+ */
+function dialogue_get_view_actions() {
+    return array('view');
+}
+
+
+/**
+ * Return a list of 'post' actions to be reported on in the participation reports
+ * @return  array   of post action labels
+ */
+function dialogue_get_post_actions() {
+    return array('add entry','edit_entry','open');
+}
+
 
 /**
  * Prints any recent dialogue activity since a given time
@@ -606,18 +625,7 @@ function dialogue_get_conversations($dialogue, $user, $condition='', $order='', 
            "GROUP BY c.id, c.userid, c.dialogueid, c.recipientid, c.lastid, c.lastrecipientid, c.timemodified, c.closed, c.seenon, c.ctype, c.format, c.subject, c.groupid, c.grouping ".
            "ORDER BY $order ";
     $conversations = get_records_sql($sql);
-    
-    // if we have a groupid we only want conversations where both recipient AND user are in that group
-    if($groupid) {
-        $memberids = array_keys($members);
-        $groupconversations = array();
-        foreach ($conversations as $conversation) {
-            if (in_array($conversation->userid,$memberids) && in_array($conversation->recipientid,$memberids)) { 
-                $groupconversations[$conversation->id] = $conversation;
-            }
-        }
-        $conversations = $groupconversations;
-    }
+
     return $conversations;
 }
 

@@ -1,4 +1,4 @@
-<?php  // $Id: locallib.php,v 1.9 2009/08/20 02:23:21 deeknow Exp $
+<?php  // $Id: locallib.php,v 1.10 2009/12/16 03:21:20 deeknow Exp $
 
 /**
  * Library of extra functions for the dialogue module not part of the standard add-on module API set
@@ -29,7 +29,7 @@ function dialogue_count_closed($dialogue, $user, $viewall=false, $groupid=0) {
     if ($viewall) {
         $userwhere = '';
     } else {
-        $userwhere = "(userid = '.$user->id.' OR recipientid = '.$user->id.') AND ";
+        $userwhere = "(userid = '$user->id' OR recipientid = '$user->id') AND ";
     }
     if($groupid) {
         $members = groups_get_members($groupid, 'u.id');
@@ -68,7 +68,7 @@ function dialogue_count_open($dialogue, $user, $viewall=false,  $groupid=0) {
         } else {
             $list = '( 0 ) ';
         }
-        $where = " ( userid IN $list AND recipientid IN $list ) AND $userwhere closed = 0";
+        $where = " ( userid IN $list OR recipientid IN $list ) AND $userwhere closed = 0";
     } else {
         $where = " $userwhere closed = 0";
     }
@@ -197,16 +197,17 @@ function dialogue_get_available_students($dialogue, $context, $editconversationi
                     continue;
                 }
 
+                $groupmode = groupmode($course, $cm);
                 // ...if teacher and groups then exclude students not in the current group
-                if (isset($teachers[$USER->id]) and groupmode($course, $cm) and $groupid) {
+                if (isset($teachers[$USER->id]) and $groupmode and $groupid) {
                     if (! ismember($groupid, $otheruser->id)) {
                         continue;
                     }
                 }
 
-                // ...if student and groupmode is SEPARATEGROUPS then exclude students not in student's group
-                if (! isset($teachers[$USER->id]) and (groupmode($course, $cm) == SEPARATEGROUPS)) {
-                    if (! ismember($groupid, $otheruser->id)) {
+                // ...if student and groupmode then exclude students not in student's group
+                if (!isset($teachers[$USER->id]) && $groupmode && $groupid) {
+                    if (!ismember($groupid, $otheruser->id)) {
                         continue;
                     }
                 }

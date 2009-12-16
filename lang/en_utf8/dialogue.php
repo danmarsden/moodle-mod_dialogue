@@ -1,4 +1,4 @@
-<?php // $Id: dialogue.php,v 1.3 2009/08/20 02:23:21 deeknow Exp $ 
+<?php // $Id: dialogue.php,v 1.4 2009/12/16 03:21:20 deeknow Exp $ 
       // dialogue.php - created with Moodle 1.7 beta + (2006101003)
 
 
@@ -94,4 +94,6 @@ $string['unreadnumber'] = '$a unread entries';
 $string['unreadone'] = '1 unread entry';
 $string['posts'] = 'posts';
 $string['noentry'] = 'No entries';
+$string['cannotadd'] = 'Cannot Open a dialogue unless you are a member of this group';
+$string['cannotaddall'] = 'Cannot Open a dialogue with all participants';
 ?>
