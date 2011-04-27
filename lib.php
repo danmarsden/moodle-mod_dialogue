@@ -1,5 +1,4 @@
 <?php
-// $Id: lib.php,v 1.8 2009/12/16 03:21:20 deeknow Exp $
 
 /**
  * Library of functions for the Dialogue module
@@ -23,10 +22,11 @@ $DIALOGUE_DAYS = array (0 => 0, 7 => 7, 14 => 14, 30 => 30, 150 => 150, 365 => 3
  *          false or a string error message on failure.
  */
 function dialogue_add_instance($dialogue) {
+    global $DB;
 
     $dialogue->timemodified = time();
 
-    return insert_record('dialogue', $dialogue);
+    return $DB->insert_record('dialogue', $dialogue);
 }
 
 /**
@@ -37,47 +37,48 @@ function dialogue_add_instance($dialogue) {
  */
 function dialogue_cron() {
 
-    global $CFG, $USER;
+    global $DB, $CFG, $USER;
 
     $context_cache = array();
     // delete any closed conversations which have expired
     dialogue_delete_expired_conversations();
 
     // Finds all dialogue entries that have yet to be mailed out, and mails them
-    $sql =  "SELECT e.* FROM {$CFG->prefix}dialogue_entries e ".
-            "INNER JOIN {$CFG->prefix}dialogue d ON e.dialogueid = d.id ".
-            "WHERE e.timecreated + d.edittime * 60 < ".time()." AND e.mailed = 0 ";
-    if ($entries = get_records_sql($sql)) {
+    $sql =  "SELECT e.* FROM {dialogue_entries} e ".
+            "INNER JOIN {dialogue} d ON e.dialogueid = d.id ".
+            "WHERE e.timecreated + d.edittime * 60 < :timenow AND e.mailed = 0 ";
+    
+    if ($entries = $DB->get_records_sql($sql, array('timenow' => time()))) {
         foreach ($entries as $entry) {
 
             echo "Processing dialogue entry $entry->id\n";
 
-            if (! $userfrom = get_record('user', 'id', $entry->userid)) {
+            if (! $userfrom = $DB->get_record('user', array('id' => $entry->userid))) {
                 mtrace("Could not find user $entry->userid\n");
                 continue;
             }
             // get conversation record
-            if (! $conversation = get_record('dialogue_conversations', 'id',
-                                            $entry->conversationid)) {
+            if (! $conversation = $DB->get_record('dialogue_conversations', array('id' =>
+                                            $entry->conversationid))) {
                 mtrace("Could not find conversation $entry->conversationid\n");
             }
             if ($userfrom->id == $conversation->userid) {
-                if (! $userto = get_record('user', 'id', $conversation->recipientid)) {
+                if (! $userto = $DB->get_record('user', array('id' => $conversation->recipientid))) {
                     mtrace("Could not find use $conversation->recipientid\n");
                 }
             } else {
-                if (! $userto = get_record('user', 'id', $conversation->userid)) {
+                if (! $userto = $DB->get_record('user', array('id' => $conversation->userid))) {
                     mtrace("Could not find use $conversation->userid\n");
                 }
             }
 
             $USER->lang = $userto->lang;
 
-            if (! $dialogue = get_record('dialogue', 'id', $conversation->dialogueid)) {
+            if (! $dialogue = $DB->get_record('dialogue', array('id' => $conversation->dialogueid))) {
                 echo "Could not find dialogue id $conversation->dialogueid\n";
                 continue;
             }
-            if (! $course = get_record('course', 'id', $dialogue->course)) {
+            if (! $course = $DB->get_record('course', array('id' => $dialogue->course))) {
                 echo "Could not find course $dialogue->course\n";
                 continue;
             }
@@ -95,7 +96,7 @@ function dialogue_cron() {
             }
             if (! has_capability('mod/dialogue:participate', $context_cache[$course->id], $userto->id) 
                 && ! has_capability('mod/dialogue:manage', $context_cache[$course->id], $userto->id)) {
-                set_field('dialogue_entries', 'mailed', '1', 'id', $entry->id);
+                $DB->set_field('dialogue_entries', 'mailed', '1', 'id', $entry->id);
                 continue; // Not an active participant
             }
 
@@ -124,28 +125,28 @@ function dialogue_cron() {
             } else {
                 $posthtml = '';
             }
-
+            
             if (! email_to_user($userto, $userfrom, $postsubject, $posttext, $posthtml)) {
                 mtrace("Error: dialogue cron: Could not send out mail for id $entry->id to user $userto->id ($userto->email)\n");
             }
-            if (! set_field('dialogue_entries', 'mailed', '1', 'id', $entry->id)) {
+            if (! $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->id))) {
                 mtrace("Could not update the mailed field for id $entry->id\n");
             }
         }
     }
 
     /// Find conversations sent to all participants and check for new participants
-    $rs = get_recordset_select('dialogue_conversations',
-                               'grouping != 0 AND grouping IS NOT NULL', 
-                               'dialogueid, grouping');
+    $conversation_rs = $DB->get_recordset_select('dialogue_conversations',
+                                    'grouping != 0 AND grouping IS NOT NULL',
+                                    null,
+                                    'dialogueid, grouping');
     $dialogueid = 0;
     $grouping = 0;
     $groupid = null;
     $inconversation = array();
     $newusers = array();
 
-    while ($conversation = rs_fetch_next_record($rs)) {
-
+    foreach($conversation_rs as $conversation) {
         if ($dialogueid != $conversation->dialogueid
              || $groupid != $conversation->groupid
              || $grouping != $conversation->grouping) {
@@ -211,32 +212,36 @@ function dialogue_cron() {
             }
         }
     }
-    rs_close($rs);
+    $conversation_rs->close();
 
     if (! empty($newusers)) {
         foreach ($newusers as $key => $newuser) {
 
-            begin_sql();
 
-            course_setup($newuser['courseid']);
-            if ($conversations = get_records('dialogue_conversations', 'grouping',
-                                           $newuser['grouping'], 'id', '*', 0, 1)) {
+            
+            $transaction = $DB->start_delegated_transaction();
+
+            if ($conversations = $DB->get_records('dialogue_conversations', array('grouping' =>
+                                           $newuser['grouping']), 'id', '*', 0, 1)) {
                 $conversation = array_pop($conversations);  // we only need one to get the common field values
-                if ($entry = get_records('dialogue_entries', 'conversationid', 
-                                         $conversation->id, 'id', '*', 0, 1)) {
-                                            
+                if ($entry = $DB->get_records('dialogue_entries', array('conversationid'=>$conversation->id),'id', '*', 0, 1)) {
+
+
+
                     unset ($conversation->id);
                     $conversation->recipientid = $newuser['userid'];
                     $conversation->lastrecipientid = $newuser['userid'];
                     $conversation->timemodified = time();
                     $conversation->seenon = false;
                     $conversation->closed = 0;
-                    $conversation = addslashes_object($conversation);
-
-                    if (! $conversationid = insert_record('dialogue_conversations', $conversation)) {
-                        rollback_sql();
+                    
+                    try {
+                        $conversationid = $DB->insert_record('dialogue_conversations', $conversation);
+                    } catch (Exception $e) {
+                        $transaction->rollback($e);
                         continue;
                     }
+
 
                     $entry = array_pop($entry);
                     $srcentry = clone ($entry);
@@ -245,13 +250,34 @@ function dialogue_cron() {
                     $entry->timecreated = $conversation->timemodified;
                     $entry->recipientid = $conversation->recipientid;
                     $entry->mailed = false;
-                    $entry = addslashes_object($entry);
-
-                    if (! $entry->id = insert_record('dialogue_entries', $entry)) {
-                        rollback_sql();
+                    
+                    try {
+                        $entry->id = $DB->insert_record('dialogue_entries', $entry);
+                    } catch (Exception $e) {
+                        $transaction->rollback($e);
                         continue;
                     }
-
+                    /// Are there embedded images
+                    $fs = get_file_storage();
+                    $oldcm = get_coursemodule_from_instance('dialogue', $srcentry->dialogueid);
+                    $oldcontext = get_context_instance(CONTEXT_MODULE, $oldcm->id);
+                    $oldentryid = $srcentry->id;
+ 
+                    if ($files = $fs->get_area_files($oldcontext->id, 'mod_dialogue', 'entry', $oldentryid)) {
+                        foreach($files as $file){
+                            $fs->create_file_from_storedfile(array('contextid' => $oldcontext->id,
+                                                                   'itemid' => $entry->id), $file);
+                        }
+                    }
+                    // Are there attachment(s)
+                    if ($entry->attachment) {
+                        if ($files = $fs->get_area_files($oldcontext->id, 'mod_dialogue', 'attachment', $oldentryid)) {
+                            foreach($files as $file){
+                                $fs->create_file_from_storedfile(array('contextid' => $oldcontext->id,
+                                                                       'itemid' => $entry->id), $file);
+                            }
+                        }
+                    }
                     $read = new stdClass;
                     $lastread = time();
                     $read->conversationid = $conversationid;
@@ -260,20 +286,16 @@ function dialogue_cron() {
                     $read->firstread = $lastread;
                     $read->lastread = $lastread;
 
-                    insert_record('dialogue_read', $read);
+                    $DB->insert_record('dialogue_read', $read);
 
-                    if ($entry->attachment) {
-                        $srcdir = dialogue_file_area($srcentry);
-                        $dstdir = dialogue_file_area($entry);
-                        copy($srcdir.'/'.$entry->attachment, $dstdir.'/'.$entry->attachment);
-                    }
                 } else {
                     mtrace('Failed to find entry for conversation: '.$conversation->id);
                 }
             } else {
                 mtrace('Failed to find conversation: '.$conversation->id);
             }
-            commit_sql();
+            
+            $transaction->allow_commit();
         }
     }
 
@@ -307,7 +329,8 @@ function dialogue_get_post_actions() {
  * @return  bool    success
  */
 function dialogue_print_recent_activity($course, $viewfullnames, $timestart) {
-    global $CFG;
+    global $DB, $CFG;
+    //return '';
     // have a look for new entries
     $addentrycontent = false;
     $tempmod = new object();         // Create a temp valid module structure (only need courseid, moduleid)
@@ -327,7 +350,7 @@ function dialogue_print_recent_activity($course, $viewfullnames, $timestart) {
             print_headline(get_string('newdialogueentries', 'dialogue').':');
             foreach ($logs as $log) {
                 $tempmod->id = $log->dialogueid;
-                $user = get_record('user', 'id', $log->userid);
+                $user = $DB->get_record('user', array('id' => $log->userid));
                 //Obtain the visible property from the instance
                 if (instance_is_visible('dialogue', $tempmod)) {
                     print_recent_activity_note($log->time, $user, $log->subject, $CFG->wwwroot .
@@ -356,7 +379,7 @@ function dialogue_print_recent_activity($course, $viewfullnames, $timestart) {
             foreach ($logs as $log) {
                 //Create a temp valid module structure (only need courseid, moduleid)
                 $tempmod->id = $log->dialogueid;
-                $user = get_record('user', 'id', $log->userid);
+                $user = $DB->get_record('user', array('id' => $log->userid));
                 //Obtain the visible property from the instance
                 if (instance_is_visible('dialogue', $tempmod)) {
                     print_recent_activity_note($log->time, $user, $log->name, $CFG->wwwroot .
@@ -381,13 +404,13 @@ function dialogue_print_recent_activity($course, $viewfullnames, $timestart) {
  * $return->info = a short text description
  */
 function dialogue_user_outline($course, $user, $mod, $dialogue) {
-    global $CFG;
+    global $DB, $CFG;
 
     $sql = "SELECT COUNT(DISTINCT timecreated) AS count, MAX(e.timecreated) AS timecreated".
            " FROM  {$CFG->prefix}dialogue_entries e".
-           " WHERE e.userid = $user->id AND e.dialogueid = $dialogue->id ";
+           " WHERE e.userid = :user AND e.dialogueid = :dialogue ";
 
-    if ($entries = get_record_sql($sql)) {
+    if ($entries = $DB->get_record_sql($sql, array('userid' => $user->id, 'dialogueid' => $dialogue->id))) {
         $result = new object();
         $result->info = $entries->count.' '.get_string('posts', 'dialogue');
         $result->time = $entries->timecreated;
@@ -405,11 +428,12 @@ function dialogue_user_outline($course, $user, $mod, $dialogue) {
  * @return  bool    true on success
  */
 function dialogue_update_instance($dialogue) {
+    global $DB;
 
     $dialogue->timemodified = time();
     $dialogue->id = $dialogue->instance;
 
-    return update_record('dialogue', $dialogue);
+    return $DB->update_record('dialogue', $dialogue);
 }
 
 /**
@@ -421,22 +445,23 @@ function dialogue_update_instance($dialogue) {
  * @return  bool    true on success, false if not
  */
 function dialogue_delete_instance($id) {
+    global $DB;
 
-    if (! $dialogue = get_record('dialogue', 'id', $id)) {
+    if (! $dialogue = $DB->get_record('dialogue', array('id' => $id))) {
         return false;
     }
 
     $result = true;
 
-    if (! delete_records('dialogue_conversations', 'dialogueid', $dialogue->id)) {
+    if (! $DB->delete_records('dialogue_conversations', array('dialogueid' => $dialogue->id))) {
         $result = false;
     }
 
-    if (! delete_records('dialogue_entries', 'dialogueid', $dialogue->id)) {
+    if (! $DB->delete_records('dialogue_entries', array('dialogueid' => $dialogue->id))) {
         $result = false;
     }
 
-    if (! delete_records('dialogue', 'id', $dialogue->id)) {
+    if (! $DB->delete_records('dialogue', array('id' => $dialogue->id))) {
         $result = false;
     }
 
@@ -453,6 +478,7 @@ function dialogue_delete_instance($id) {
  * @param object $dialogue
  */
 function dialogue_user_complete($course, $user, $mod, $dialogue) {
+    global $DB;
 
     if ($conversations = dialogue_get_conversations($dialogue, $user, 'e.userid = '.$user->id)) {
         print_simple_box_start();
@@ -470,11 +496,11 @@ function dialogue_user_complete($course, $user, $mod, $dialogue) {
 
         foreach ($conversations as $conversation) {
             if ($user->id != $conversation->userid) {
-                if (! $with = get_record('user', 'id', $conversation->userid)) {
+                if (! $with = $DB->get_record('user', array('id' => $conversation->userid))) {
                     error("User's record not found");
                 }
             } else {
-                if (! $with = get_record('user', 'id', $conversation->recipientid)) {
+                if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
                     error("User's record not found");
                 }
             }
@@ -511,12 +537,14 @@ function dialogue_user_complete($course, $user, $mod, $dialogue) {
  * @return  int     count of records found
  */
 function dialogue_count_entries($dialogue, $conversation, $user = '') {
+    global $DB;
 
     if (empty($user)) {
-        return count_records_select('dialogue_entries', "conversationid = $conversation->id");
+        return $DB->count_records_select('dialogue_entries', "conversationid = :conversationid", array('conversationid' => $conversation->id));
     } else {
-        return count_records_select('dialogue_entries', 
-                                    "conversationid = $conversation->id AND userid = $user->id  ");
+        return $DB->count_records_select('dialogue_entries',
+                                    "conversationid = :conversationid AND userid = :userid  ", array('couversationid' => $conversation->id,
+                                                                                                       'userid' => $user->id));
     }
 }
 
@@ -527,19 +555,21 @@ function dialogue_count_entries($dialogue, $conversation, $user = '') {
  * expired entries and removes them. Called by dialogue_cron()
  */
 function dialogue_delete_expired_conversations() {
+    global $DB;
 
-    if ($dialogues = get_records('dialogue')) {
+    if ($dialogues = $DB->get_records('dialogue')) {
         foreach ($dialogues as $dialogue) {
             if ($dialogue->deleteafter) {
                 $expirytime = time() - $dialogue->deleteafter * 86400;
-                if ($conversations = get_records_select('dialogue_conversations',
-                    "(timemodified < $expirytime) AND (dialogueid = ".$dialogue->id.") AND (closed = 1)")) {
+                if ($conversations = $DB->get_records_select('dialogue_conversations',
+                    "(timemodified < :expirytime) AND (dialogueid = :dialogueid) AND (closed = 1)",
+                    array('expirytime' => $expirytime, 'dialogueid' => $dialogue->id))) {
                     echo "\nDeleting expired conversations for Dialogue id ".$dialogue->id;
                     foreach ($conversations as $conversation) {
-                        delete_records('dialogue_conversations', 'id',
-                                       $conversation->id, 'dialogueid', $dialogue->id);
-                        delete_records('dialogue_entries', 'conversationid', 
-                                       $conversation->id, 'dialogueid', $dialogue->id);
+                        $DB->delete_records('dialogue_conversations', array('id' =>
+                                       $conversation->id, 'dialogueid' => $dialogue->id));
+                        $DB->delete_records('dialogue_entries', array('conversationid' =>
+                                       $conversation->id, 'dialogueid' => $dialogue->id));
                     }
                 }
             }
@@ -559,24 +589,28 @@ function dialogue_delete_expired_conversations() {
  * @todo    sql_cast_char2int will choke if l.info is a string, its usually an int, but need to review this
  */
 function dialogue_get_add_entry_logs($course, $timestart) {
-    global $CFG, $USER;
+    global $DB, $CFG, $USER;
+
     if (! isset($USER->id)) {
         return false;
     }
-    return get_records_sql("SELECT l.time, l.url, u.firstname, u.lastname, e.dialogueid, d.name, c.subject, l.userid ".
-                           "FROM {$CFG->prefix}log l,".
-                           "{$CFG->prefix}dialogue d,". 
-                           "{$CFG->prefix}dialogue_conversations c,". 
-                           "{$CFG->prefix}dialogue_entries e,". 
-                           "{$CFG->prefix}user u".
-                           " WHERE l.time > $timestart AND l.course = $course->id AND l.module = 'dialogue'".
+
+    $sqlparams = array('timestart' => $timestart, 'courseid' => $course->id, 'userid0' => $USER->id,'userid1' => $USER->id,'userid2' => $USER->id);
+
+    return $DB->get_records_sql("SELECT l.time, l.url, u.firstname, u.lastname, e.dialogueid, d.name, c.subject, l.userid ".
+                           "FROM {log} l,".
+                           "{dialogue} d,".
+                           "{dialogue_conversations} c,".
+                           "{dialogue_entries} e,".
+                           "{user} u".
+                           " WHERE l.time > :timestart AND l.course = :courseid AND l.module = 'dialogue'".
                            " AND l.action = 'add entry'".
-                           " AND e.id = ". sql_cast_char2int('l.info') .
+                           " AND e.id = ". $DB->sql_cast_char2int('l.info') .
                            " AND c.id = e.conversationid ".
-                           " AND (c.userid = $USER->id or c.recipientid = $USER->id) ".
+                           " AND (c.userid = :userid0 or c.recipientid = :userid1 ) ".
                            " AND d.id = e.dialogueid".
                            " AND u.id = e.userid". 
-                           " AND e.userid <> '$USER->id'");
+                           " AND e.userid <> :userid2", $sqlparams);
 }
 
 /**
@@ -589,14 +623,13 @@ function dialogue_get_add_entry_logs($course, $timestart) {
  * @param   int     $groupid    of the group to filter conversations by (default: 0)
  * @return  array   recordset of conversations
  */
-function dialogue_get_conversations($dialogue, $user, $condition='', $order='', $groupid=0) {
-    global $CFG, $COURSE;
+function dialogue_get_conversations($dialogue, $user, $condition=array(), $cond_params=array(), $order='', $groupid=0) {
+    global $CFG, $COURSE, $DB;
+
+    $params = array($user->id, $dialogue->id);
 
     if (! $cm = get_coursemodule_from_instance('dialogue', $dialogue->id, $COURSE->id)) {
         error('Course Module ID was incorrect');
-    }
-    if (! empty($condition)) {
-        $condition = ' AND '.$condition;
     }
     if (empty($order)) {
         $order = 'c.timemodified DESC';
@@ -604,7 +637,13 @@ function dialogue_get_conversations($dialogue, $user, $condition='', $order='', 
     if (has_capability('mod/dialogue:viewall', get_context_instance(CONTEXT_MODULE, $cm->id))) {
         $whereuser = '';
     } else {
-        $whereuser = ' AND (c.userid = '.$user->id.' OR c.recipientid = '.$user->id.') ';
+        $whereuser = ' AND (c.userid = ? OR c.recipientid = ?) ';
+        $params[] = $user->id;
+        $params[] = $user->id;
+    }
+    if (count($condition) > 0) {
+        $condition = ' AND '.implode(' AND ', $condition);
+        $params = array_merge($params, $cond_params);
     }
     // ULPGC ecastro enforce groups use
     if($groupid) {
@@ -618,16 +657,17 @@ function dialogue_get_conversations($dialogue, $user, $condition='', $order='', 
     }
 
     $sql = "SELECT c.*, COUNT(e.id) AS total, COUNT(r.id) as readings ".
-           "FROM {$CFG->prefix}dialogue_conversations c ".
-           "LEFT JOIN {$CFG->prefix}dialogue_entries e ON e.conversationid = c.id ".
-           "LEFT JOIN {$CFG->prefix}dialogue_read r ON r.entryid = e.id AND r.userid = $user->id ".
-           "WHERE c.dialogueid = $dialogue->id $whereuser $condition ".
+           "FROM {dialogue_conversations} c ".
+           "LEFT JOIN {dialogue_entries} e ON e.conversationid = c.id ".
+           "LEFT JOIN {dialogue_read} r ON r.entryid = e.id AND r.userid = ? ".
+           "WHERE c.dialogueid = ? $whereuser $condition ".
            "GROUP BY c.id, c.userid, c.dialogueid, c.recipientid, c.lastid, c.lastrecipientid, c.timemodified, c.closed, c.seenon, c.ctype, c.format, c.subject, c.groupid, c.grouping ".
            "ORDER BY $order ";
-    $conversations = get_records_sql($sql);
+    $conversations = $DB->get_records_sql($sql, $params);
 
     return $conversations;
 }
+
 
 
 /**
@@ -640,20 +680,22 @@ function dialogue_get_conversations($dialogue, $user, $condition='', $order='', 
  */
 
 function dialogue_get_open_conversations($course) {
-    global $CFG, $USER;
+    global $DB, $CFG, $USER;
+
     if (empty($USER->id)) {
         return false;
     }
-    if ($conversations = get_records_sql("SELECT d.name AS dialoguename, c.id, c.dialogueid, c.timemodified, c.lastid, c.userid".
-                                         " FROM {$CFG->prefix}dialogue d, {$CFG->prefix}dialogue_conversations c".
-                                         " WHERE d.course = $course->id".
+    $sqlparams = array('courseid' => $course->id, 'userid0' => $USER->id, 'userid1' => $USER->id, 'userid2' => $USER->id);
+    if ($conversations = $DB->get_records_sql("SELECT d.name AS dialoguename, c.id, c.dialogueid, c.timemodified, c.lastid, c.userid".
+                                         " FROM {dialogue} d, {dialogue_conversations} c".
+                                         " WHERE d.course = :courseid".
                                          " AND c.dialogueid = d.id".
-                                         " AND (c.userid = $USER->id OR c.recipientid = $USER->id)".
-                                         " AND c.lastid != $USER->id".
-                                         " AND c.closed =0")) {
+                                         " AND (c.userid = :userid0 OR c.recipientid = :userid1)".
+                                         " AND c.lastid != :userid2".
+                                         " AND c.closed =0", $sqlparams)) {
         $entry = array();
         foreach ($conversations as $conversation) {
-            if (! $user = get_record('user', 'id', $conversation->lastid)) {
+            if (! $user = $DB->get_record('user', array('id' => $conversation->lastid))) {
                 error("Get open conversations: user record not found");
             }
             if (! $cm = get_coursemodule_from_instance('dialogue', $conversation->dialogueid, $course->id)) {
@@ -680,93 +722,168 @@ function dialogue_get_open_conversations($course) {
  * @return  array   of "dialogue_entries" records
  */
 function dialogue_get_user_entries($dialogue, $user) {
-    global $CFG;
-    return get_records_select('dialogue_entries', "dialogueid = $dialogue->id AND userid = $user->id", 
-                              'timecreated DESC');
+    global $DB, $CFG;
+    $sqlparams = array('dialogueid' => $dialogue->id, 'userid' => $user->id);
+    return $DB->get_records_select('dialogue_entries', "dialogueid = :dialogueid AND userid = :userid",
+                                   'timecreated DESC', $sqlparams);
 }
 
 /**
  * Saves an uploaded Dialogue attachment to the moddata directory
  *  
- * @param   object  $entry
- * @param   string  $inputname
- * @param   string  messages string, passed by reference
- * @return  string  new file name
+ * @param   
+ * @param   
+ * @param   
+ * @return  
  */
-function dialogue_add_attachment($entry, $inputname, & $message) {
-    global $CFG, $COURSE;
+function dialogue_add_attachment($draftitemid, $contextid, $entryid) {
+    global $DB, $CFG, $COURSE;
 
-    require_once ($CFG->dirroot.'/lib/uploadlib.php');
-    $um = new upload_manager($inputname, true, false, $COURSE, false, 0, true, true);
-    $dir = dialogue_file_area_name($entry);
-    if ($um->process_file_uploads($dir)) {
-        $message .= $um->get_errors();
-        return $um->get_new_filename();
+    
+    $info = file_get_draft_area_info($draftitemid);
+    $present = ($info['filecount']>0) ? '1' : '';
+
+
+    file_save_draft_area_files($draftitemid, $contextid, 'mod_dialogue', 'attachment', $entryid);
+    return $DB->set_field('dialogue_entries', 'attachment', $present, array('id'=>$entryid));
+}
+
+
+/**
+ * Returns attachments as formated text/html optionally with separate images
+ *
+ * @global object
+ * @global object
+ * @global object
+ * @param object $entry
+ * @param object $cm
+ * @param string $type html/text/separateimages
+ * @return mixed string or array of (html text withouth images and image HTML)
+ */
+function dialogue_print_attachments($entry, $cm, $type) {
+    global $CFG, $DB, $USER, $OUTPUT;
+
+    if (empty($entry->attachment)) {
+        return $type !== 'separateimages' ? '' : array('', '');
     }
-    $message .= $um->get_errors();
-    return null;
-}
 
-/**
- * Returns a path to the moddata directory for this dialogue instance
- * 
- * @param   object  $entry
- * @return  string  path to the folder
- */
-function dialogue_file_area_name($entry) {
-    global $CFG, $COURSE;
+    if (!in_array($type, array('separateimages', 'html', 'text'))) {
+        return $type !== 'separateimages' ? '' : array('', '');
+    }
 
-    return "$COURSE->id/$CFG->moddata/dialogue/$entry->dialogueid/$entry->id";
-}
+    if (!$context = get_context_instance(CONTEXT_MODULE, $cm->id)) {
+        return $type !== 'separateimages' ? '' : array('', '');
+    }
+    $strattachment = get_string('attachment', 'dialogue');
 
-/**
- * Make a folder to contain Dialogue attachements
- * 
- * @param   object  $entry
- * @return  string|false full path to directory if successful, false if not
- */
-function dialogue_file_area($entry) {
-    return make_upload_directory(dialogue_file_area_name($entry));
-}
-
-/**
- * Build an HTML list of attachments for this entry with links to them
- * 
- * @param   object  $entry to process
- * @return  string  html rendering of attachments list
- */
-function dialogue_print_attachments($entry) {
-    global $CFG;
-    require_once ($CFG->dirroot.'/lib/filelib.php');
-
-    $filearea = dialogue_file_area_name($entry);
+    $fs = get_file_storage();
 
     $imagereturn = '';
     $output = '';
 
-    if ($basedir = dialogue_file_area($entry)) {
-        if ($files = get_directory_list($basedir)) {
-            $output .= '<p>'.get_string('attachment', 'dialogue');
-            foreach ($files as $file) {
-                $icon = mimeinfo('icon', $file);
-                $type = mimeinfo('type', $file);
-                if ($CFG->slasharguments) {
-                    $ffurl = "$CFG->wwwroot/file.php/$filearea/$file";
-                } else {
-                    $ffurl = "$CFG->wwwroot/file.php?file=/$filearea/$file";
-                }
-                $image = "<img src=\"$CFG->pixpath/f/$icon\" class=\"icon\" alt=\"\" />";
-                $output .= "<a href=\"$ffurl\">$image</a> ".
-                           "<a href=\"$ffurl\">$file</a><br />";
+    if ($files = $fs->get_area_files($context->id, 'mod_dialogue', 'attachment', $entry->id, "timemodified", false)) {
 
+        foreach ($files as $file) {
+            $filename = $file->get_filename();
+            $mimetype = $file->get_mimetype();
+            $iconimage = '<img src="'.$OUTPUT->pix_url(file_mimetype_icon($mimetype)).'" class="icon" alt="'.$mimetype.'" />';
+            $path = file_encode_url($CFG->wwwroot.'/pluginfile.php', '/'.$context->id.'/mod_dialogue/attachment/'.$entry->id.'/'.$filename);
+
+            if ($type == 'html') {
+                $output .= "<a href=\"$path\">$iconimage</a> ";
+                $output .= "<a href=\"$path\">".s($filename)."</a>";
+                $output .= "<br />";
+
+            } else if ($type == 'text') {
+                $output .= "$strattachment ".s($filename).":\n$path\n";
+
+            } else { //'returnimages'
+                if (in_array($mimetype, array('image/gif', 'image/jpeg', 'image/png'))) {
+                    // Image attachments don't get printed as links
+                    $imagereturn .= "<br /><img src=\"$path\" alt=\"\" />";
+
+                } else {
+                    $output .= "<a href=\"$path\">$iconimage</a> ";
+                    $output .= format_text("<a href=\"$path\">".s($filename)."</a>", FORMAT_HTML, array('context'=>$context));
+                    $output .= '<br />';
+                }
             }
-            $output .= '</p>';
         }
     }
 
-    return $output;
+    if ($type !== 'separateimages') {
+        return $output;
 
+    } else {
+        return array($output, $imagereturn);
+    }
 }
+
+/**
+ * Serves the dialogue attachments. Implements needed access control ;-)
+ *
+ * @param object $course
+ * @param object $cm
+ * @param object $context
+ * @param string $filearea
+ * @param array $args
+ * @param bool $forcedownload
+ * @return bool false if file not found, does not return if found - justsend the file
+ */
+function dialogue_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
+    global $CFG, $DB, $USER;
+
+    if ($context->contextlevel != CONTEXT_MODULE) {
+        return false;
+    }
+
+    require_course_login($course, true, $cm);
+
+    $fileareas = array('attachment', 'entry');
+    if (!in_array($filearea, $fileareas)) {
+        return false;
+    }
+
+    $itemid = (int)array_shift($args);
+
+    if (!$entry = $DB->get_record('dialogue_entries', array('id'=>$itemid))) {
+        return false;
+    }
+
+    if (!$conversation = $DB->get_record('dialogue_conversations', array('id'=>$entry->conversationid))) {
+        return false;
+    }
+
+    if (!$dialogue = $DB->get_record('dialogue', array('id'=>$cm->instance))) {
+        return false;
+    }
+
+    $fs = get_file_storage();
+    $relativepath = implode('/', $args);
+    $fullpath = "/$context->id/mod_dialogue/$filearea/$itemid/$relativepath";
+    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+        return false;
+    }
+
+
+
+    
+    // Make sure groups allow this user to see this file
+    if ($conversation->groupid > 0 and $groupmode = groups_get_activity_groupmode($cm, $course)) {   // Groups are being used
+        if (!groups_group_exists($conversation->groupid)) { // Can't find group
+            return false;                           // Be safe and don't send it to anyone
+        }
+
+        if (!groups_is_member($conversation->groupid) and !has_capability('moodle/site:accessallgroups', $context)) {
+            // do not send posts from other groups when in SEPARATEGROUPS or VISIBLEGROUPS
+            return false;
+        }
+    }
+    
+    // finally send the file
+    send_stored_file($file, 0, 0, true); // download MUST be forced - security!
+}
+
 
 /**
  * Count number of unread entries a user has for this dialogue
@@ -779,7 +896,7 @@ function dialogue_print_attachments($entry) {
  * @return  int count of unread entries
  */
 function dialogue_count_unread_entries($dialogueid, $userid, $cm) {
-    global $CFG;
+    global $DB, $CFG;
     static $hascapviewall;
 
     if (! isset($hascapviewall)) {
@@ -789,16 +906,18 @@ function dialogue_count_unread_entries($dialogueid, $userid, $cm) {
     if ($hascapviewall) {
         $whereuser = '';
     } else {
-        $whereuser = ' AND (c.userid = '.$userid.' OR c.recipientid = '.$userid.') ';
+        $whereuser = ' AND (c.userid = :userid OR c.recipientid = :userid) ';
     }
 
+    $sqlparams = array('userid' => $userid, 'dialogueid' => $dialogueid);
     $sql = "SELECT COUNT(e.id)".
-           " FROM {$CFG->prefix}dialogue_conversations c".
-           " LEFT JOIN {$CFG->prefix}dialogue_entries e ON c.id = e.conversationid". 
-           " LEFT JOIN {$CFG->prefix}dialogue_read r ON e.id = r.entryid AND r.userid = '$userid'". 
-           " WHERE r.id IS NULL AND c.closed = 0 AND c.dialogueid = '$dialogueid' $whereuser ";
+           " FROM {dialogue_conversations} c".
+           " LEFT JOIN {dialogue_entries} e ON c.id = e.conversationid".
+           " LEFT JOIN {dialogue_read} r ON e.id = r.entryid AND r.userid = ':userid'".
+           " WHERE r.id IS NULL AND c.closed = 0 AND c.dialogueid = ':dialogueid' $whereuser ";
 
-    return (count_records_sql($sql));
+
+    return ($DB->count_records_sql($sql, $sqlparams));
 }
 
 /**
@@ -831,5 +950,32 @@ function dialogue_can_track_dialogue($user = false) {
 
     // finally if user has trackForums set then allow tracking
     return true && ! empty($user->trackforums);
+}
+
+/**
+ * Indicates API features that the dialogue supports.
+ *
+ * @uses FEATURE_GROUPS
+ * @uses FEATURE_GROUPINGS
+ * @uses FEATURE_GROUPMEMBERSONLY
+ * @uses FEATURE_MOD_INTRO
+ * @param string $feature
+ * @return mixed True if yes (some features may use other values)
+ */
+function dialogue_supports($feature) {
+    switch($feature) {
+        case FEATURE_GROUPS:                  return true;
+        case FEATURE_GROUPINGS:               return false;
+        case FEATURE_GROUPMEMBERSONLY:        return false;
+        case FEATURE_MOD_INTRO:               return true;
+        case FEATURE_COMPLETION_TRACKS_VIEWS: return false;
+        case FEATURE_COMPLETION_HAS_RULES:    return false;
+        case FEATURE_GRADE_HAS_GRADE:         return false;
+        case FEATURE_GRADE_OUTCOMES:          return false;
+        case FEATURE_RATE:                    return false;
+        case FEATURE_BACKUP_MOODLE2:          return true;
+
+        default: return null;
+    }
 }
 ?>

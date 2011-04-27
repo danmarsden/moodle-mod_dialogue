@@ -1,5 +1,4 @@
-<?PHP // $Id: dialogue.php,v 1.2 2009/12/16 03:27:02 deeknow Exp $ 
-      // dialogue.php - created with Moodle 1.6.2+ (2006050521)
+<?php
 
 $string['addmynewentries'] = 'Meine neuen Einträge hinzufügen.';
 $string['addmynewentry'] = 'Meinen neuen Eintrag hinzufügen.';
@@ -16,7 +15,7 @@ $string['deleteafter'] = 'Geschlossene Dialoge löschen nach (Tagen)';
 $string['dialogueclosed'] = 'Der Dialog wurde geschlossen.';
 $string['dialogueintro'] = 'Zusammenfassung';
 $string['dialoguemail'] = '$a->userfrom hat einen neuen Beitrag im Dialog  \'$a->dialogue\' geschrieben. Sie können diesen Beitrag ansehen unter:    $a->url'; 
-$string['dialoguemailhtml'] = '$a->userfrom hat einen neuen Beitrag geschrieben im Dialog \'<i>$a->dialogue</i>\'<br /><br /> Sie können diesen Beitrag ansehen unter <a href=\"$a->url\">dialogue</a>.';
+$string['dialoguemailhtml'] = '$a->userfrom hat einen neuen Beitrag geschrieben im Dialog \'<i>$a->dialogue</i>\'<br /><br /> Sie können diesen Beitrag ansehen unter <a href="{$a->url}">dialogue</a>.';
 $string['dialoguename'] = 'Link (Kursseite)';
 $string['dialogueopened'] = 'Dialog mit $a->name begonnen</p><p>Sie haben $a->edittime Minuten, um Änderungen vorzunehmen.</p>';
 $string['dialoguewith'] = 'Dialog mit $a';

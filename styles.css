@@ -1,0 +1,20 @@
+
+.dialogue-entry.first {border:1px solid #DDD;}
+.dialogue-entry.reply {border-width:0px 1px 1px 1px; border-style: solid; border-color: #DDD;}
+.dialogue-entry .row.header {background-color:#EEE;background-image:none;}
+.dialogue-entry .left {float:left; width: 43px;}
+.dialogue-entry .row.header .content{overflow:hidden;}
+.dialogue-entry h1 {margin: 0px;}
+.dialogue-entry .conversant {font-weight: bold;}
+.dialogue-entry .row .topic,
+.dialogue-entry .picture img {margin:4px;}
+.dialogue-entry .content {padding: 4px 4px 4px 0px;}
+.dialogue-entry .body {padding: 4px 0px 0px 0px;}
+.dialogue-entry .commands,
+.dialogue-entry .content .attachments,
+.dialogue-entry .content {overflow:auto;max-width:100%;}
+.dialogue-entry .content .attachedimages img {max-width:100%;}
+.dialogue-entry.first .maincontent {background-color:#fBfBfB;}
+.dialogue-entry.reply .maincontent {background-color:#FFF;}
+.modified {font-size: 0.8em;font-weight: bold;}
+.dialogue-entry .commands {float: right;}

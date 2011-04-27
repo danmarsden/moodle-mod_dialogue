@@ -1,6 +1,4 @@
-<?PHP // $Id: dialogue.php,v 1.2 2009/12/16 03:27:03 deeknow Exp $ 
-      // dialogue.php - created with Moodle 1.6 Beta 5 (2006050500)
-
+<?php
 
 $string['addmynewentries'] = 'Agregar mis nuevas entradas';
 $string['addmynewentry'] = 'Agregar mi nueva entrada';
@@ -18,7 +16,7 @@ $string['dialoguemail'] = '$a->userfrom ha respondido a su intervención en el d
 Puede verlo junto a su intervención en:
     $a->url';
 $string['dialoguemailhtml'] = 'El usuario $a->userfrom ha respondido a su intervención en el diálogo \'<i>$a->dialogue</i>\'<br /><br />
-Puede verlo adjunto <a href=\"$a->url\">aquí</a>.';
+Puede verlo adjunto <a href="{$a->url}">aquí</a>.';
 $string['dialoguename'] = 'Nombre del diálogo';
 $string['dialogueopened'] = 'Diálogo abierto con $a';
 $string['dialoguewith'] = 'Diálogo con $a';

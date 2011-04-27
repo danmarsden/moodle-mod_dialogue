@@ -1,4 +1,4 @@
-<?php  // $Id: locallib.php,v 1.10 2009/12/16 03:21:20 deeknow Exp $
+<?php
 
 /**
  * Library of extra functions for the dialogue module not part of the standard add-on module API set
@@ -26,15 +26,20 @@ define ('DIALOGUEPANE_CLOSED', 3);
  * @return  int     count of the records found
  */
 function dialogue_count_closed($dialogue, $user, $viewall=false, $groupid=0) {
+    global $DB;   
     if ($viewall) {
         $userwhere = '';
     } else {
         $userwhere = "(userid = '$user->id' OR recipientid = '$user->id') AND ";
+
     }
+
+
     if($groupid) {
         $members = groups_get_members($groupid, 'u.id');
-        if($members) {
+        if ($members) {
             $list = '( '.implode(', ', array_keys($members)).' )';
+
         } else {
             $list = '( 0 ) ';
         }
@@ -42,7 +47,7 @@ function dialogue_count_closed($dialogue, $user, $viewall=false, $groupid=0) {
     } else {
         $where = " $userwhere closed = 1";
     }
-    return count_records_select("dialogue_conversations", "dialogueid = $dialogue->id AND $where ");
+    return $DB->count_records_select("dialogue_conversations", "dialogueid = $dialogue->id AND $where ");
 }
 
 
@@ -56,6 +61,8 @@ function dialogue_count_closed($dialogue, $user, $viewall=false, $groupid=0) {
  * @return  int     count of the records found
  */
 function dialogue_count_open($dialogue, $user, $viewall=false,  $groupid=0) {
+    global $DB;
+
     if ($viewall) {
         $userwhere = '';
     } else {
@@ -72,7 +79,7 @@ function dialogue_count_open($dialogue, $user, $viewall=false,  $groupid=0) {
     } else {
         $where = " $userwhere closed = 0";
     }
-    return count_records_select('dialogue_conversations', "dialogueid = $dialogue->id AND $where ");
+    return $DB->count_records_select('dialogue_conversations', "dialogueid = $dialogue->id AND $where ");
 }
 
 
@@ -87,14 +94,15 @@ function dialogue_count_open($dialogue, $user, $viewall=false,  $groupid=0) {
  * @return  array   usernames and ids
  */
 function dialogue_get_available_users($dialogue, $context, $editconversationid) {
+    global $DB;
 
-    if (! $course = get_record('course', 'id', $dialogue->course)) {
-        error('Course is misconfigured');
+    if (! $course = $DB->get_record('course', array('id' => $dialogue->course))) {
+        print_error('Course is misconfigured');
     }
     $hascapopen = has_capability('mod/dialogue:participate', $context);
-    $hascapmanage = has_capability('mod/dialogue:manage', $context);
-    
-    
+    $hascapmanage = has_capability('mod/dialogue:manage', $context); 
+
+
     switch ($dialogue->dialoguetype) {
         case DIALOGUETYPE_TEACHERSTUDENT : // teacher to student
             if ($hascapmanage) {
@@ -144,13 +152,13 @@ function dialogue_get_available_users($dialogue, $context, $editconversationid) 
  * @return  array   usernames and ids
  */
 function dialogue_get_available_students($dialogue, $context, $editconversationid=0) {
-    global $USER, $CFG;
+    global $DB, $USER, $CFG;
     
-    if (! $course = get_record('course', 'id', $dialogue->course)) {
-        error('Course is misconfigured');
+    if (! $course = $DB->get_record('course', array('id' =>  $dialogue->course))) {
+        print_error('Course is misconfigured');
     }
     if (! $cm = get_coursemodule_from_instance('dialogue', $dialogue->id, $course->id)) {
-        error('Course Module ID was incorrect');
+        print_error('Course Module ID was incorrect');
     }
 
     // get the list of teachers (actually, those who have dialogue:manage capability)
@@ -167,8 +175,8 @@ function dialogue_get_available_students($dialogue, $context, $editconversationi
     if (isset($teachers[$USER->id])) {
         // show teacher their current group
         if ($groupid) {
-            if (! $group = get_record('groups', 'id', $groupid)) {
-                error('Dialogue get available students: group not found');
+            if (! $group = $DB->get_record('groups', array('id' => $groupid))) {
+                print_error('Dialogue get available students: group not found');
             }
             $gnames["g$groupid"] = $group->name;
         }
@@ -180,6 +188,7 @@ function dialogue_get_available_students($dialogue, $context, $editconversationi
     // get the students on this course (default sort order)...
     if ($users = get_users_by_capability($context, 'mod/dialogue:participate', 
                                          null, null, null, null, null, null, null,null,false)) {
+
         if (! empty($CFG->enablegroupings) && ! empty($cm->groupingid) && ! empty($users)) {
             $groupingusers = groups_get_grouping_members($cm->groupingid, 'u.id', 'u.id');
             foreach($users as $key => $user) {
@@ -213,10 +222,18 @@ function dialogue_get_available_students($dialogue, $context, $editconversationi
                 }
 
                 // ... and any already in any open conversations unless multiple conversations allowed
-                if ($dialogue->multipleconversations or count_records_select('dialogue_conversations', 
-                        "dialogueid = $dialogue->id AND id != $editconversationid AND 
-                        ((userid = $USER->id AND recipientid = $otheruser->id) OR 
-                        (userid = $otheruser->id AND recipientid = $USER->id)) AND closed = 0") == 0) {
+
+                $countparams = array('dialogueid' => $dialogue->id, 'editconversationid' => $editconversationid,
+                                     'userid0' => $USER->id, 'userid1' => $USER->id, 'otheruserid0' => $otheruser->id,
+                                     'otheruserid1' => $otheruser->id);
+
+                $countsql = "dialogueid = :dialogueid AND id != :editconversationid AND
+                            ((userid = :userid0 AND recipientid = :otheruserid0) OR
+                            (userid = :otheruserid1 AND recipientid = :userid1)) AND closed = 0";
+
+                if ($dialogue->multipleconversations or
+                    $DB->count_records_select('dialogue_conversations',$countsql, $countparams) == 0) {
+                    
                     $names[$otheruser->id] = fullname($otheruser);
                 }
             }
@@ -254,19 +271,20 @@ function dialogue_get_available_students($dialogue, $context, $editconversationi
  * @return  array   usernames and ids
  */
 function dialogue_get_available_teachers($dialogue, $context, $editconversationid = 0) {
-    global $USER, $CFG;
-    $canseehidden = has_capability('moodle/role:viewhiddenassigns', $context);
-    if (! $course = get_record('course', 'id', $dialogue->course)) {
-        error('Course is misconfigured');
+    global $DB, $USER, $CFG;
+    //$canseehidden = has_capability('moodle/role:viewhiddenassigns', $context);
+ 
+    if (! $course = $DB->get_record('course', array('id'=>$dialogue->course))) {
+        print_error('Course is misconfigured');
         }
     if (! $cm = get_coursemodule_from_instance('dialogue', $dialogue->id, $course->id)) {
-        error('Course Module ID was incorrect');
+        print_error('Course Module ID was incorrect');
     }
     // get the list of teachers (actually, those who have dialogue:manage capability)
     $hiddenTeachers = array();
     if ($users = get_users_by_capability($context, 'mod/dialogue:manage', '', 
                                          null, null, null, null, null, null,true,null)) {
-        foreach ($users as $user) {
+        /*foreach ($users as $user) {
             $userRoles = get_user_roles($context, $user->id, true);
             foreach ($userRoles as $role) {
                 if ($role->hidden == 1) {
@@ -278,7 +296,7 @@ function dialogue_get_available_teachers($dialogue, $context, $editconversationi
         $canSeeHidden = false;
         if (has_capability('moodle/role:viewhiddenassigns', $context)) {
             $canSeeHidden = true;
-        }
+        }*/
         $groupid = get_current_group($course->id);
         foreach ($users as $otheruser) {
             // ...exclude self and ...
@@ -289,12 +307,12 @@ function dialogue_get_available_teachers($dialogue, $context, $editconversationi
                         continue;
                     }
                 }
-                if (! $canSeeHidden && array_key_exists($otheruser->id, $hiddenTeachers) 
+                /*if (! $canSeeHidden && array_key_exists($otheruser->id, $hiddenTeachers)
                       && ($hiddenTeachers[$otheruser->id] == 1)) {
                     continue;
-                }
+                }*/
                 // ...any already in open conversations unless multiple conversations allowed 
-                if ($dialogue->multipleconversations or count_records_select('dialogue_conversations', 
+                if ($dialogue->multipleconversations or $DB->count_records_select('dialogue_conversations',
                         "dialogueid = $dialogue->id AND id != $editconversationid AND ((userid = $USER->id AND 
                         recipientid = $otheruser->id) OR (userid = $otheruser->id AND 
                         recipientid = $USER->id)) AND closed = 0") == 0) {
@@ -323,82 +341,104 @@ function dialogue_get_available_teachers($dialogue, $context, $editconversationi
  */
 function dialogue_print_conversation($dialogue, $conversation) {
 
-    global $USER, $CFG;
+    global $CFG, $DB, $USER, $OUTPUT;
 
-    if (! $course = get_record('course', 'id', $dialogue->course)) {
-        error('Course is misconfigured');
+    if (! $course = $DB->get_record('course', array('id' => $dialogue->course))) {
+        print_error('Course is misconfigured');
     }
     if (! $cm = get_coursemodule_from_instance('dialogue', $dialogue->id, $course->id)) {
-        error('Course Module ID was incorrect');
+        print_error('Course Module ID was incorrect');
     }
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     $dialoguemanagers = array_keys(get_users_by_capability($context, 'mod/dialogue:manage'));
 
     $timenow = time();
     $showbutton = false;
-    
-    require_once('dialogue_reply_form.php');
-    $mform = new mod_dialogue_reply_form('dialogues.php', array('conversationid' => $conversation->id));
-    $mform->set_data(array('id' => $cm->id,
-                           'action' => 'insertentries',
-                           'pane' => DIALOGUEPANE_CURRENT));
-
-    $showbutton = true;
-    print_simple_box_start('center', '');
-    echo "<table align=\"center\" border=\"1\" cellspacing=\"0\" valign=\"top\" cellpadding=\"4\" 
-        width=\"100%\">\n";
-    echo "<tr><td>\n";
+   
     if (in_array($USER->id, $dialoguemanagers)) {
         if (! in_array($conversation->userid, $dialoguemanagers)) {
-            if (! $otheruser = get_record('user', 'id', $conversation->userid)) {
-                error("User's record not found");
+            if (! $otheruser = $DB->get_record('user', array('id' => $conversation->userid))) {
+                print_error("User's record not found");
             }
         }
         else {
-            if (! $otheruser = get_record('user', 'id', $conversation->recipientid)) {
-                error("User's record not found");
+            if (! $otheruser = $DB->get_record('user', array('id' => $conversation->recipientid))) {
+                print_error("User's record not found");
             }                
         }
     } else {
         if ($USER->id != $conversation->userid) {
-            if (! $otheruser = get_record('user', 'id', $conversation->userid)) {
-                error("User's record not found");
+            if (! $otheruser = $DB->get_record('user', array('id' => $conversation->userid))) {
+                print_error("User's record not found");
             }
         }
         else {
-            if (! $otheruser = get_record('user', 'id', $conversation->recipientid)) {
-                error("User's record not found");
+            if (! $otheruser = $DB->get_record('user', array('id' => $conversation->recipientid))) {
+                print_error("User's record not found");
             }                
         }
     }
-    $picture = print_user_picture($otheruser->id, $course->id, $otheruser->picture, false, true);
-    echo $picture." <b>".get_string('dialoguewith', 'dialogue', fullname($otheruser)).
-        '</b></td>';
-    echo '<td><i>'.format_string($conversation->subject)."&nbsp;</i><br />\n";
-    echo "<div align=\"right\">\n";
-    if (! $conversation->subject) {
-        // conversation does not have a subject, show add subject link
-        echo "<a href=\"dialogues.php?action=getsubject&amp;id=$cm->id&amp;cid=$conversation->id&amp;pane=".DIALOGUEPANE_CURRENT."\">".
-            get_string('addsubject', 'dialogue')."</a>\n";
-        helpbutton('addsubject', get_string('addsubject', 'dialogue'), 'dialogue');
-        echo '&nbsp; | ';
-    }
-    if (! $conversation->closed && has_capability('mod/dialogue:close', $context)) {
-    echo "<a href=\"dialogues.php?action=confirmclose&amp;id=$cm->id&amp;cid=$conversation->id&amp;pane=".DIALOGUEPANE_CURRENT."\">".
-        get_string('close', 'dialogue')."</a>\n";
-        helpbutton('closedialogue', get_string('close', 'dialogue'), 'dialogue');
-    }
-    echo "</div></td></tr>\n";
+    
 
-    if ($entries = get_records_select('dialogue_entries', "conversationid = $conversation->id", 'id')) {
+    // Prepare an array of commands
+    $commands = array();    
+    // conversation does not have a subject, create a subject link
+    if (! $conversation->subject) {
+        $nosubject = '';
+        if ($conversation->userid == $USER->id) {
+            $addsubjecturl = new moodle_url('dialogues.php', array('action'=>'getsubject',
+                                                                   'id'=>$cm->id,
+                                                                   'cid'=>$conversation->id,
+                                                                   'pane'=>DIALOGUEPANE_CURRENT));
+
+            $nosubject = html_writer::link($addsubjecturl, get_string('addsubject', 'dialogue')) . $OUTPUT->help_icon('addsubject', 'dialogue');;
+        } else {
+            $nosubject = get_string('nosubject', 'dialogue');
+        }
+    }
+    // can close diaogue?
+    if (! $conversation->closed && has_capability('mod/dialogue:close', $context)) {            
+        $closeurl = new moodle_url('dialogues.php', array('id'=>$cm->id,
+                                                          'cid'=>$conversation->id,
+                                                          'action'=>'confirmclose',
+                                                          'pane'=>DIALOGUEPANE_CURRENT));
+        
+        $commands['close'] = array('url'=>$closeurl, 'text'=>get_string('close', 'dialogue'));
+    }
+    
+
+    if ($entries = $DB->get_records_select('dialogue_entries', "conversationid = ?", array($conversation->id), 'id')) {
         $firstentry = true;
         foreach ($entries as $entry) {
-            if (! $otheruser = get_record('user', 'id', $entry->userid)) {
-                error('User not found');
-            }
-            $canedit = false;
+            $canedit = false; //default
+            $output = ''; // reset output var
+            $modified = '';
+            $modifiedstamp = '';
+            // Grab conversant
+            if (in_array($USER->id, $dialoguemanagers)) {
+                if (! in_array($conversation->userid, $dialoguemanagers)) {
+                    if (! $otheruser = $DB->get_record('user', array('id'=>$conversation->userid))) {
+                        print_error("User's record not found");
+                    }
+                } else {
+                    if (! $otheruser = $DB->get_record('user', array('id'=>$conversation->recipientid))) {
+                        print_error("User's record not found");
+                    }
+                }
+            } else {
+                if ($USER->id != $conversation->userid) {
+                    if (! $otheruser = $DB->get_record('user', array('id'=>$conversation->userid))) {
+                        print_error("User's record not found");
+                    }
+                }  else {
+                    if (! $otheruser = $DB->get_record('user', array('id'=>$conversation->recipientid))) {
+                        print_error("User's record not found");
+                    }
+                }
+            }         
+            // Can edit?
             if (! $conversation->closed && $entry->userid == $USER->id 
-                  && $timenow < $entry->timecreated+($dialogue->edittime * 60)) {
+                  && $timenow < $entry->timecreated + ($dialogue->edittime * 60)) {
             	 $canedit = true;
             }
     
@@ -407,45 +447,136 @@ function dialogue_print_conversation($dialogue, $conversation) {
             } else {
                 $modified = '';
             }
-            
+            // Build edit command and modified stamp.
             if ($entry->userid == $USER->id) {
-                echo "<tr><td colspan=\"2\" bgcolor=\"#FFFFFF\">\n";
                 if ($canedit) {
                     if ($firstentry) {
-                    	echo "<a href=\"dialogues.php?action=editconversation&amp;id=$cm->id&amp;entryid=$entry->id&amp;pane=".DIALOGUEPANE_CURRENT."\">".
-                            get_string('edit').'</a>';
+                        $editconversationurl = new moodle_url('dialogues.php', array('id'=>$cm->id,
+                                                                                     'cid'=>$conversation->id,
+                                                                                     'entryid'=>$entry->id,
+                                                                                     'action'=>'editconversation',
+                                                                                     'pane'=>DIALOGUEPANE_CURRENT));
+
+                        $commands['edit'] = array('url'=>$editconversationurl, 'text'=>get_string('edit'));
+
                     } else {
-                        echo "<a href=\"dialogues.php?action=editreply&amp;id=$cm->id&amp;entryid=$entry->id&amp;pane=".DIALOGUEPANE_CURRENT."\">".
-                            get_string('edit').'</a>';
+                        $editreplyurl = new moodle_url('dialogues.php', array('id'=>$cm->id,
+                                                                              'cid'=>$conversation->id,
+                                                                              'entryid'=>$entry->id,
+                                                                              'action'=>'editreply',
+                                                                              'pane'=>DIALOGUEPANE_CURRENT));
+
+                        $commands['edit'] = array('url'=>$editreplyurl, 'text'=>get_string('edit'));
+                        
                     }
                 }
-                echo "<p><font size=\"1\">".get_string('onyouwrote', 'dialogue', 
-                            userdate($entry->timecreated).' '.$modified);
-                echo ":</font></p><br />".format_text($entry->text);
+                $modifiedstamp = get_string('onyouwrote', 'dialogue', userdate($entry->timecreated).' '.$modified);
+            } else {
+                $modifiedstamp = get_string("onwrote", "dialogue", userdate($entry->timecreated)." $modified ".fullname($otheruser));
             }
-            else {
-                echo "<tr><td colspan=\"2\">\n";
-                echo "<p><font size=\"1\">".get_string("onwrote", "dialogue", 
-                            userdate($entry->timecreated)." $modified ".fullname($otheruser));
-                
-                echo ":</font></p><br />".format_text($entry->text);
-            }
-            echo dialogue_print_attachments($entry);
-            echo "</td></tr>\n";
-            $firstentry = false;
-        }
 
+            
+
+            $options = new stdClass;
+            $options->para    = false;
+            $options->trusted = $entry->trust;
+            $options->context = $context;
+
+            
+            $commandshtml = array();
+
+            $content = file_rewrite_pluginfile_urls($entry->text, 'pluginfile.php', $context->id, 'mod_dialogue', 'entry', $entry->id);
+            $content = format_text($content, 1, $options, $course->id);
+
+            $attachments = dialogue_print_attachments($entry, $cm, 'html');
+
+            if ($firstentry) {
+                
+                $picture = $OUTPUT->user_picture($otheruser, array('courseid'=>$course->id));
+                $conversant = get_string('dialoguewith', 'dialogue', fullname($otheruser));
+                $conversationsubject = empty($conversation->subject) ?  $nosubject : format_string($conversation->subject);
+                
+
+                $output .= html_writer::start_tag('div', array('class'=>'dialogue-entry first'));
+                $output .= html_writer::start_tag('div', array('class'=>'row header clearfix'));
+                $output .= html_writer::start_tag('div', array('class'=>'left'));
+                $output .= html_writer::tag('span', $picture, array('class'=>'picture')); // Picture
+                $output .= html_writer::end_tag('div'); // end left column
+                //$output .= html_writer::start_tag('div', array('class'=>'no-overflow'));
+                $output .= html_writer::start_tag('div', array('class'=>'content'));
+                $output .= html_writer::tag('h1', $conversationsubject, array('class'=>'subject')); // subject
+                
+                $output .= html_writer::tag('span', $conversant, array('class'=>'conversant')); // conversant
+                //$output .= html_writer::end_tag('div'); // no-overflow
+                $output .= html_writer::end_tag('div'); // end content
+                $output .= html_writer::end_tag('div'); // end header row
+                $output .= html_writer::start_tag('div', array('class'=>'row maincontent clearfix'));
+                $output .= html_writer::tag('div', '&nbsp;', array('class'=>'left'));
+                $output .= html_writer::start_tag('div', array('class'=>'no-overflow'));
+                $output .= html_writer::start_tag('div', array('class'=>'content'));
+                if (isset($commands['edit'])) {
+                    $commandshtml[] = html_writer::link($commands['edit']['url'], $commands['edit']['text']);
+                }
+                if (isset($commands['close'])) {
+                    $commandshtml[] = html_writer::link($commands['close']['url'], $commands['close']['text']);
+                }
+                $output .= html_writer::tag('div', implode(' | ', $commandshtml), array('class'=>'commands'));
+                $output .= html_writer::tag('span', '<i>'.$modifiedstamp.'</i>', array('class'=>'modified')); // margin hack
+                $output .= html_writer::tag('div', $content, array('class'=>'body'));
+                if (!empty($attachments)) {
+                    $output .= html_writer::tag('div', $attachments, array('class'=>'attachments'));
+                }
+                
+                $output .= html_writer::end_tag('div'); // content   
+                $output .= html_writer::end_tag('div'); // no-overflow
+                $output .= html_writer::end_tag('div'); // row maincontent
+                $output .= html_writer::end_tag('div'); // end
+               
+                $firstentry = false;
+           } else {
+               
+                //$content = format_text($entry->text, 1, $options, $course->id);
+                $output .= html_writer::start_tag('div', array('class'=>'dialogue-entry reply'));
+                //$output .= html_writer::start_tag('div', array('class'=>'row header'));
+                $output .= html_writer::tag('div', '&nbsp;', array('class'=>'left')); // left column
+                //$output .= html_writer::end_tag('div');
+                $output .= html_writer::start_tag('div', array('class'=>'row maincontent clearfix'));
+                $output .= html_writer::start_tag('div', array('class'=>'no-overflow'));
+                $output .= html_writer::start_tag('div', array('class'=>'content'));
+                if (isset($commands['edit'])) {
+                    $commandshtml[] = html_writer::link($commands['edit']['url'], $commands['edit']['text']);
+                }
+                
+                $output .= html_writer::tag('div', implode(' | ', $commandshtml), array('class'=>'commands'));
+                $output .= html_writer::tag('span', '<i>'.$modifiedstamp.'</i>', array('class'=>'modified')); // margin hack
+                $output .= html_writer::tag('div', $content, array('class'=>'body'));
+                if (!empty($attachments)) {
+                    $output .= html_writer::tag('div', $attachments, array('class'=>'attachments'));
+                }
+                $output .= html_writer::end_tag('div'); // content
+                $output .= html_writer::end_tag('div'); // no-overflow
+                $output .= html_writer::end_tag('div'); // row maincontent
+                $output .= html_writer::end_tag('div'); // end
+                  
+           }
+           echo $output;           
+        }
     }
-    echo "</table><br />\n";
+    /// Finally add the reply form.
     if (! $conversation->closed && (has_capability('mod/dialogue:participateany', $context) 
           || $conversation->userid == $USER->id || $conversation->recipientid == $USER->id)) {
+
+        require_once('dialogue_reply_form.php');
+        $mform = new mod_dialogue_reply_form('dialogues.php', array('conversationid' => $conversation->id,
+                                                                    'context' => $context ));
+        $mform->set_data(array('id' => $cm->id,
+                               'action' => 'insertentries',
+                               'pane' => DIALOGUEPANE_CURRENT));
         $mform->display();
     }
 
-    print_simple_box_end();
-
     if (! $conversation->seenon && $conversation->lastrecipientid == $USER->id) {
-        set_field('dialogue_conversations', 'seenon', time(), 'id', $conversation->id); 
+        $DB->set_field('dialogue_conversations', 'seenon', time(), array('id' => $conversation->id));
     }
     dialogue_mark_conversation_read($conversation->id, $USER->id);
 }
@@ -465,16 +596,17 @@ function dialogue_print_conversation($dialogue, $conversation) {
  * @todo    remove the embedded style for 'th', make it a class driven thing in the theme
  */
 function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
+    global $CFG, $DB, $USER, $OUTPUT;
 
-    global $USER, $CFG;
-    $condition = ($type == 'closed') ? " closed='1' " : " closed='0' ";  
-    $tabid = ($type == 'closed') ? 3 : 1;  
+    $condition = array(" closed=? ");
+    $cond_params = ($type == 'closed') ? array(1) : array(0);
+    $tabid = 1;
     
-    if (! $course = get_record('course', 'id', $dialogue->course)) {
-        error('Course is misconfigured');
+    if (! $course = $DB->get_record('course', array('id' => $dialogue->course))) {
+        print_error('Course is misconfigured');
     }
     if (! $cm = get_coursemodule_from_instance('dialogue', $dialogue->id, $course->id)) {
-        error('Course Module ID was incorrect');
+        print_error('Course Module ID was incorrect');
     }
     
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
@@ -530,30 +662,29 @@ function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
             $namesort = $sqlsort;
         }
     }
-    
     // list the conversations requiring a resonse from this user in full
-    if ($conversations = dialogue_get_conversations($dialogue, $USER, $condition, $order, $groupid)) {
+    if ($conversations = dialogue_get_conversations($dialogue, $USER, $condition, $cond_params, $order, $groupid)) {
         foreach ($conversations as $conversation) {
             if (in_array($USER->id, $dialoguemanagers)) {
                 if (! in_array($conversation->userid, $dialoguemanagers)) {
-                    if (! $with = get_record('user', 'id', $conversation->userid)) {
-                        error("User's record not found");
+                    if (! $with = $DB->get_record('user', array('id' => $conversation->userid))) {
+                        print_error("User's record not found");
                     }
                 }
                 else {
-                    if (! $with = get_record('user', 'id', $conversation->recipientid)) {
-                        error("User's record not found");
+                    if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
+                        print_error("User's record not found");
                     }                
                 }
             } else {
                 if ($USER->id != $conversation->userid) {
-                    if (! $with = get_record('user', 'id', $conversation->userid)) {
-                        error("User's record not found");
+                    if (! $with = $DB->get_record('user', array('id' => $conversation->userid))) {
+                        print_error("User's record not found");
                     }
                 }
                 else {
-                    if (! $with = get_record('user', 'id', $conversation->recipientid)) {
-                        error("User's record not found");
+                    if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
+                        print_error("User's record not found");
                     }                
                 }
             }
@@ -562,7 +693,7 @@ function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
             $unread[$conversation->id] = $conversation->total-$conversation->readings;
             $names_firstlast[$conversation->id] = $with->firstname.' '.$with->lastname;
             $names_lastfirst[$conversation->id] = $with->lastname.' '.$with->firstname;
-            $photos[$conversation->id] = print_user_picture($with, $course->id, true, 0, true);
+            $photos[$conversation->id] = $OUTPUT->user_picture($with, array('courseid' => $course->id));
             $ids[$conversation->id] = $with->id;
             
         }
@@ -607,8 +738,9 @@ function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
             }
             $profileurl = "$CFG->wwwroot/user/view.php?id=".$ids[$conversation->id]."&amp;course=$dialogue->course";
             $entryurl = "$CFG->wwwroot/mod/dialogue/dialogues.php?id=".$cm->id."&amp;action=printdialogue&amp;cid=".$cid;
+            $subject = empty($conversation->subject) ? get_string('nosubject', 'dialogue') : $conversation->subject;
             $row = array($photos[$conversation->id], 
-                         "<a href='$entryurl'>".$conversation->subject.'</a>',
+                         "<a href='$entryurl'>".$subject.'</a>',
                          "<a href='$profileurl'>".$names[$conversation->id].'</a>',
                          $conversation->total,
                          $unreadcount,
@@ -629,19 +761,19 @@ function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
  * @param   int  $userid
  */
 function dialogue_mark_conversation_read($conversationid, $userid) {
-    global $CFG;
+    global $CFG, $DB;
 
     $lastread = time();
 
     // Update any previously seen entries in this conversaion
-    set_field('dialogue_read', 'lastread', $lastread, 'conversationid', $conversationid, 'userid', $userid);
+    $DB->set_field('dialogue_read', 'lastread', $lastread, array('conversationid' => $conversationid, 'userid' => $userid));
 
-    $sql = "SELECT e.id FROM {$CFG->prefix}dialogue_entries e
-                LEFT JOIN {$CFG->prefix}dialogue_read r ON e.id = r.entryid AND r.userid = $userid 
-            WHERE e.conversationid = $conversationid AND r.id IS NULL ";
+    $sql = "SELECT e.id FROM {dialogue_entries} e
+                LEFT JOIN {dialogue_read} r ON e.id = r.entryid AND r.userid = :userid
+            WHERE e.conversationid = :conversationid AND r.id IS NULL ";
+    $params = array('userid' => $userid, 'conversationid' => $conversationid);
 
-
-    if ($unread = get_records_sql($sql)) {
+    if ($unread = $DB->get_records_sql($sql, $params)) {
         foreach($unread as $entry) {
             $read = new stdClass;
             $read->conversationid = $conversationid;
@@ -650,7 +782,7 @@ function dialogue_mark_conversation_read($conversationid, $userid) {
             $read->firstread      = $lastread;
             $read->lastread       = $lastread;
 
-            insert_record('dialogue_read', $read);
+            $DB->insert_record('dialogue_read', $read);
         }
     }
 }

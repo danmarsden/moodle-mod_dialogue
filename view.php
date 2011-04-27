@@ -1,4 +1,4 @@
-<?php  // $Id: view.php,v 1.11 2009/12/16 03:21:20 deeknow Exp $
+<?php
 
 /**
  * This page prints a particular instance of Dialogue
@@ -14,55 +14,65 @@
 
     $id   = required_param('id', PARAM_INT);
     $pane = optional_param('pane', 1, PARAM_INT);
-    $group = optional_param('group',-1,PARAM_INT);
- 
+    $group = optional_param('group',-1, PARAM_INT);
+
+    $PAGE->set_url('/mod/dialogue/view.php', array('id' => $id, 
+                                                   'pane' => $pane,
+                                                   'group' => $group));
+
     if (! $cm = get_coursemodule_from_id('dialogue', $id)) {
-        error("Course Module ID was incorrect");
+        print_error("Course Module ID was incorrect");
+    }
+ 
+    if (! $course = $DB->get_record("course", array('id' => $cm->course))) {
+        print_error("Course is misconfigured");
     }
 
-    if (! $course = get_record("course", "id", $cm->course)) {
-        error("Course is misconfigured");
-    }
-
-    if (! $dialogue = get_record("dialogue", "id", $cm->instance)) {
-        error("Course module is incorrect");
+    if (! $dialogue = $DB->get_record("dialogue", array('id' => $cm->instance))) {
+        print_error("Course module is incorrect");
     }
 
     require_login($course, false, $cm);
 
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $context           = get_context_instance(CONTEXT_MODULE, $cm->id); // m odule context
     $hascapopen        = has_capability('mod/dialogue:open', $context);
     $hascapparticipate = has_capability('mod/dialogue:participate', $context);
     $hascapviewall     = has_capability('mod/dialogue:viewall', $context);
     $hascapmanage      = has_capability('mod/dialogue:manage', $context);
-    $currentgroup = groups_get_activity_group($cm, true);
-    $groupmode = groups_get_activity_groupmode($cm);
+    $currentgroup      = groups_get_activity_group($cm, true);
+    $groupmode         = groups_get_activity_groupmode($cm);
 
+    /// Some capability checks.
+    if (empty($cm->visible) and !has_capability('moodle/course:viewhiddenactivities', $context)) {
+        echo $OUTPUT->notification(get_string("activityiscurrentlyhidden"));
+    }
+
+    
+    
     add_to_log($course->id, "dialogue", "view", "view.php?id=$cm->id", $dialogue->id, $cm->id);
 
     $strdialogue = get_string("modulename", "dialogue");
     $strdialogues = get_string("modulenameplural", "dialogue");
 
-    $navlinks = array(array('name' => $strdialogues, 'link' => "index.php?id=$course->id", 'type' => 'activity'),
-                      array('name' => format_string($dialogue->name), 'link' => '', 'type' => 'activityinstance')
-                     );
-    $navigation = build_navigation($navlinks);
+    $PAGE->set_context($context);
+    $PAGE->set_title(format_string($dialogue->name));
+    $PAGE->set_heading(format_string($course->fullname));
 
-    print_header_simple(format_string($dialogue->name), "", $navigation,
-                 "", "", true,
-                  update_module_button($cm->id, $course->id, $strdialogue), navmenu($course, $cm));
-
+    echo $OUTPUT->header();
+    
     if (!$hascapparticipate) { // no access
-        notify(get_string("notavailable", "dialogue"));
-        print_footer($course);
+        echo $OUTPUT->notification(get_string("notavailable", "dialogue"));
+        echo $OUTPUT->footer($course);
         die;
     }
+    /// find out current groups mode
+    groups_print_activity_menu($cm, new moodle_url($CFG->wwwroot . '/mod/dialogue/view.php', array('id' => $cm->id,
+                                                                                                   'pane' => $pane)));
+    $currentgroup = groups_get_activity_group($cm);
+    $groupmode = groups_get_activity_groupmode($cm);
 
-    groups_print_activity_menu($cm, "view.php?id=$cm->id&amp;pane=$pane");
-
-    echo '<br />';
-    print_simple_box(format_text($dialogue->intro), 'center', '70%', '', 5, 'generalbox', 'intro');
-    echo "<br />";
+    /// print intro text
+    echo $OUTPUT->box(format_module_intro('dialogue', $dialogue, $cm->id), 'generalbox', 'intro');
 
     // get some stats
     $countopen = dialogue_count_open($dialogue, $USER, $hascapviewall, $currentgroup);
@@ -105,33 +115,44 @@
     switch ($pane) {
         case 0: // Open dialogue
             if (! $hascapopen) {
-                notify(get_string("notavailable", "dialogue"));
-                print_continue("view.php?id=$cm->id");
+                echo $OUTPUT->notification(get_string("notavailable", "dialogue"));
+                echo $OUTPUT->continue_button("view.php?id=$cm->id");
                 break;
             }
             if ($groupmode && ! $hascapmanage) {
                 if ($group>0) {
                     $members = groups_get_members($group, 'u.id');
                     if (! in_array($USER->id, array_keys($members))) {
-                        notify(get_string("cannotadd", "dialogue"));
-                        print_continue("view.php?id=$cm->id");
+                        echo $OUTPUT->notification(get_string("cannotadd", "dialogue"));
+                        echo $OUTPUT->continue_button("view.php?id=$cm->id");
                         break;
                     }
                 } else {
-                        notify(get_string("cannotaddall", "dialogue"));
-                        print_continue("view.php?id=$cm->id");
+                        echo $OUTPUT->notification(get_string("cannotaddall", "dialogue"));
+                        echo $OUTPUT->continue_button("view.php?id=$cm->id");
                         break;
                 }
             }
             if ($names) {
-                $mform = new mod_dialogue_open_form('dialogues.php', array('names' => $names));
+                // setup form for opening a new conversation
+                $mform = new mod_dialogue_open_form('dialogues.php', array('context'=>$context,
+                                                                           'names'=>$names,
+                                                                           ));
+                //$draftitemid = file_get_unused_draft_itemid();
+
+                //$draftitemid = file_get_submitted_draft_itemid('attachment');
+                //print_object($draftitemid);
+                //file_prepare_draft_area($draftitemid, $context->id, 'mod_glossary', 'attachment', null);
+
                 $mform->set_data(array('id' => $cm->id, 
                                        'action' => 'openconversation'));
+                //,
+                  //                     'attachment' => $draftitemid));
                 $mform->display();
 
             } else {
-                notify(get_string("noavailablepeople", "dialogue"));
-                print_continue("view.php?id=$cm->id");
+                echo $OUTPUT->notification(get_string("noavailablepeople", "dialogue"));
+                echo $OUTPUT->continue_button("view.php?id=$cm->id");
             }
             break;
 
@@ -146,6 +167,6 @@
             break;
     }
 
-    print_footer($course);
+    echo $OUTPUT->footer($course);
 
 ?>

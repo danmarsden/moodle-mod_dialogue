@@ -1,4 +1,4 @@
-<?php // $Id: index.php,v 1.8 2009/08/20 02:23:21 deeknow Exp $
+<?php
 
 /**
  * This page lists all the instances of Dialogue in a particular course
@@ -13,8 +13,8 @@
 
     $id = required_param('id', PARAM_INT);
 
-    if (!$course = get_record('course', 'id', $id)) {
-        error('Course ID is incorrect');
+    if (!$course = $DB->get_record('course', array('id' => $id))) {
+        print_error('Course ID is incorrect');
     }
 
     require_login($course);
@@ -27,9 +27,8 @@
     $strcloseddialogues = get_string('closeddialogues', 'dialogue');
 
     $navlinks = array(array('name' => $strdialogues, 'link' => '', 'type' => 'activity' ));
-    $navigation = build_navigation($navlinks);
     
-    print_header_simple($strdialogues, '', $navigation,  '', '', true, '', navmenu($course));
+    print_header($strdialogues, '', $navlinks,  '', '', true, '', navmenu($course));
 
 
     if (!$dialogues = get_all_instances_in_course('dialogue', $course)) {
@@ -39,6 +38,7 @@
 
     $timenow = time();
 
+    $table = new html_table();
     $table->head  = array ($strname, $stropendialogues, $strcloseddialogues);
     $table->align = array ('center', 'center', 'center');
  
@@ -55,7 +55,7 @@
     }
 
     echo '<br />';
-    print_table($table);
+    echo html_writer::table($table);
 
     print_footer($course);
  

@@ -1,4 +1,4 @@
-<?php  //$Id: settings.php,v 1.2 2009/08/20 02:23:21 deeknow Exp $
+<?php
 
 /**
  * Configure site-wide settings specific to the Dialogue modue

@@ -1,165 +1,180 @@
-<?php  //$Id: upgrade.php,v 1.2 2009/08/20 02:23:21 deeknow Exp $
+<?php
 
 function xmldb_dialogue_upgrade($oldversion=0) {
 
-    global $CFG, $THEME, $db;
+    global $CFG, $DB, $OUTPUT;
 
-    $result = true;
-    
-    if ($result && $oldversion < 2007100300) {
+    $dbman = $DB->get_manager(); // loads ddl manager and xmldb classes
 
-    /// Define field recipientid to be added to dialogue_entries
-        $table = new XMLDBTable('dialogue_entries');
-        $field = new XMLDBField('recipientid');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, '0', 'userid');
+    if ($oldversion < 2010123102) {
+    /// Define field introformat to be added to dialogue
+        $table = new xmldb_table('dialogue');
+        $field = new xmldb_field('introformat');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'intro');
 
-    /// Launch add field recipientid
-        $result = $result && add_field($table, $field);
-        
-        $index = new XMLDBIndex('dialogue_entries_recipientid_idx');
-        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('recipientid'));
+    /// Conditionally launch add field introformat
+        if (!$dbman->field_exists($table,$field)) {
+            $dbman->add_field($table, $field);
+        }
 
-    /// Launch add index dialogue_entries_recipientid_idx
-        $result = $result && add_index($table, $index);
+
+    /// Define field format to be added to dialogue_entries
+        $table = new xmldb_table('dialogue_entries');
+        $field = new xmldb_field('format');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'text');
+        /// Conditionally launch add field format
+        if (!$dbman->field_exists($table,$field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_mod_savepoint(true, 2010123102, 'dialogue');
     }
-    
-    if ($result && $oldversion < 2007100301) {
+    if ($oldversion < 2010123103) {
+        /////////////////////////////////////
+        /// new file storage upgrade code ///
+        /////////////////////////////////////
 
-    /// Define field lastrecipientid to be added to dialogue_conversations
-        $table = new XMLDBTable('dialogue_conversations');
-        $field = new XMLDBField('lastrecipientid');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, '0', 'lastid');
+        $fs = get_file_storage();
 
-    /// Launch add field lastrecipientid
-        $result = $result && add_field($table, $field);
-    }
-    
-    if ($result && $oldversion < 2007100400) {
+        $siteid = get_site()->id;
 
-    /// Define field attachment to be added to dialogue_entries
-        $table = new XMLDBTable('dialogue_entries');
-        $field = new XMLDBField('attachment');
-        $field->setAttributes(XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null, null, null, 'text');
+        $base = preg_quote($CFG->wwwroot,"/");
 
-    /// Launch add field attachment
-        $result = $result && add_field($table, $field);
-    }
-    
-    if ($result && $oldversion < 2007100800) {
+        $empty = $DB->sql_empty(); // silly oracle empty string handling workaround
 
-    /// Define field edittime to be added to dialogue
-        $table = new XMLDBTable('dialogue');
-        $field = new XMLDBField('edittime');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'intro');
+        $fs = get_file_storage();
 
-    /// Launch add field edittime
-        $result = $result && add_field($table, $field);
-    }
-    
-    if ($result && $oldversion < 2007110700) {
+        $empty = $DB->sql_empty(); // silly oracle empty string handling workaround
 
-    /// Define field groupid to be added to dialogue_conversations
-        $table = new XMLDBTable('dialogue_conversations');
-        $field = new XMLDBField('groupid');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'subject');
+        $sqlfrom = "FROM {dialogue_entries} e
+                    JOIN {dialogue_conversations} c ON c.id = e.conversationid
+                    JOIN {dialogue} d ON d.id = c.dialogueid
+                    JOIN {modules} m ON m.name = 'dialogue'
+                    JOIN {course_modules} cm ON (cm.module = m.id AND cm.instance = d.id) ";
+                  // WHERE e.attachment <> '$empty' AND e.attachment <> '1'";
 
-    /// Launch add field groupid
-        $result = $result && add_field($table, $field);
-        
-    /// Define index dialogue_conversations_groupid_idx (not unique) to be added to dialogue_conversations
-        $index = new XMLDBIndex('dialogue_conversations_groupid_idx');
-        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('groupid'));
+        $count = $DB->count_records_sql("SELECT COUNT('x') $sqlfrom");
 
-    /// Launch add index dialogue_conversations_groupid_idx
-        $result = $result && add_index($table, $index);
-    }
-    
-    if ($result && $oldversion < 2007110800) {
+        $rs = $DB->get_recordset_sql("SELECT e.id, e.text, e.attachment, e.userid, e.recipientid, c.dialogueid, d.course, cm.id AS cmid $sqlfrom ORDER BY d.course, d.id, c.id");
+       
+        if ($rs->valid()) {
+            $pbar = new progress_bar('migratedialoguefiles', 500, true);
+            $i = 0;
+            foreach ($rs as $entry) {
+                $i++;
+                upgrade_set_timeout(60); // set up timeout, may also abort execution
+                $pbar->update($i, $count, "Migrating dialogue entries - $i/$count.");
+                /// Migrate embedded message images
+                $context     = get_context_instance(CONTEXT_COURSE, $entry->course);
+                $modcontext  = get_context_instance(CONTEXT_MODULE, $entry->cmid);     
+                $filerecord  = array('contextid'=>$modcontext->id, 'component'=>'mod_dialogue', 'filearea'=>'entry', 'itemid'=>$entry->id);
+                $search="|$CFG->wwwroot/file.php(\?file=)?/$entry->course(/[^\s'\"&\?#]+)|";
+                if (preg_match_all($search, $entry->text, $matches)) {        
+                    $text = $entry->text;
+                    foreach ($matches[2] as $i=>$imagepath) {
+                        $path = "/$context->id/course/legacy/0" . $imagepath; 
+                        if ($file = $fs->get_file_by_hash(sha1($path))) {
+                            try {
+                                $fs->create_file_from_storedfile($filerecord, $file);
+                                $text = str_replace($matches[0][$i], '@@PLUGINFILE@@'.$imagepath , $text);           
+                            } catch (Exception $e) {
+                            }
+                        }
+                    }
+                    $DB->set_field('dialogue_entries', 'text', $content, array('id'=> $entry->id));
+                }
 
-    /// Define field grouping to be added to dialogue_conversations
-        $table = new XMLDBTable('dialogue_conversations');
-        $field = new XMLDBField('grouping');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, '0', 'groupid');
+                
+                if ($entry->attachment) {
+                    $filepath = "$CFG->dataroot/$entry->course/$CFG->moddata/dialogue/$entry->dialogueid/$entry->id/$entry->attachment";
+          
+                    if (!is_readable($filepath)) {
+                        //file missing??
+                        echo $OUTPUT->notification("File not readable, skipping: ".$filepath);
+                        $entry->attachment = '';
+                        $DB->update_record('dialogue_entries', $entry);
+                        continue;
+                    }
+                    $context = get_context_instance(CONTEXT_MODULE, $entry->cmid);
 
-    /// Launch add field grouping
-        $result = $result && add_field($table, $field);
+                
+                $filename = clean_param($entry->attachment, PARAM_FILE);
+                if ($filename === '') {
+                    echo $OUTPUT->notification("Unsupported entry filename, skipping: ".$filepath);
+                    $entry->attachment = '';
+                    $DB->update_record('dialogue_entries', $entry);
+                    continue;
+                }
+                if (!$fs->file_exists($context->id, 'mod_dialogue', 'attachment', $entry->id, '/', $filename)) {
+                    $file_record = array('contextid'=>$context->id, 'component'=>'mod_dialogue', 'filearea'=>'attachment', 'itemid'=>$entry->id, 'filepath'=>'/', 'filename'=>$filename, 'userid'=>$entry->userid);
+                    if ($fs->create_file_from_pathname($file_record, $filepath)) {
+                        $entry->attachment = '1';
+                        $DB->update_record('dialogue_entries', $entry);
+                        unlink($filepath);
+                    }
+                }
 
-    /// Define index dialogue_conversations_grouping_idx (not unique) to be added to dialogue_conversations
-        $table = new XMLDBTable('dialogue_conversations');
-        $index = new XMLDBIndex('dialogue_conversations_grouping_idx');
-        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('grouping'));
+                // remove dirs if empty
+                @rmdir("$CFG->dataroot/$entry->course/$CFG->moddata/dialogue/$entry->dialogueid/$entry->id");
+                @rmdir("$CFG->dataroot/$entry->course/$CFG->moddata/dialogue/$entry->dialogueid");
+                @rmdir("$CFG->dataroot/$entry->course/$CFG->moddata/dialogue");
+                }
+            }
 
-    /// Launch add index dialogue_conversations_grouping_idx
-        $result = $result && add_index($table, $index);
-        
-    }
-    
-    if ($result && $oldversion < 2007111401) {
+        }
+        $rs->close();
 
-    /// Define field timemodified to be added to dialogue_entries
-        $table = new XMLDBTable('dialogue_entries');
-        $field = new XMLDBField('timemodified');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', null, null, null, null, null, '0', 'timecreated');
-
-    /// Launch add field timemodified
-        $result = $result && add_field($table, $field);
-        
-        $result = $result && $result = execute_sql('UPDATE '.$CFG->prefix.'dialogue_entries SET timemodified = timecreated');
-    }
-    
-    if ($result && $oldversion < 2007112200) {
-
-    /// Define table dialogue_read to be created
-        $table = new XMLDBTable('dialogue_read');
-
-    /// Adding fields to table dialogue_read
-        $table->addFieldInfo('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
-        $table->addFieldInfo('entryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
-        $table->addFieldInfo('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
-        $table->addFieldInfo('firstread', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
-        $table->addFieldInfo('lastread', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
-
-    /// Adding keys to table dialogue_read
-        $table->addKeyInfo('primary', XMLDB_KEY_PRIMARY, array('id'));
-        $table->addKeyInfo('dialogueread_entryid_userid_uk', XMLDB_KEY_UNIQUE, array('entryid', 'userid'));
-
-    /// Launch create table for dialogue_read
-        $result = $result && create_table($table);
-    }
-    
-    if ($result && $oldversion < 2007112201) {
-
-    /// Define field conversationid to be added to dialogue_read
-        $table = new XMLDBTable('dialogue_read');
-        $field = new XMLDBField('conversationid');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null, 'lastread');
-
-    /// Launch add field conversationid
-        $result = $result && add_field($table, $field);
-
-    /// Define key dialogueread_conversation_fk (foreign) to be added to dialogue_read
-        $table = new XMLDBTable('dialogue_read');
-        $key = new XMLDBKey('dialogueread_conversation_fk');
-        $key->setAttributes(XMLDB_KEY_FOREIGN, array('conversationid'), 'dialogue_conversations', array('id'));
-
-    /// Launch add key dialogueread_conversation_fk
-        $result = $result && add_key($table, $key);
+        upgrade_mod_savepoint(true, 2010123103, 'dialogue');
         
     }
-    
-    if ($result && $oldversion < 2007121701) {
-        $logdisplay = new stdClass;
-        $logdisplay->module = 'assignment';
-        $logdisplay->mtable = 'assignment';
-        $logdisplay->field  = 'name';
-        
-        $logdisplay->action = 'delete';
-        $result = $result && insert_record('log_display', $logdisplay);
-        
-        $logdisplay->action = 'view receipt';
-        $result = $result && insert_record('log_display', $logdisplay);
+
+    if ($oldversion < 2010123104) {
+
+    /// Add field format on table dialogue_entries
+        $table = new xmldb_table('dialogue_entries');
+        $field = new xmldb_field('format', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'text');
+
+    /// Conditionally launch add field  format
+        if (!$dbman->field_exists($table,$field)) {
+            $dbman->add_field($table, $field);
+        }
+    /// dialogue savepoint reached
+        upgrade_mod_savepoint(true, 2010123104, 'dialogue');
     }
-    return($result);
+
+    if ($oldversion < 2010123105) {
+
+    /// Define field trust to be added to dialogue_entries
+        $table = new xmldb_table('dialogue_entries');
+        $field = new xmldb_field('trust', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'format');
+
+    /// Conditionally launch add field trust
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+    /// dialogue savepoint reached
+        upgrade_mod_savepoint(true, 2010123105, 'dialogue');
+    }
+
+    if ($oldversion < 2010123106) {
+
+        $trustmark = '#####TRUSTTEXT#####';
+        $rs = $DB->get_recordset_sql("SELECT * FROM {dialogue_entries} WHERE text LIKE ?", array($trustmark.'%'));
+        foreach ($rs as $entry) {
+            if (strpos($entry->text, $trustmark) !== 0) {
+                // probably lowercase in some DBs
+                continue;
+            }
+            $entry->text      = str_replace($trustmark, '', $entry->text);
+            $entry->trust = 1;
+            $DB->update_record('dialogue_entries', $entry);
+        }
+        $rs->close();
+
+    /// dialogue savepoint reached
+        upgrade_mod_savepoint(true, 2010123106, 'dialogue');
+    }
+
+    return true;
 }
-
 ?>

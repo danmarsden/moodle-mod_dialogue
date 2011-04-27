@@ -1,5 +1,4 @@
-<?PHP // $Id: dialogue.php,v 1.2 2009/12/16 03:27:04 deeknow Exp $ 
-      // dialogue.php - created with Moodle 1.8 dev (2006101001)
+<?php
 
 
 $string['addmynewentries'] = 'Aggiungi i miei nuovi messaggi';
@@ -10,7 +9,7 @@ $string['allowstudentdialogues'] = 'Permetti dialoghi studente-studente';
 $string['close'] = 'Termina';
 $string['closed'] = 'Terminato';
 $string['closeddialogues'] = 'Dialoghi terminati';
-$string['confirmclosure'] = 'Stai per terminare un dialogo con $a. Una volta terminato il dialogo non può essere riiniziato. Se termini questo dialogo potrai visualizzarlo ma non potrai più aggiungere niente, e dovrai iniziare un altro dialogo per continuare a \"parlare\" con questa persona.<br /><br />Sei sicuro di voler terminare questo dialogo?';
+$string['confirmclosure'] = 'Stai per terminare un dialogo con $a. Una volta terminato il dialogo non può essere riiniziato. Se termini questo dialogo potrai visualizzarlo ma non potrai più aggiungere niente, e dovrai iniziare un altro dialogo per continuare a "parlare" con questa persona.<br /><br />Sei sicuro di voler terminare questo dialogo?';
 $string['deleteafter'] = 'Cancella i dialoghi terminati dopo (Giorni)';
 $string['dialogueclosed'] = 'Dialogo terminato';
 $string['dialogueintro'] = 'Introduzione dialogo';
@@ -20,7 +19,7 @@ Puoi vederlo aggiunto al vostro dialogo:
 
 $a->url';
 $string['dialoguemailhtml'] = '$a->userform ha spedito un nuovo messaggio al vostro dialogo \'<i>$a->dialogue</i>\'<br /><br />
-Puoi vederlo aggiunto al vostro <a href=\"$a->url\">dialogo</a>.';
+Puoi vederlo aggiunto al vostro <a href="{$a->url}">dialogo</a>.';
 $string['dialoguename'] = 'Nome dialogo';
 $string['dialogueopened'] = 'Dialogo aperto con $a';
 $string['dialoguewith'] = 'Dialogo con $a';

@@ -1,4 +1,4 @@
-<?php  // $Id: dialogue_open_form.php,v 1.2 2009/08/20 02:23:20 deeknow Exp $
+<?php
 
 /**
  * This page builds a Dialogue Open form when called from view.php or dialogues.php
@@ -8,36 +8,43 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  */
 
+if (!defined('MOODLE_INTERNAL')) {
+    die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
+}
+
 require_once($CFG->libdir.'/formslib.php');
 
 class mod_dialogue_open_form extends moodleform {
 
     function definition() {
 
-        global $CFG, $COURSE;
+        global $CFG, $COURSE, $DB;
+
+        $mform    =& $this->_form;
         
-        $this->set_upload_manager(new upload_manager('attachment', true, false,$COURSE, false, 0, true, true));
-        
-        $mform =& $this->_form;
-        
-        $names = (array)$this->_customdata['names'];
-        $names = array('' => get_string('select').'...')+$names;
+        $context = $this->_customdata['context'];
+        $maxbytes = $COURSE->maxbytes; // Could also use $CFG->maxbytes if you are not coding within a course context
+        $editoroptions = array('subdirs'=>false, 'maxfiles'=>1, 'maxbytes'=>$maxbytes, 'trusttext'=>true, 'context'=>$context,'accepted_types'=>'image');
+        $attachmentoptions = array('subdirs'=>false, 'maxfiles'=>1, 'maxbytes'=>$maxbytes);
+
+        $names = (array) $this->_customdata['names'];
+        $names = array('' => get_string('select').'...') + $names;
+
         
         $mform->addElement('header', 'general', '');//fill in the data depending on page params
-        $mform->addElement('select', 'recipientid',get_string('openadialoguewith', 'dialogue'), $names);
+        $mform->addElement('select', 'recipientid', get_string('openadialoguewith', 'dialogue'), $names);
         $mform->addRule('recipientid', get_string('required'), 'required', null, 'client');
         
         $mform->addElement('text', 'subject', get_string('subject', 'dialogue'), 'size="48"');
         $mform->setType('subject', PARAM_TEXT);
         $mform->addRule('subject', get_string('required'), 'required', null, 'client');
-        
-        $mform->addElement('htmleditor', 'firstentry',get_string('typefirstentry', 'dialogue'),array('cols'=>80, 'rows'=>20));
+
+        $mform->addElement('editor', 'firstentry', get_string('typefirstentry', 'dialogue'), null, $editoroptions);
         $mform->setType('firstentry', PARAM_CLEANHTML);
         $mform->addRule('firstentry', get_string('required'), 'required', null, 'client');
-        $mform->setHelpButton('firstentry',array('reading', 'writing', 'questions', 'richtext'),false, 'editorhelpbutton');
-        
-        $mform->addElement('file', 'attachment', get_string('attachment', 'dialogue'));
-        
+
+        $mform->addElement('filemanager', 'attachment', get_string('attachment', 'dialogue'), null, $attachmentoptions);
+
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         
