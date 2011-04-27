@@ -18,14 +18,15 @@ function xmldb_dialogue_upgrade($oldversion=0) {
         }
 
 
-    /// Define field format to be added to dialogue_entries
+    /// Add field format on table dialogue_entries
         $table = new xmldb_table('dialogue_entries');
-        $field = new xmldb_field('format');
-        $field->set_attributes(XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'text');
-        /// Conditionally launch add field format
+        $field = new xmldb_field('format', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'text');
+
+    /// Conditionally launch add field  format
         if (!$dbman->field_exists($table,$field)) {
             $dbman->add_field($table, $field);
         }
+    /// dialogue savepoint reached
         upgrade_mod_savepoint(true, 2010123102, 'dialogue');
     }
     if ($oldversion < 2010123103) {
