@@ -497,11 +497,11 @@ function dialogue_user_complete($course, $user, $mod, $dialogue) {
         foreach ($conversations as $conversation) {
             if ($user->id != $conversation->userid) {
                 if (! $with = $DB->get_record('user', array('id' => $conversation->userid))) {
-                    error("User's record not found");
+                    print_error("User's record not found");
                 }
             } else {
                 if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
-                    error("User's record not found");
+                    print_error("User's record not found");
                 }
             }
             $total = $conversation->total;
@@ -629,7 +629,7 @@ function dialogue_get_conversations($dialogue, $user, $condition=array(), $cond_
     $params = array($user->id, $dialogue->id);
 
     if (! $cm = get_coursemodule_from_instance('dialogue', $dialogue->id, $COURSE->id)) {
-        error('Course Module ID was incorrect');
+        print_error('Course Module ID was incorrect');
     }
     if (empty($order)) {
         $order = 'c.timemodified DESC';
@@ -685,21 +685,21 @@ function dialogue_get_open_conversations($course) {
     if (empty($USER->id)) {
         return false;
     }
-    $sqlparams = array('courseid' => $course->id, 'userid0' => $USER->id, 'userid1' => $USER->id, 'userid2' => $USER->id);
-    if ($conversations = $DB->get_records_sql("SELECT d.name AS dialoguename, c.id, c.dialogueid, c.timemodified, c.lastid, c.userid".
-                                         " FROM {dialogue} d, {dialogue_conversations} c".
-                                         " WHERE d.course = :courseid".
-                                         " AND c.dialogueid = d.id".
-                                         " AND (c.userid = :userid0 OR c.recipientid = :userid1)".
-                                         " AND c.lastid != :userid2".
-                                         " AND c.closed =0", $sqlparams)) {
+    if ($conversations = $DB->get_records_sql("SELECT c.id, c.dialogueid, c.timemodified, c.lastid, c.userid".
+                                              " FROM {dialogue} d, {dialogue_conversations} c".
+                                              " WHERE d.course = ?".
+                                              " AND c.dialogueid = d.id".
+                                              " AND (c.userid = ? OR c.recipientid = ?)".
+                                              " AND c.lastid != ?".
+                                              " AND c.closed =0", array($course->id, $USER->id, $USER->id, $USER->id))) {
         $entry = array();
         foreach ($conversations as $conversation) {
             if (! $user = $DB->get_record('user', array('id' => $conversation->lastid))) {
-                error("Get open conversations: user record not found");
+                // @todo print_error("Get open conversations: user record not found");
+                continue;
             }
             if (! $cm = get_coursemodule_from_instance('dialogue', $conversation->dialogueid, $course->id)) {
-                error('Course Module ID was incorrect');
+                print_error('Course Module ID was incorrect');
             }
             $entry[$conversation->id]->dialogueid = $conversation->dialogueid;
             $entry[$conversation->id]->time = $conversation->timemodified;
