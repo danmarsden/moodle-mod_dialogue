@@ -49,7 +49,7 @@
 
     
     
-    add_to_log($course->id, "dialogue", "view", "view.php?id=$cm->id", $dialogue->id, $cm->id);
+    add_to_log($course->id, "dialogue", "view", "view.php?id=$cm->id");
 
     $strdialogue = get_string("modulename", "dialogue");
     $strdialogues = get_string("modulenameplural", "dialogue");

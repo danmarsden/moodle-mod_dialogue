@@ -18,7 +18,7 @@
     }
 
     require_login($course);
-    add_to_log($course->id, 'dialogue', 'view all', "index.php?id=$course->id", '');
+    add_to_log($course->id, 'dialogue', 'view all', "index.php?id=$course->id");
 
     $strdialogue        = get_string('modulename', 'dialogue');
     $strdialogues       = get_string('modulenameplural', 'dialogue');
