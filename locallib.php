@@ -209,14 +209,14 @@ function dialogue_get_available_students($dialogue, $context, $editconversationi
                 $groupmode = groupmode($course, $cm);
                 // ...if teacher and groups then exclude students not in the current group
                 if (isset($teachers[$USER->id]) and $groupmode and $groupid) {
-                    if (! ismember($groupid, $otheruser->id)) {
+                    if (! groups_is_member($groupid, $otheruser->id)) {
                         continue;
                     }
                 }
 
                 // ...if student and groupmode then exclude students not in student's group
                 if (!isset($teachers[$USER->id]) && $groupmode && $groupid) {
-                    if (!ismember($groupid, $otheruser->id)) {
+                    if (!groups_is_member($groupid, $otheruser->id)) {
                         continue;
                     }
                 }
@@ -303,7 +303,7 @@ function dialogue_get_available_teachers($dialogue, $context, $editconversationi
             if ($USER->id != $otheruser->id) {
                 // ...if groupmode is SEPARATEGROUPS then exclude teachers not in student's group
                 if ($groupid and (groupmode($course, $cm) == SEPARATEGROUPS)) {
-                    if (! ismember($groupid, $otheruser->id)) {
+                    if (! groups_is_member($groupid, $otheruser->id)) {
                         continue;
                     }
                 }
