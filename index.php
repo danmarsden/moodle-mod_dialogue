@@ -13,12 +13,18 @@
 
     $id = required_param('id', PARAM_INT);
 
-    if (!$course = $DB->get_record('course', array('id' => $id))) {
-        print_error('Course ID is incorrect');
+    $url = new moodle_url('/mod/forum/index.php', array('id'=>$id));
+    $PAGE->set_url($url);
+
+    if (! $course = $DB->get_record('course', array('id' => $id))) {
+        print_error('invalidcourseid');
     }
 
-    require_login($course);
-    add_to_log($course->id, 'dialogue', 'view all', "index.php?id=$course->id");
+    require_course_login($course);
+    $PAGE->set_pagelayout('incourse');
+    $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
+
+    add_to_log($course->id, 'dialogue', 'view all', "index.php?id=$course->id", '');
 
     $strdialogue        = get_string('modulename', 'dialogue');
     $strdialogues       = get_string('modulenameplural', 'dialogue');
@@ -26,15 +32,16 @@
     $stropendialogues   = get_string('opendialogues', 'dialogue');
     $strcloseddialogues = get_string('closeddialogues', 'dialogue');
 
-    $navlinks = array(array('name' => $strdialogues, 'link' => '', 'type' => 'activity' ));
-    
-    print_header($strdialogues, '', $navlinks,  '', '', true, '', navmenu($course));
-
-
     if (!$dialogues = get_all_instances_in_course('dialogue', $course)) {
         notice('There are no dialogues', "../../course/view.php?id=$course->id");
         die;
     }
+
+    /// Output the page
+    $PAGE->navbar->add($strdialogues);
+    $PAGE->set_title("$course->shortname: $strdialogues");
+    $PAGE->set_heading($course->fullname);
+    echo $OUTPUT->header();
 
     $timenow = time();
 
@@ -43,7 +50,7 @@
     $table->align = array ('center', 'center', 'center');
  
     foreach ($dialogues as $dialogue) {
-        $hascapviewall = has_capability('mod/dialogue:viewall', get_context_instance(CONTEXT_COURSE, $course->id));
+        $hascapviewall = has_capability('mod/dialogue:viewall', $coursecontext);
 
         $dimmedclass = '';
         if (!$dialogue->visible) {      // Show dimmed if the mod is hidden
@@ -57,7 +64,7 @@
     echo '<br />';
     echo html_writer::table($table);
 
-    print_footer($course);
+    echo $OUTPUT->footer();
  
 ?>
 
