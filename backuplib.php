@@ -1,4 +1,4 @@
-<?php //$Id: backuplib.php,v 1.4.10.2 2009/08/05 05:06:55 deeknow Exp $
+<?php //$Id: backuplib.php,v 1.4.10.1 2009/03/25 21:23:32 deeknow Exp $
     //This php script contains all the stuff to backup/restore
     //dialogue mods
 
@@ -71,6 +71,11 @@
         if ($preferences->mods["dialogue"]->userinfo) {
             $status = backup_dialogue_conversations($bf,$preferences,$dialogue->id);
         }
+
+        if ($status) {
+            $status = backup_dialogue_files_instance($bf,$preferences,$dialogue->id);
+        }
+
         //End mod
         $status =fwrite ($bf,end_tag("MOD",3,true));
         return($status);
@@ -231,4 +236,59 @@
                                  WHERE a.course = '$course' AND
                                        s.dialogueid = a.id");
     }
+
+    //Backup dialogue files because we've selected to backup user info
+    //and files are user info's level
+    function backup_dialogue_files_instance($bf,$preferences,$instanceid) {
+        global $CFG;
+
+        $status = true;
+
+        //First we check to moddata exists and create it as necessary
+        //in temp/backup/$backup_code  dir
+        $status = check_and_create_moddata_dir($preferences->backup_unique_code);
+        $status = check_dir_exists($CFG->dataroot."/temp/backup/".$preferences->backup_unique_code."/moddata/dialogue/",true);
+        //Now copy the dialogue dir
+        if ($status) {
+            //Only if it exists !! Thanks to Daniel Miksik.
+            if (is_dir($CFG->dataroot."/".$preferences->backup_course."/".$CFG->moddata."/dialogue/".$instanceid)) {
+                $status = backup_copy_file($CFG->dataroot."/".$preferences->backup_course."/".$CFG->moddata."/dialogue/".$instanceid,
+                                           $CFG->dataroot."/temp/backup/".$preferences->backup_unique_code."/moddata/dialogue/".$instanceid);
+            }
+        }
+
+        return $status;
+
+    }
+
+    //Backup dialogue files because we've selected to backup user info
+    //and files are user info's level
+    function backup_dialogue_files($bf,$preferences) {
+        global $CFG;
+
+        $status = true;
+
+        //First we check to moddata exists and create it as necessary
+        //in temp/backup/$backup_code  dir
+        $status = check_and_create_moddata_dir($preferences->backup_unique_code);
+        //Now copy the dialogue dir
+        if ($status) {
+            //Only if it exists !! Thanks to Daniel Miksik.
+            if (is_dir($CFG->dataroot."/".$preferences->backup_course."/".$CFG->moddata."/dialogue")) {
+                $handle = opendir($CFG->dataroot."/".$preferences->backup_course."/".$CFG->moddata."/dialogue");
+                while (false!==($item = readdir($handle))) {
+                    if ($item != '.' && $item != '..' && is_dir($CFG->dataroot."/".$preferences->backup_course."/".$CFG->moddata."/dialogue/".$item)
+                        && array_key_exists($item,$preferences->mods['dialogue']->instances)
+                        && !empty($preferences->mods['dialogue']->instances[$item]->backup)) {
+                        $status = backup_copy_file($CFG->dataroot."/".$preferences->backup_course."/".$CFG->moddata."/dialogue/".$item,
+                                                   $CFG->dataroot."/temp/backup/".$preferences->backup_unique_code."/moddata/dialogue/",$item);
+                    }
+                }
+            }
+        }
+
+        return $status;
+
+    }
+
 ?>

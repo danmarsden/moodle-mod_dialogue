@@ -1,4 +1,4 @@
-<?php //$Id: restorelib.php,v 1.4.10.2 2009/08/05 05:06:56 deeknow Exp $
+<?php //$Id: restorelib.php,v 1.4.10.1 2009/03/25 21:23:33 deeknow Exp $
     //This php script contains all the stuff to backup/restore
     //dialogue mods
 
@@ -219,6 +219,14 @@
                     //We have the newid, update backup_ids
                     backup_putid($restore->backup_unique_code,"dialogue_entry",$oldid,
                             $newid);
+                    
+                    //Get old dialogue id from backup_ids
+                    $rec = get_record("backup_ids","backup_code",$restore->backup_unique_code,
+                                                   "table_name","dialogue",
+                                                   "new_id",$new_dialogue_id);
+
+                    $status = dialogue_restore_files($rec->old_id, $new_dialogue_id, $oldid, $newid, $restore);
+
                 } else {
                     $status = false;
                 }
@@ -285,6 +293,59 @@
 
         return $status;
     }
-    
+
+    //This function copies the dialogue related info from backup temp dir to course moddata folder,
+    //creating it if needed and recoding everything (dialogue id and entry id)
+    function dialogue_restore_files ($olddialogueid, $newdialogueid, $oldentryid, $newentryid, $restore) {
+
+        global $CFG;
+
+        $status = true;
+        $todo = false;
+        $moddata_path = "";
+        $dialogue_path = "";
+        $temp_path = "";
+
+        //First, we check to "course_id" exists and create is as necessary
+        //in CFG->dataroot
+        $dest_dir = $CFG->dataroot."/".$restore->course_id;
+        $status = check_dir_exists($dest_dir,true);
+
+        //First, locate course's moddata directory
+        $moddata_path = $CFG->dataroot."/".$restore->course_id."/".$CFG->moddata;
+
+        //Check it exists and create it
+        $status = check_dir_exists($moddata_path,true);
+
+        //Now, locate dialogue directory
+        if ($status) {
+            $dialogue_path = $moddata_path."/dialogue";
+            //Check it exists and create it
+            $status = check_dir_exists($dialogue_path,true);
+        }
+
+        //Now locate the temp dir we are restoring from
+        if ($status) {
+            $temp_path = $CFG->dataroot."/temp/backup/".$restore->backup_unique_code.
+                         "/moddata/dialogue/".$olddialogueid."/".$oldentryid;
+            //Check it exists
+            if (is_dir($temp_path)) {
+                $todo = true;
+            }
+        }
+
+        //If todo, we create the neccesary dirs in course moddata/dialogue
+        if ($status and $todo) {
+            //First this dialogue id
+            $this_dialogue_path = $dialogue_path."/".$newdialogueid;
+            $status = check_dir_exists($this_dialogue_path,true);
+            //Now this post id
+            $post_dialogue_path = $this_dialogue_path."/".$newentryid;
+            //And now, copy temp_path to post_dialogue_path
+            $status = backup_copy_file($temp_path, $post_dialogue_path);
+        }
+
+        return $status;
+    }
     
 ?>
