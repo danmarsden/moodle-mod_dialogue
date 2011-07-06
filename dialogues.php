@@ -1,4 +1,4 @@
-<?php   // $Id: dialogues.php,v 1.9.10.11 2009/12/16 01:45:32 deeknow Exp $
+<?php
 
 /**
  * Displays conversations/posts that are part of a dialogue module instance

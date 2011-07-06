@@ -1,5 +1,4 @@
-<?PHP // $Id: dialogue.php,v 1.1.2.1 2009/12/16 01:00:59 deeknow Exp $ 
-      // dialogue.php - created with Moodle 1.6 Beta 5 (2006050500)
+<?php // dialogue.php - created with Moodle 1.6 Beta 5 (2006050500)
 
 
 $string['addmynewentries'] = 'Agregar mis nuevas entradas';

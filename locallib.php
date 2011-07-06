@@ -1,4 +1,4 @@
-<?php  // $Id: locallib.php,v 1.3.10.8 2009/08/21 04:59:34 deeknow Exp $
+<?php
 
 /**
  * Library of extra functions for the dialogue module not part of the standard add-on module API set

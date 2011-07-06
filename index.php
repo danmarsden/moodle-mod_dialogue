@@ -1,4 +1,4 @@
-<?php // $Id: index.php,v 1.6.10.4 2009/08/03 03:06:31 deeknow Exp $
+<?php
 
 /**
  * This page lists all the instances of Dialogue in a particular course

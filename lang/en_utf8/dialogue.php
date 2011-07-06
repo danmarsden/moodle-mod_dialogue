@@ -1,4 +1,4 @@
-<?php // $Id: dialogue.php,v 1.1.2.5 2009/08/21 04:59:34 deeknow Exp $ 
+<?php
       // dialogue.php - created with Moodle 1.7 beta + (2006101003)
 
 

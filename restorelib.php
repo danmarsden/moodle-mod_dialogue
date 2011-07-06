@@ -1,4 +1,4 @@
-<?php //$Id: restorelib.php,v 1.4.10.1 2009/03/25 21:23:33 deeknow Exp $
+<?php
     //This php script contains all the stuff to backup/restore
     //dialogue mods
 

@@ -1,4 +1,4 @@
-<?php  // $Id: dialogue_open_form.php,v 1.1.2.3 2009/08/03 03:06:30 deeknow Exp $
+<?php
 
 /**
  * This page builds a Dialogue Open form when called from view.php or dialogues.php

@@ -1,4 +1,4 @@
-<?php  // $Id: view.php,v 1.7.10.14 2009/08/21 04:59:34 deeknow Exp $
+<?php
 
 /**
  * This page prints a particular instance of Dialogue

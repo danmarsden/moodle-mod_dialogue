@@ -1,5 +1,4 @@
 <?php
-// $Id: lib.php,v 1.4.10.9 2009/08/21 04:59:34 deeknow Exp $
 
 /**
  * Library of functions for the Dialogue module

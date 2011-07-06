@@ -1,4 +1,4 @@
-<?php // $Id: version.php,v 1.5.10.3 2009/08/19 23:36:43 deeknow Exp $
+<?php
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Code fragment to define the module version etc.
