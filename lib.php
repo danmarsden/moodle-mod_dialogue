@@ -329,8 +329,8 @@ function dialogue_get_post_actions() {
  * @return  bool    success
  */
 function dialogue_print_recent_activity($course, $viewfullnames, $timestart) {
-    global $DB, $CFG;
-    //return '';
+    global $CFG, $DB, $OUTPUT;
+
     // have a look for new entries
     $addentrycontent = false;
     $tempmod = new object();         // Create a temp valid module structure (only need courseid, moduleid)
@@ -347,7 +347,7 @@ function dialogue_print_recent_activity($course, $viewfullnames, $timestart) {
         }
         // if we got some "live" ones then output them
         if ($addentrycontent) {
-            print_headline(get_string('newdialogueentries', 'dialogue').':');
+            echo $OUTPUT->heading(get_string('newdialogueentries', 'dialogue').':', 3);
             foreach ($logs as $log) {
                 $tempmod->id = $log->dialogueid;
                 $user = $DB->get_record('user', array('id' => $log->userid));
@@ -375,7 +375,7 @@ function dialogue_print_recent_activity($course, $viewfullnames, $timestart) {
         }
         // if we got some 'live' ones then output them
         if ($opencontent) {
-            print_headline(get_string('opendialogueentries', 'dialogue').':');
+            echo $OUTPUT->heading(get_string('opendialogueentries', 'dialogue').':', 3);
             foreach ($logs as $log) {
                 //Create a temp valid module structure (only need courseid, moduleid)
                 $tempmod->id = $log->dialogueid;
@@ -586,7 +586,7 @@ function dialogue_delete_expired_conversations() {
  * @param   object  $course
  * @param   timestamp   $timestart  filter by entries later than this date/time
  * @return  array   of log fields and related user fields
- * @todo    sql_cast_char2int will choke if l.info is a string, its usually an int, but need to review this
+ * @todo  recipient id not set in entries table if opener - weird shiz - I love this
  */
 function dialogue_get_add_entry_logs($course, $timestart) {
     global $DB, $CFG, $USER;
@@ -595,22 +595,24 @@ function dialogue_get_add_entry_logs($course, $timestart) {
         return false;
     }
 
-    $sqlparams = array('timestart' => $timestart, 'courseid' => $course->id, 'userid0' => $USER->id,'userid1' => $USER->id,'userid2' => $USER->id);
+    $sql = "SELECT l.id, l.time, l.userid, l.cmid, l.url, dc.dialogueid, dc.subject, de.recipientid
+            FROM {log} l
+                JOIN {course_modules} cm
+                    ON cm.id = l.cmid
+                JOIN {dialogue_conversations} dc
+                    ON dc.dialogueid = cm.instance
+                JOIN {dialogue_entries} de
+                    ON de.conversationid = dc.id
+            WHERE l.course = ?
+            AND l.module = 'dialogue'
+            AND l.action = 'add entry' 
+            AND l.time > ?
+            AND de.recipientid = ? 
+            AND l.userid <> dc.recipientid";
 
-    return $DB->get_records_sql("SELECT l.time, l.url, u.firstname, u.lastname, e.dialogueid, d.name, c.subject, l.userid ".
-                           "FROM {log} l,".
-                           "{dialogue} d,".
-                           "{dialogue_conversations} c,".
-                           "{dialogue_entries} e,".
-                           "{user} u".
-                           " WHERE l.time > :timestart AND l.course = :courseid AND l.module = 'dialogue'".
-                           " AND l.action = 'add entry'".
-                           " AND e.id = ". $DB->sql_cast_char2int('l.info') .
-                           " AND c.id = e.conversationid ".
-                           " AND (c.userid = :userid0 or c.recipientid = :userid1 ) ".
-                           " AND d.id = e.dialogueid".
-                           " AND u.id = e.userid". 
-                           " AND e.userid <> :userid2", $sqlparams);
+    $addentries = $DB->get_records_sql($sql, array($course->id, $timestart, $USER->id));
+
+    return $addentries;
 }
 
 /**
@@ -685,7 +687,7 @@ function dialogue_get_open_conversations($course) {
     if (empty($USER->id)) {
         return false;
     }
-    if ($conversations = $DB->get_records_sql("SELECT c.id, c.dialogueid, c.timemodified, c.lastid, c.userid".
+    if ($conversations = $DB->get_records_sql("SELECT d.name AS dialoguename, c.id, c.dialogueid, c.timemodified, c.lastid, c.userid".
                                               " FROM {dialogue} d, {dialogue_conversations} c".
                                               " WHERE d.course = ?".
                                               " AND c.dialogueid = d.id".
