@@ -892,34 +892,34 @@ function dialogue_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
  * 
  * This function only used if site has patched their /course/lib.php to show
  * unread posts in the topic/section areas on the course page.
- * @param   int $dialogueid
- * @param   int $userid
  * @param   int $cm course module
+ * @param   int $userid
  * @return  int count of unread entries
  */
-function dialogue_count_unread_entries($dialogueid, $userid, $cm) {
-    global $DB, $CFG;
+function dialogue_count_unread_entries($cm, $userid) {
+    global $CFG, $DB;
     static $hascapviewall;
 
     if (! isset($hascapviewall)) {
         $hascapviewall = has_capability('mod/dialogue:viewall', get_context_instance(CONTEXT_MODULE, $cm->id));
     }
-
+    $dialogueid = $cm->instance;
+    $params = array($userid, $dialogueid);
     if ($hascapviewall) {
         $whereuser = '';
     } else {
-        $whereuser = ' AND (c.userid = :userid OR c.recipientid = :userid) ';
+        $whereuser = ' AND (c.userid = ? OR c.recipientid = ?) ';
+        $params[] = $userid;
+        $params[] = $userid;
     }
 
-    $sqlparams = array('userid' => $userid, 'dialogueid' => $dialogueid);
     $sql = "SELECT COUNT(e.id)".
            " FROM {dialogue_conversations} c".
            " LEFT JOIN {dialogue_entries} e ON c.id = e.conversationid".
-           " LEFT JOIN {dialogue_read} r ON e.id = r.entryid AND r.userid = ':userid'".
-           " WHERE r.id IS NULL AND c.closed = 0 AND c.dialogueid = ':dialogueid' $whereuser ";
+           " LEFT JOIN {dialogue_read} r ON e.id = r.entryid AND r.userid = ?".
+           " WHERE r.id IS NULL AND c.closed = 0 AND c.dialogueid = ? $whereuser ";
 
-
-    return ($DB->count_records_sql($sql, $sqlparams));
+    return ($DB->count_records_sql($sql, $params));
 }
 
 /**
@@ -979,5 +979,38 @@ function dialogue_supports($feature) {
 
         default: return null;
     }
+}
+
+
+/**
+ * Adds information about unread messages, that is only required for the course view page (and
+ * similar), to the course-module object.
+ * @param cm_info $cm Course-module object
+ */
+function dialogue_cm_info_view(cm_info $cm) {
+    global $CFG, $USER;
+
+    // Get tracking status (once per request)
+    static $initialised;
+    static $usetracking, $strunreaddialoguesone;
+    if (!isset($initialised)) {
+        if ($usetracking = dialogue_can_track_dialogue()) {
+            $strunreaddialoguesone = get_string('unreadone', 'dialogue');
+        }
+        $initialised = true;
+    }
+
+    if ($usetracking) {
+        if ($unread = dialogue_count_unread_entries($cm, $USER->id)) {
+            $out = '<span class="unread"> <a href="' . $cm->get_url() . '">';
+            if ($unread == 1) {
+                $out .= $strunreaddialoguesone;
+            } else {
+                $out .= get_string('unreadnumber', 'dialogue', $unread);
+            }
+            $out .= '</a></span>';
+            $cm->set_after_link($out);
+        }
+    } 
 }
 ?>
