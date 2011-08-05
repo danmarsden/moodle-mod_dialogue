@@ -350,36 +350,25 @@ function dialogue_print_conversation($dialogue, $conversation) {
         print_error('Course Module ID was incorrect');
     }
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-    $dialoguemanagers = array_keys(get_users_by_capability($context, 'mod/dialogue:manage'));
 
     $timenow = time();
     $showbutton = false;
-   
-    if (in_array($USER->id, $dialoguemanagers)) {
-        if (! in_array($conversation->userid, $dialoguemanagers)) {
-            if (! $otheruser = $DB->get_record('user', array('id' => $conversation->userid))) {
-                print_error("User's record not found");
-            }
+
+    //$otheruser always recipient if admin or other viewing
+    if ($USER->id == $conversation->userid) {
+        if (! $otheruser = $DB->get_record('user', array('id' => $conversation->recipientid))) {
+            print_error("User's record not found");
         }
-        else {
-            if (! $otheruser = $DB->get_record('user', array('id' => $conversation->recipientid))) {
-                print_error("User's record not found");
-            }                
+    } else if ($USER->id == $conversation->recipientid) {
+        if (! $otheruser = $DB->get_record('user', array('id' => $conversation->userid))) {
+            print_error("User's record not found");
         }
     } else {
-        if ($USER->id != $conversation->userid) {
-            if (! $otheruser = $DB->get_record('user', array('id' => $conversation->userid))) {
-                print_error("User's record not found");
-            }
-        }
-        else {
-            if (! $otheruser = $DB->get_record('user', array('id' => $conversation->recipientid))) {
-                print_error("User's record not found");
-            }                
+        if (! $otheruser = $DB->get_record('user', array('id' => $conversation->recipientid))) {
+            print_error("User's record not found");
         }
     }
     
-
     // Prepare an array of commands
     $commands = array();    
     // conversation does not have a subject, create a subject link
@@ -396,7 +385,7 @@ function dialogue_print_conversation($dialogue, $conversation) {
             $nosubject = get_string('nosubject', 'dialogue');
         }
     }
-    // can close diaogue?
+    // can close dialogue?
     if (! $conversation->closed && has_capability('mod/dialogue:close', $context)) {            
         $closeurl = new moodle_url('dialogues.php', array('id'=>$cm->id,
                                                           'cid'=>$conversation->id,
@@ -414,28 +403,12 @@ function dialogue_print_conversation($dialogue, $conversation) {
             $output = ''; // reset output var
             $modified = '';
             $modifiedstamp = '';
-            // Grab conversant
-            if (in_array($USER->id, $dialoguemanagers)) {
-                if (! in_array($conversation->userid, $dialoguemanagers)) {
-                    if (! $otheruser = $DB->get_record('user', array('id'=>$conversation->userid))) {
-                        print_error("User's record not found");
-                    }
-                } else {
-                    if (! $otheruser = $DB->get_record('user', array('id'=>$conversation->recipientid))) {
-                        print_error("User's record not found");
-                    }
-                }
-            } else {
-                if ($USER->id != $conversation->userid) {
-                    if (! $otheruser = $DB->get_record('user', array('id'=>$conversation->userid))) {
-                        print_error("User's record not found");
-                    }
-                }  else {
-                    if (! $otheruser = $DB->get_record('user', array('id'=>$conversation->recipientid))) {
-                        print_error("User's record not found");
-                    }
-                }
-            }         
+
+            // Author of entry
+            if (! $author = $DB->get_record('user', array('id'=>$entry->userid))) {
+                print_error("User's record not found");
+            }
+
             // Can edit?
             if (! $conversation->closed && $entry->userid == $USER->id 
                   && $timenow < $entry->timecreated + ($dialogue->edittime * 60)) {
@@ -470,20 +443,22 @@ function dialogue_print_conversation($dialogue, $conversation) {
                         
                     }
                 }
-                $modifiedstamp = get_string('onyouwrote', 'dialogue', userdate($entry->timecreated).' '.$modified);
+                $a->timestamp = userdate($entry->timecreated);
+                $a->picture = $OUTPUT->user_picture($author, array('courseid'=>$course->id, 'size'=>'12'));
+                $modifiedstamp = get_string('onyouwrote', 'dialogue', $a);
             } else {
-                $modifiedstamp = get_string("onwrote", "dialogue", userdate($entry->timecreated)." $modified ".fullname($otheruser));
+                $a->timestamp = userdate($entry->timecreated);
+                $a->author = fullname($author);
+                $a->picture = $OUTPUT->user_picture($author, array('courseid'=>$course->id, 'size'=>'12'));
+                $modifiedstamp = get_string('onwrote', 'dialogue', $a);
             }
-
             
-
             $options = new stdClass;
             $options->para    = false;
             $options->trusted = $entry->trust;
             $options->context = $context;
 
-            
-            $commandshtml = array();
+            $commandshtml = array(); // command links
 
             $content = file_rewrite_pluginfile_urls($entry->text, 'pluginfile.php', $context->id, 'mod_dialogue', 'entry', $entry->id);
             $content = format_text($content, 1, $options, $course->id);
