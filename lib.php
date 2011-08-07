@@ -687,7 +687,7 @@ function dialogue_get_open_conversations($course) {
     if (empty($USER->id)) {
         return false;
     }
-    if ($conversations = $DB->get_records_sql("SELECT d.name AS dialoguename, c.id, c.dialogueid, c.timemodified, c.lastid, c.userid".
+    if ($conversations = $DB->get_records_sql("SELECT c.id, d.name AS dialoguename, c.dialogueid, c.timemodified, c.lastid, c.userid".
                                               " FROM {dialogue} d, {dialogue_conversations} c".
                                               " WHERE d.course = ?".
                                               " AND c.dialogueid = d.id".
