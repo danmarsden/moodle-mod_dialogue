@@ -444,12 +444,18 @@ function dialogue_print_conversation($dialogue, $conversation) {
                     }
                 }
                 $a->timestamp = userdate($entry->timecreated);
-                $a->picture = $OUTPUT->user_picture($author, array('courseid'=>$course->id, 'size'=>'12'));
+                $a->picture = '';
+                if ($author->picture) {
+                    $a->picture = $OUTPUT->user_picture($author, array('courseid'=>$course->id, 'size'=>'12'));
+                }
                 $modifiedstamp = get_string('onyouwrote', 'dialogue', $a);
             } else {
                 $a->timestamp = userdate($entry->timecreated);
                 $a->author = fullname($author);
-                $a->picture = $OUTPUT->user_picture($author, array('courseid'=>$course->id, 'size'=>'12'));
+                $a->picture = '';
+                if ($author->picture) {
+                    $a->picture = $OUTPUT->user_picture($author, array('courseid'=>$course->id, 'size'=>'12'));
+                }
                 $modifiedstamp = get_string('onwrote', 'dialogue', $a);
             }
             
