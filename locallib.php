@@ -593,7 +593,7 @@ function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     
     $dialoguemanagers = array_keys(get_users_by_capability($context, 'mod/dialogue:manage'));
-   
+
     echo '<style>th.header { text-align: left; }</style>';
     require_once($CFG->libdir.'/tablelib.php');
     $tablecolumns = array('picture', 'subject', 'fullname', 'total', 'unread', 'lastentry');
@@ -646,29 +646,20 @@ function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
     // list the conversations requiring a resonse from this user in full
     if ($conversations = dialogue_get_conversations($dialogue, $USER, $condition, $cond_params, $order, $groupid)) {
         foreach ($conversations as $conversation) {
-            if (in_array($USER->id, $dialoguemanagers)) {
-                if (! in_array($conversation->userid, $dialoguemanagers)) {
-                    if (! $with = $DB->get_record('user', array('id' => $conversation->userid))) {
-                        print_error("User's record not found");
-                    }
+            if ($USER->id == $conversation->userid) {
+                if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
+                    print_error("User's record not found");
                 }
-                else {
-                    if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
-                        print_error("User's record not found");
-                    }                
+            } else if ($USER->id == $conversation->recipientid) {
+                if (! $with = $DB->get_record('user', array('id' => $conversation->userid))) {
+                    print_error("User's record not found");
                 }
             } else {
-                if ($USER->id != $conversation->userid) {
-                    if (! $with = $DB->get_record('user', array('id' => $conversation->userid))) {
-                        print_error("User's record not found");
-                    }
-                }
-                else {
-                    if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
-                        print_error("User's record not found");
-                    }                
+                if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
+                    print_error("User's record not found");
                 }
             }
+
             // save sortable field values for each conversation so can sort by them later
             $names[$conversation->id] = fullname($with);
             $unread[$conversation->id] = $conversation->total-$conversation->readings;
