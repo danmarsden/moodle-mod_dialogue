@@ -91,7 +91,7 @@ function dialogue_cron() {
 
             if (! has_capability('mod/dialogue:participate', $context_cache[$course->id], $userfrom->id)
                  && ! has_capability('mod/dialogue:manage', $context_cache[$course->id], $userfrom->id)) {
-                set_field('dialogue_entries', 'mailed', '1', 'id', $entry->id);
+                $DB->set_field('dialogue_entries', 'mailed', '1', 'id', $entry->id);
                 continue; // Not an active participant
             }
             if (! has_capability('mod/dialogue:participate', $context_cache[$course->id], $userto->id) 
