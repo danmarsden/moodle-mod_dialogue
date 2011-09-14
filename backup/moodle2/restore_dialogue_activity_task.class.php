@@ -62,6 +62,11 @@ class restore_dialogue_activity_task extends restore_activity_task {
      */
     static public function define_decode_rules() {
         $rules = array();
+
+        $rules[] = new restore_decode_rule('DIALOGUEINDEX', '/mod/dialogue/index.php?id=$1', 'course');
+        // Dialogue by cm->id and Dialogue->id
+        $rules[] = new restore_decode_rule('DIALOGUEVIEWBYID', '/mod/dialogue/view.php?id=$1', 'course_module');
+
         return $rules;
 
     } 
