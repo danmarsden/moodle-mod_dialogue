@@ -52,6 +52,15 @@ class backup_dialogue_activity_task extends backup_activity_task {
      * @return string
      */
     static public function encode_content_links($content) {
+
+        // Link to the list of forums
+        $search="/(".$base."\/mod\/dialogue\/index.php\?id\=)([0-9]+)/";
+        $content= preg_replace($search, '$@DIALOGUEINDEX*$2@$', $content);
+
+        // Link to forum view by moduleid
+        $search="/(".$base."\/mod\/dialogue\/view.php\?id\=)([0-9]+)/";
+        $content= preg_replace($search, '$@DIALOGUEVIEWBYID*$2@$', $content);
+
         return $content;
     }
 }
