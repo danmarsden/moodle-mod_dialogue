@@ -53,6 +53,8 @@ class backup_dialogue_activity_task extends backup_activity_task {
      */
     static public function encode_content_links($content) {
 
+        $base = preg_quote($CFG->wwwroot,"/");
+
         // Link to the list of forums
         $search="/(".$base."\/mod\/dialogue\/index.php\?id\=)([0-9]+)/";
         $content= preg_replace($search, '$@DIALOGUEINDEX*$2@$', $content);
