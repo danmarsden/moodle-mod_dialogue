@@ -52,6 +52,18 @@ class backup_dialogue_activity_task extends backup_activity_task {
      * @return string
      */
     static public function encode_content_links($content) {
+        global $CFG;
+
+        $base = preg_quote($CFG->wwwroot,"/");
+
+        // Link to the list of dialogues
+        $search="/(".$base."\/mod\/dialogue\/index.php\?id\=)([0-9]+)/";
+        $content= preg_replace($search, '$@DIALOGUEINDEX*$2@$', $content);
+
+        // Link to dialogue view by moduleid
+        $search="/(".$base."\/mod\/dialogue\/view.php\?id\=)([0-9]+)/";
+        $content= preg_replace($search, '$@DIALOGUEVIEWBYID*$2@$', $content);
+
         return $content;
     }
 }
