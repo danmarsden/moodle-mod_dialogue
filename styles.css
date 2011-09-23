@@ -1,7 +1,8 @@
 
 .dialogue-entry.first {border:1px solid #DDD;}
 .dialogue-entry.reply {border-width:0px 1px 1px 1px; border-style: solid; border-color: #DDD;}
-.dialogue-entry .row.header {background-color:#EEE;background-image:none;}
+.dialogue-entry .row.header {background-image: none;}
+.dialogue-entry .first .row.header {background-color: #DDDDDD;}
 .dialogue-entry .left {float:left; width: 43px;}
 .dialogue-entry .row.header .content{overflow:hidden;}
 .dialogue-entry h1 {margin: 0px;}
@@ -18,3 +19,5 @@
 .dialogue-entry.reply .maincontent {background-color:#FFF;}
 .modified {font-size: 0.8em;font-weight: bold;}
 .dialogue-entry .commands {float: right;}
+
+
