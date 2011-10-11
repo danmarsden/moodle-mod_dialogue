@@ -408,7 +408,7 @@ function dialogue_user_outline($course, $user, $mod, $dialogue) {
 
     $sql = "SELECT COUNT(DISTINCT timecreated) AS count, MAX(e.timecreated) AS timecreated".
            " FROM  {$CFG->prefix}dialogue_entries e".
-           " WHERE e.userid = :user AND e.dialogueid = :dialogue ";
+           " WHERE e.userid = :userid AND e.dialogueid = :dialogueid ";
 
     if ($entries = $DB->get_record_sql($sql, array('userid' => $user->id, 'dialogueid' => $dialogue->id))) {
         $result = new object();
@@ -478,12 +478,12 @@ function dialogue_delete_instance($id) {
  * @param object $dialogue
  */
 function dialogue_user_complete($course, $user, $mod, $dialogue) {
-    global $DB;
+    global $DB, $OUTPUT;
 
-    if ($conversations = dialogue_get_conversations($dialogue, $user, 'e.userid = '.$user->id)) {
-        print_simple_box_start();
+    if ($conversations = dialogue_get_conversations($dialogue, $user, array('e.userid=?'),array($user->id))) {
+        $table = new html_table();
         $table->head = array (
-            get_string('dialoguewith', 'dialogue'),
+            get_string('dialoguewith', 'dialogue', ''), //Hack alert
             get_string('numberofentries', 'dialogue'),
             get_string('lastentry', 'dialogue'),
             get_string('status', 'dialogue')
@@ -517,8 +517,7 @@ function dialogue_user_complete($course, $user, $mod, $dialogue) {
                 $status
             );
         }
-        print_table($table);
-        print_simple_box_end();
+        echo html_writer::table($table);
     } else {
         print_string('noentry', 'dialogue');
     }
