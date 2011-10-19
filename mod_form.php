@@ -26,7 +26,7 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
-        $this->add_intro_editor(true, get_string('forumintro', 'forum'));
+        $this->add_intro_editor(true, get_string('dialogueintro', 'dialogue'));
 
         $options = array();
         $options[0] =  get_string('no'); 
