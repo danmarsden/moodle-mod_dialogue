@@ -43,11 +43,15 @@
         print_error('Course module dialogue is incorrect');
     }
 
-    $PAGE->set_url(new moodle_url('/mod/dialogue/dialogues.php', array('id' => $params->id, 'action' => $params->action)));
-
     require_login($course, false, $cm);
     // get module context
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+
+    $PAGE->set_url(new moodle_url('/mod/dialogue/dialogues.php', array('id' => $params->id, 'action' => $params->action)));
+    $PAGE->set_cm($cm, $course, $dialogue);
+    $PAGE->set_context($context);
+    $PAGE->set_title(format_string($dialogue->name));
+    $PAGE->set_heading($course->fullname);
 
     $strdialogues = get_string('modulenameplural', 'dialogue');
     $strdialogue  = get_string('modulename', 'dialogue');
