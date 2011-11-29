@@ -85,7 +85,7 @@
             print_error('Close dialogue: unable to set lastid');
         }
 
-        add_to_log($course->id, 'dialogue', 'closed', "view.php?id=$cm->id", $params->cid);
+        add_to_log($course->id, 'dialogue', 'closed', "view.php?id=$cm->id", $params->cid, $cm->id);
 
         redirect(new moodle_url('/mod/dialogue/view.php', array('id'=> $cm->id,'pane'=>$params->pane)),
                  get_string('dialogueclosed', 'dialogue'));
@@ -193,7 +193,7 @@
                         print_error('Insert Dialogue Entries: could not reset seenon');
                     }
 
-                    add_to_log($course->id, 'dialogue', 'add entry', "view.php?id=$cm->id", $item->id);
+                    add_to_log($course->id, 'dialogue', 'add entry', "view.php?id=$cm->id", $item->id, $cm->id);
                     if (!empty($formdata->attachment)){
                         if (dialogue_add_attachment(file_get_submitted_draft_itemid('attachment'), $context->id, $item->id)) {
                             $DB->set_field('dialogue_entries', 'attachment', 1, array('id' => $item->id));
@@ -269,7 +269,7 @@
                     if (! $conversation->id = $DB->insert_record('dialogue_conversations', $conversation)) {
                         print_error('Open dialogue: Could not insert dialogue record!');
                     }
-                    add_to_log($course->id, 'dialogue', 'open', "view.php?id=$cm->id", $dialogue->id);
+                    add_to_log($course->id, 'dialogue', 'open', "view.php?id=$cm->id", $dialogue->id, $cm->id);
 
                     // now add the entry
                     unset($entry);
@@ -299,7 +299,7 @@
                   
                     $DB->set_field('dialogue_entries', 'text', $message, array('id'=>$entry->id));
 
-                    add_to_log($course->id, 'dialogue', 'add entry', "view.php?id=$cm->id", $entry->id);
+                    add_to_log($course->id, 'dialogue', 'add entry', "view.php?id=$cm->id", $entry->id, $cm->id);
 
                     dialogue_mark_conversation_read($conversation->id, $USER->id);
                     $n++;
@@ -380,7 +380,7 @@
             $draftitemid = file_get_submitted_draft_itemid('attachment');
             dialogue_add_attachment($draftitemid, $context->id, $entry->id);
 
-            add_to_log($course->id, 'dialogue', 'edit entry', "view.php?id=$cm->id", $entry->id);
+            add_to_log($course->id, 'dialogue', 'edit entry', "view.php?id=$cm->id", $entry->id, $cm->id);
             
             redirect(new moodle_url('dialogues.php', array('id'=>$cm->id, 'pane'=>$params->pane,
                                                            'action'=>'printdialogue', 'cid'=>$entry->conversationid)),
@@ -446,7 +446,7 @@
 
             $DB->set_field('dialogue_entries', 'text', $message, array('id' => $entry->id));
 
-            add_to_log($course->id, 'dialogue', 'edit entry', "view.php?id=$cm->id", $entry->id);
+            add_to_log($course->id, 'dialogue', 'edit entry', "view.php?id=$cm->id", $entry->id, $cm->id);
             
             redirect(new moodle_url('dialogues.php', array('id'=>$cm->id, 'pane'=>$params->pane,
                                                            'action'=>'printdialogue',
