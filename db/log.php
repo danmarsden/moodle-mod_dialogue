@@ -26,8 +26,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-global $DB; // TODO: this is a hack, we should really do something with the SQL in SQL tables
-
 $logs = array(
     array('module'=>'dialogue', 'action'=>'view', 'mtable'=>'dialogue', 'field'=>'name'),
     array('module'=>'dialogue', 'action'=>'add entry', 'mtable'=>'dialogue_entries', 'field'=>'id'),
