@@ -28,4 +28,3 @@ $module->requires = 2010112400;  // Requires this Moodle version 2.x
 $module->release  = '2.0.4+';  // Human-friendly version name
 $module->maturity = MATURITY_STABLE;            // this version's maturity level
 $module->cron     = 60;
-?>

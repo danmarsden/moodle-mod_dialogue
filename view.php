@@ -168,5 +168,3 @@
     }
 
     echo $OUTPUT->footer($course);
-
-?>

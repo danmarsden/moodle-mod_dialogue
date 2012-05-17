@@ -1012,4 +1012,3 @@ function dialogue_cm_info_view(cm_info $cm) {
         }
     } 
 }
-?>

@@ -87,4 +87,3 @@ $string['posts'] = "messaggi";
 $string['replyupdated'] = "Risposta aggiornata";
 $string['unread'] = "Messaggi non letti";
 $string['updated'] = '(Aggiornato il {$a})';
-?>

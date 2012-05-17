@@ -178,4 +178,3 @@ function xmldb_dialogue_upgrade($oldversion=0) {
 
     return true;
 }
-?>

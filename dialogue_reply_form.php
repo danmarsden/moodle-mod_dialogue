@@ -51,4 +51,3 @@ class mod_dialogue_reply_form extends moodleform {
         $this->add_action_buttons(true, get_string('addmynewentry', 'dialogue'));
     }
 }
-?>

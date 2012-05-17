@@ -202,5 +202,3 @@ $string['maildefault'] = '<h1>Set Mail Notification</h1>
 <p>Note this option applies to all the dialogues active in the dialogue
     instance. The option can be changed at anytime.</p>
 ';
-
-?>

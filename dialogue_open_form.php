@@ -60,4 +60,3 @@ class mod_dialogue_open_form extends moodleform {
         $this->add_action_buttons(true, get_string('opendialogue','dialogue'));
     }
 }
-?>

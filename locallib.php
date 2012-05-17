@@ -758,4 +758,3 @@ function dialogue_mark_conversation_read($conversationid, $userid) {
         }
     }
 }
-?>

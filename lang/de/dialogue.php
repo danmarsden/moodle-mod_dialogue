@@ -84,5 +84,3 @@ $string['posts'] = 'Beiträge';
 $string['noentry'] = 'Keine Einträge';
 $string['cannotadd'] = 'Sie können einen Dialog nur beginnen, wenn Sie ein Mitglied dieser Gruppe sind';
 $string['cannotaddall'] = 'Dialog mit allen Teilnehmer/innen ist nicht möglich';
-
-?>
