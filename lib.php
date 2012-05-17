@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Library of functions for the Dialogue module
@@ -407,7 +421,7 @@ function dialogue_user_outline($course, $user, $mod, $dialogue) {
     global $DB, $CFG;
 
     $sql = "SELECT COUNT(DISTINCT timecreated) AS count, MAX(e.timecreated) AS timecreated".
-           " FROM  {$CFG->prefix}dialogue_entries e".
+           " FROM  {dialogue_entries} e".
            " WHERE e.userid = :userid AND e.dialogueid = :dialogueid ";
 
     if ($entries = $DB->get_record_sql($sql, array('userid' => $user->id, 'dialogueid' => $dialogue->id))) {
@@ -451,21 +465,11 @@ function dialogue_delete_instance($id) {
         return false;
     }
 
-    $result = true;
+    $DB->delete_records('dialogue_conversations', array('dialogueid' => $dialogue->id));
+    $DB->delete_records('dialogue_entries', array('dialogueid' => $dialogue->id));
+    $DB->delete_records('dialogue', array('id' => $dialogue->id));
 
-    if (! $DB->delete_records('dialogue_conversations', array('dialogueid' => $dialogue->id))) {
-        $result = false;
-    }
-
-    if (! $DB->delete_records('dialogue_entries', array('dialogueid' => $dialogue->id))) {
-        $result = false;
-    }
-
-    if (! $DB->delete_records('dialogue', array('id' => $dialogue->id))) {
-        $result = false;
-    }
-
-    return $result;
+    return true;
 
 }
 
@@ -1012,4 +1016,3 @@ function dialogue_cm_info_view(cm_info $cm) {
         }
     } 
 }
-?>
