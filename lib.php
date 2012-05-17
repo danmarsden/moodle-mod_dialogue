@@ -451,21 +451,11 @@ function dialogue_delete_instance($id) {
         return false;
     }
 
-    $result = true;
+    $DB->delete_records('dialogue_conversations', array('dialogueid' => $dialogue->id));
+    $DB->delete_records('dialogue_entries', array('dialogueid' => $dialogue->id));
+    $DB->delete_records('dialogue', array('id' => $dialogue->id));
 
-    if (! $DB->delete_records('dialogue_conversations', array('dialogueid' => $dialogue->id))) {
-        $result = false;
-    }
-
-    if (! $DB->delete_records('dialogue_entries', array('dialogueid' => $dialogue->id))) {
-        $result = false;
-    }
-
-    if (! $DB->delete_records('dialogue', array('id' => $dialogue->id))) {
-        $result = false;
-    }
-
-    return $result;
+    return true;
 
 }
 
