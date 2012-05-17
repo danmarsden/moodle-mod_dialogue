@@ -407,7 +407,7 @@ function dialogue_user_outline($course, $user, $mod, $dialogue) {
     global $DB, $CFG;
 
     $sql = "SELECT COUNT(DISTINCT timecreated) AS count, MAX(e.timecreated) AS timecreated".
-           " FROM  {$CFG->prefix}dialogue_entries e".
+           " FROM  {dialogue_entries} e".
            " WHERE e.userid = :userid AND e.dialogueid = :dialogueid ";
 
     if ($entries = $DB->get_record_sql($sql, array('userid' => $user->id, 'dialogueid' => $dialogue->id))) {
