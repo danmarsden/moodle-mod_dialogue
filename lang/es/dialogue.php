@@ -67,4 +67,3 @@ $string['typeofdialogue'] = 'Tipo de diálogo';
 $string['typereply'] = 'Escriba la respuesta aquí';
 $string['viewallentries'] = ' Ver entradas a diálogo de {$a}';
 
-?>

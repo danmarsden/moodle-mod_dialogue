@@ -481,5 +481,3 @@
 /*************** no man's land **************************************/
         print_error('Fatal Error: Unknown Action: '.$params->action."\n");
     }
-
-?>
