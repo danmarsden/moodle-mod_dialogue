@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/dialogue/db" VERSION="2010123106" COMMENT="XMLDB file for Moodle mod/dialogue"
+<XMLDB PATH="mod/dialogue/db" VERSION="20120518" COMMENT="XMLDB file for Moodle mod/dialogue"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
     <TABLE NAME="dialogue" COMMENT="Dialogue" NEXT="dialogue_conversations">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="course"/>
-        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="deleteafter"/>
-        <FIELD NAME="deleteafter" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="course" NEXT="dialoguetype"/>
-        <FIELD NAME="dialoguetype" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="deleteafter" NEXT="multipleconversations"/>
-        <FIELD NAME="multipleconversations" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="dialoguetype" NEXT="maildefault"/>
-        <FIELD NAME="maildefault" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="multipleconversations" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="maildefault" NEXT="name"/>
-        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" ENUM="false" PREVIOUS="timemodified" NEXT="intro"/>
-        <FIELD NAME="intro" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" ENUM="false" COMMENT="Default comment for the field, please edit me" PREVIOUS="name" NEXT="introformat"/>
-        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="text format of intro field" PREVIOUS="intro" NEXT="edittime"/>
-        <FIELD NAME="edittime" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="introformat"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="course"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="deleteafter"/>
+        <FIELD NAME="deleteafter" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="course" NEXT="dialoguetype"/>
+        <FIELD NAME="dialoguetype" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="deleteafter" NEXT="multipleconversations"/>
+        <FIELD NAME="multipleconversations" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="dialoguetype" NEXT="maildefault"/>
+        <FIELD NAME="maildefault" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="multipleconversations" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="maildefault" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="timemodified" NEXT="intro"/>
+        <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Default comment for the field, please edit me" PREVIOUS="name" NEXT="introformat"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="text format of intro field" PREVIOUS="intro" NEXT="edittime"/>
+        <FIELD NAME="edittime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="introformat"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for label"/>
@@ -27,20 +27,20 @@
     </TABLE>
     <TABLE NAME="dialogue_conversations" COMMENT="Dialogue Conversations" PREVIOUS="dialogue" NEXT="dialogue_entries">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="true" ENUM="false" COMMENT="id of the table, please edit me" NEXT="dialogueid"/>
-        <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="userid"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" COMMENT="Default comment for the field, please edit me" PREVIOUS="dialogueid" NEXT="recipientid"/>
-        <FIELD NAME="recipientid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="userid" NEXT="lastid"/>
-        <FIELD NAME="lastid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="recipientid" NEXT="lastrecipientid"/>
-        <FIELD NAME="lastrecipientid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="lastid" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="lastrecipientid" NEXT="closed"/>
-        <FIELD NAME="closed" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="timemodified" NEXT="seenon"/>
-        <FIELD NAME="seenon" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="closed" NEXT="ctype"/>
-        <FIELD NAME="ctype" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="seenon" NEXT="format"/>
-        <FIELD NAME="format" TYPE="int" LENGTH="2" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="ctype" NEXT="subject"/>
-        <FIELD NAME="subject" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" ENUM="false" PREVIOUS="format" NEXT="groupid"/>
-        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="subject" NEXT="grouping"/>
-        <FIELD NAME="grouping" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="groupid"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="id of the table, please edit me" NEXT="dialogueid"/>
+        <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default comment for the field, please edit me" PREVIOUS="dialogueid" NEXT="recipientid"/>
+        <FIELD NAME="recipientid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid" NEXT="lastid"/>
+        <FIELD NAME="lastid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="recipientid" NEXT="lastrecipientid"/>
+        <FIELD NAME="lastrecipientid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="lastid" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="lastrecipientid" NEXT="closed"/>
+        <FIELD NAME="closed" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="seenon"/>
+        <FIELD NAME="seenon" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="closed" NEXT="ctype"/>
+        <FIELD NAME="ctype" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="seenon" NEXT="format"/>
+        <FIELD NAME="format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="ctype" NEXT="subject"/>
+        <FIELD NAME="subject" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" PREVIOUS="format" NEXT="groupid"/>
+        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="subject" NEXT="grouping"/>
+        <FIELD NAME="grouping" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="groupid"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="primary key of the table, please edit me"/>
@@ -56,18 +56,18 @@
     </TABLE>
     <TABLE NAME="dialogue_entries" COMMENT="Dialogue entries" PREVIOUS="dialogue_conversations" NEXT="dialogue_read">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="true" ENUM="false" COMMENT="id of the table, please edit me" NEXT="dialogueid"/>
-        <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="conversationid"/>
-        <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="dialogueid" NEXT="userid"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="conversationid" NEXT="recipientid"/>
-        <FIELD NAME="recipientid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="userid" NEXT="timecreated"/>
-        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="recipientid" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="timecreated" NEXT="mailed"/>
-        <FIELD NAME="mailed" TYPE="int" LENGTH="4" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="timemodified" NEXT="text"/>
-        <FIELD NAME="text" TYPE="text" LENGTH="medium" NOTNULL="true" SEQUENCE="false" ENUM="false" PREVIOUS="mailed" NEXT="format"/>
-        <FIELD NAME="format" TYPE="int" LENGTH="2" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="text" NEXT="trust"/>
-        <FIELD NAME="trust" TYPE="int" LENGTH="2" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="format" NEXT="attachment"/>
-        <FIELD NAME="attachment" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" ENUM="false" PREVIOUS="trust"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="id of the table, please edit me" NEXT="dialogueid"/>
+        <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="conversationid"/>
+        <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="dialogueid" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="conversationid" NEXT="recipientid"/>
+        <FIELD NAME="recipientid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid" NEXT="timecreated"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="recipientid" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="timecreated" NEXT="mailed"/>
+        <FIELD NAME="mailed" TYPE="int" LENGTH="4" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="text"/>
+        <FIELD NAME="text" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="mailed" NEXT="format"/>
+        <FIELD NAME="format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="text" NEXT="trust"/>
+        <FIELD NAME="trust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="format" NEXT="attachment"/>
+        <FIELD NAME="attachment" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" PREVIOUS="trust"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="primary key of the table, please edit me"/>
@@ -81,12 +81,12 @@
     </TABLE>
     <TABLE NAME="dialogue_read" COMMENT="Records when dialogue entries were viewed" PREVIOUS="dialogue_entries">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="entryid"/>
-        <FIELD NAME="entryid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="userid"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" ENUM="false" PREVIOUS="entryid" NEXT="firstread"/>
-        <FIELD NAME="firstread" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" ENUM="false" PREVIOUS="userid" NEXT="lastread"/>
-        <FIELD NAME="lastread" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" ENUM="false" PREVIOUS="firstread" NEXT="conversationid"/>
-        <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" ENUM="false" PREVIOUS="lastread"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="entryid"/>
+        <FIELD NAME="entryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="entryid" NEXT="firstread"/>
+        <FIELD NAME="firstread" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="userid" NEXT="lastread"/>
+        <FIELD NAME="lastread" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="firstread" NEXT="conversationid"/>
+        <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="lastread"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="dialogueread_entryid_userid_uk"/>
@@ -95,5 +95,4 @@
       </KEYS>
     </TABLE>
   </TABLES>
-  
 </XMLDB>
