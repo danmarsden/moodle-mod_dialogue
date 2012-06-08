@@ -53,9 +53,6 @@ function dialogue_cron() {
 
     global $DB, $CFG, $USER;
 
-    // delete any closed conversations which have expired
-    dialogue_delete_expired_conversations();
-
     // Finds all dialogue entries that have yet to be mailed out, and mails them
     $sql =  "SELECT e.id as eid, e.userid as euserid, e.conversationid as ecid, ds.recipientid as recipientid, ds.userid as dsuser
              d.id as did, d.course as course, d.name as dname, c.shortname as cname, cm.id as cmid
@@ -136,173 +133,183 @@ function dialogue_cron() {
         }
     }
 
-    /// Find conversations sent to all participants and check for new participants
-    $sql = "SELECT dc.*, cm.id as cmid, cm.course as course FROM {dialogue_conversations} dc
-            INNER JOIN {course_modules} cm ON cm.instance = dc.dialogueid
-            INNER JOIN {modules} m ON m.id = cm.module
-            WHERE m.name = 'dialogue' AND dc.grouping != 0 AND dc.grouping IS NOT NULL
-            ORDER BY dialogueid, grouping";
-    $conversation_rs = $DB->get_recordset_sql($sql);
+    //the following functions don't need to be run as frequently - schedule these to run less frequently
+    $dialogueconfig = get_config('dialogue');
+    if (!isset($dialogueconfig->overduelastrun)) {
+        $dialogueconfig->overduelastrun = 0;
+    }
 
-    $dialogueid = 0;
-    $grouping = 0;
-    $groupid = null;
-    $inconversation = array();
-    $newusers = array();
+    $timenow = time();
+    if ($timenow > $dialogueconfig->overduelastrun + 1800) { //only run this every 30min
 
-    foreach($conversation_rs as $conversation) {
-        if ($dialogueid != $conversation->dialogueid
-             || $groupid != $conversation->groupid
-             || $grouping != $conversation->grouping) {
-            if ($dialogueid == 0 || $groupid === null) {
+        // delete any closed conversations which have expired
+        dialogue_delete_expired_conversations();
+
+        /// Find conversations sent to all participants and check for new participants
+        $sql = "SELECT dc.*, cm.id as cmid, cm.course as course FROM {dialogue_conversations} dc
+                INNER JOIN {course_modules} cm ON cm.instance = dc.dialogueid
+                INNER JOIN {modules} m ON m.id = cm.module
+                WHERE m.name = 'dialogue' AND dc.grouping != 0 AND dc.grouping IS NOT NULL
+                ORDER BY dialogueid, grouping";
+        $conversation_rs = $DB->get_recordset_sql($sql);
+
+        $dialogueid = 0;
+        $grouping = 0;
+        $groupid = null;
+        $inconversation = array();
+        $newusers = array();
+
+        foreach($conversation_rs as $conversation) {
+            if ($dialogueid != $conversation->dialogueid
+                 || $groupid != $conversation->groupid
+                 || $grouping != $conversation->grouping) {
+                if ($dialogueid == 0 || $groupid === null) {
+                    $dialogueid = $conversation->dialogueid;
+                    $groupid = $conversation->groupid;
+                }
+                $context = context_module::instance($conversation_rs->cmid);
+
+                $users = (array) get_users_by_capability($context, 'mod/dialogue:participate',
+                                                         'u.id, u.firstname, u.lastname', null, null, null,
+                                                         empty($groupid) ? null : $groupid,
+                                                         null, null, null, false);
+                $managers = (array) get_users_by_capability($context, 'mod/dialogue:manage',
+                                                         'u.id, u.firstname, u.lastname',
+                                                         null, null, null, null, null, null, null, false);
                 $dialogueid = $conversation->dialogueid;
                 $groupid = $conversation->groupid;
             }
-            $context = context_module::instance($conversation_rs->cmid);
 
-            $users = (array) get_users_by_capability($context, 'mod/dialogue:participate',
-                                                     'u.id, u.firstname, u.lastname', null, null, null, 
-                                                     empty($groupid) ? null : $groupid, 
-                                                     null, null, null, false);
-            $managers = (array) get_users_by_capability($context, 'mod/dialogue:manage',
-                                                     'u.id, u.firstname, u.lastname', 
-                                                     null, null, null, null, null, null, null, false);
-            $dialogueid = $conversation->dialogueid;
-            $groupid = $conversation->groupid;
-        }
-
-        if ($grouping != $conversation->grouping) {
-            if ($grouping) {
-                if ($userdiff = array_diff_key($users, $inconversation, $managers)) {
-                    foreach ($userdiff as $userid => $value) {
-                        $newusers[$userid.','.$grouping] = array (
-                            'userid' => $userid,
-                            'courseid' => $conversation_rs->course,
-                            'grouping' => $grouping
-                        );
-                    }
-                }
-            }
-            $inconversation = array();
-            $grouping = $conversation->grouping;
-        }
-
-        $inconversation[$conversation->recipientid] = true;
-    }
-    $conversation_rs->close();
-
-    //TODO: What is this part for? - it seems to duplicate the get_users_by_cap stuff above
-    //we shouldn't need to make these calls again for the same context should we?
-    if (! empty($dialogueid)) {
-        // Finish of any remaing users
-        $cm = get_coursemodule_from_instance('dialogue', $dialogueid);
-        $context = context_module::instance($cm->id);
-
-        $users = (array) get_users_by_capability($context, 'mod/dialogue:participate', 
-                                                 'u.id, u.firstname, u.lastname', 
-                                                 null, null, null, 
-                                                 empty($groupid) ? null : $groupid, 
-                                                 null, null, null, false);
-        $managers = (array) get_users_by_capability($context, 'mod/dialogue:manage',
-                                                 'u.id, u.firstname, u.lastname', 
-                                                  null, null, null, 
-                                                  null, null, null, null, false);
-
-        if ($userdiff = array_diff_key($users, $inconversation, $managers)) {
-            foreach ($userdiff as $userid => $value) {
-                $newusers[$userid.','.$grouping] = array (
-                    'userid' => $userid,
-                    'courseid' => $cm->course,
-                    'grouping' => $grouping
-                );
-            }
-        }
-    }
-    //TODO: CHECK above block - is this really needed? - should be able to optimise this  ^
-
-    if (! empty($newusers)) {
-        foreach ($newusers as $key => $newuser) {
-
-            $transaction = $DB->start_delegated_transaction();
-
-            if ($conversations = $DB->get_records('dialogue_conversations', array('grouping' =>
-                                           $newuser['grouping']), 'id', '*', 0, 1)) {
-                $conversation = array_pop($conversations);  // we only need one to get the common field values
-                if ($entry = $DB->get_records('dialogue_entries', array('conversationid'=>$conversation->id),'id', '*', 0, 1)) {
-
-
-
-                    unset ($conversation->id);
-                    $conversation->recipientid = $newuser['userid'];
-                    $conversation->lastrecipientid = $newuser['userid'];
-                    $conversation->timemodified = time();
-                    $conversation->seenon = false;
-                    $conversation->closed = 0;
-                    
-                    try {
-                        $conversationid = $DB->insert_record('dialogue_conversations', $conversation);
-                    } catch (Exception $e) {
-                        $transaction->rollback($e);
-                        continue;
-                    }
-
-
-                    $entry = array_pop($entry);
-                    $srcentry = clone ($entry);
-                    unset ($entry->id);
-                    $entry->conversationid = $conversationid;
-                    $entry->timecreated = $conversation->timemodified;
-                    $entry->recipientid = $conversation->recipientid;
-                    $entry->mailed = false;
-                    
-                    try {
-                        $entry->id = $DB->insert_record('dialogue_entries', $entry);
-                    } catch (Exception $e) {
-                        $transaction->rollback($e);
-                        continue;
-                    }
-                    /// Are there embedded images
-                    $fs = get_file_storage();
-                    $oldcm = get_coursemodule_from_instance('dialogue', $srcentry->dialogueid);
-                    $oldcontext = context_module::instance($oldcm->id);
-                    $oldentryid = $srcentry->id;
- 
-                    if ($files = $fs->get_area_files($oldcontext->id, 'mod_dialogue', 'entry', $oldentryid)) {
-                        foreach($files as $file){
-                            $fs->create_file_from_storedfile(array('contextid' => $oldcontext->id,
-                                                                   'itemid' => $entry->id), $file);
+            if ($grouping != $conversation->grouping) {
+                if ($grouping) {
+                    if ($userdiff = array_diff_key($users, $inconversation, $managers)) {
+                        foreach ($userdiff as $userid => $value) {
+                            $newusers[$userid.','.$grouping] = array (
+                                'userid' => $userid,
+                                'courseid' => $conversation_rs->course,
+                                'grouping' => $grouping
+                            );
                         }
                     }
-                    // Are there attachment(s)
-                    if ($entry->attachment) {
-                        if ($files = $fs->get_area_files($oldcontext->id, 'mod_dialogue', 'attachment', $oldentryid)) {
+                }
+                $inconversation = array();
+                $grouping = $conversation->grouping;
+            }
+
+            $inconversation[$conversation->recipientid] = true;
+        }
+        $conversation_rs->close();
+
+        //TODO: What is this part for? - it seems to duplicate the get_users_by_cap stuff above
+        //we shouldn't need to make these calls again for the same context should we?
+        if (! empty($dialogueid)) {
+            // Finish of any remaing users
+            $cm = get_coursemodule_from_instance('dialogue', $dialogueid);
+            $context = context_module::instance($cm->id);
+
+            $users = (array) get_users_by_capability($context, 'mod/dialogue:participate',
+                                                     'u.id, u.firstname, u.lastname',
+                                                     null, null, null,
+                                                     empty($groupid) ? null : $groupid,
+                                                     null, null, null, false);
+            $managers = (array) get_users_by_capability($context, 'mod/dialogue:manage',
+                                                     'u.id, u.firstname, u.lastname',
+                                                      null, null, null,
+                                                      null, null, null, null, false);
+
+            if ($userdiff = array_diff_key($users, $inconversation, $managers)) {
+                foreach ($userdiff as $userid => $value) {
+                    $newusers[$userid.','.$grouping] = array (
+                        'userid' => $userid,
+                        'courseid' => $cm->course,
+                        'grouping' => $grouping
+                    );
+                }
+            }
+        }
+        //TODO: CHECK above block - is this really needed? - should be able to optimise this  ^
+
+        if (! empty($newusers)) {
+            foreach ($newusers as $key => $newuser) {
+
+                $transaction = $DB->start_delegated_transaction();
+
+                if ($conversations = $DB->get_records('dialogue_conversations', array('grouping' =>
+                                               $newuser['grouping']), 'id', '*', 0, 1)) {
+                    $conversation = array_pop($conversations);  // we only need one to get the common field values
+                    if ($entry = $DB->get_records('dialogue_entries', array('conversationid'=>$conversation->id),'id', '*', 0, 1)) {
+
+                        unset ($conversation->id);
+                        $conversation->recipientid = $newuser['userid'];
+                        $conversation->lastrecipientid = $newuser['userid'];
+                        $conversation->timemodified = time();
+                        $conversation->seenon = false;
+                        $conversation->closed = 0;
+
+                        try {
+                            $conversationid = $DB->insert_record('dialogue_conversations', $conversation);
+                        } catch (Exception $e) {
+                            $transaction->rollback($e);
+                            continue;
+                        }
+
+                        $entry = array_pop($entry);
+                        $srcentry = clone ($entry);
+                        unset ($entry->id);
+                        $entry->conversationid = $conversationid;
+                        $entry->timecreated = $conversation->timemodified;
+                        $entry->recipientid = $conversation->recipientid;
+                        $entry->mailed = false;
+                    
+                        try {
+                            $entry->id = $DB->insert_record('dialogue_entries', $entry);
+                        } catch (Exception $e) {
+                            $transaction->rollback($e);
+                            continue;
+                        }
+                        /// Are there embedded images
+                        $fs = get_file_storage();
+                        $oldcm = get_coursemodule_from_instance('dialogue', $srcentry->dialogueid);
+                        $oldcontext = context_module::instance($oldcm->id);
+                        $oldentryid = $srcentry->id;
+ 
+                        if ($files = $fs->get_area_files($oldcontext->id, 'mod_dialogue', 'entry', $oldentryid)) {
                             foreach($files as $file){
                                 $fs->create_file_from_storedfile(array('contextid' => $oldcontext->id,
                                                                        'itemid' => $entry->id), $file);
                             }
                         }
+                        // Are there attachment(s)
+                        if ($entry->attachment) {
+                            if ($files = $fs->get_area_files($oldcontext->id, 'mod_dialogue', 'attachment', $oldentryid)) {
+                                foreach($files as $file){
+                                    $fs->create_file_from_storedfile(array('contextid' => $oldcontext->id,
+                                                                           'itemid' => $entry->id), $file);
+                                }
+                            }
+                        }
+                        $read = new stdClass;
+                        $lastread = time();
+                        $read->conversationid = $conversationid;
+                        $read->entryid = $entry->id;
+                        $read->userid = $conversation->userid;
+                        $read->firstread = $lastread;
+                        $read->lastread = $lastread;
+
+                        $DB->insert_record('dialogue_read', $read);
+
+                    } else {
+                        mtrace('Failed to find entry for conversation: '.$conversation->id);
                     }
-                    $read = new stdClass;
-                    $lastread = time();
-                    $read->conversationid = $conversationid;
-                    $read->entryid = $entry->id;
-                    $read->userid = $conversation->userid;
-                    $read->firstread = $lastread;
-                    $read->lastread = $lastread;
-
-                    $DB->insert_record('dialogue_read', $read);
-
                 } else {
-                    mtrace('Failed to find entry for conversation: '.$conversation->id);
+                    mtrace('Failed to find conversation: '.$conversation->id);
                 }
-            } else {
-                mtrace('Failed to find conversation: '.$conversation->id);
-            }
             
-            $transaction->allow_commit();
+                $transaction->allow_commit();
+            }
         }
+        set_config('overduelastrun', $timenow, 'dialogue');
     }
-
     return true;
 }
 
