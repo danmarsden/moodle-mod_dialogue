@@ -57,10 +57,11 @@ function dialogue_cron() {
     dialogue_delete_expired_conversations();
 
     // Finds all dialogue entries that have yet to be mailed out, and mails them
-    $sql =  "SELECT e.id as eid, e.userid as euserid, e.conversationid as ecid,
+    $sql =  "SELECT e.id as eid, e.userid as euserid, e.conversationid as ecid, ds.recipientid as recipientid, ds.userid as dsuser
              d.id as did, d.course as course, d.name as dname, c.shortname as cname, cm.id as cmid
              FROM {dialogue_entries} e
              INNER JOIN {dialogue} d ON e.dialogueid = d.id
+             INNER JOIN {dialogue_conversations} ds ON ds.id = e.conversationid
              INNER JOIN {course} c ON c.id = d.course
              INNER JOIN {course_modules} cm ON cm.course = c.id AND cm.instance = d.id
              INNER JOIN {modules} m ON m.id = cm.module
@@ -75,18 +76,15 @@ function dialogue_cron() {
                 mtrace("Could not find user $entry->euserid\n");
                 continue;
             }
-            // get conversation record
-            if (! $conversation = $DB->get_record('dialogue_conversations', array('id' =>
-                                            $entry->ecid))) {
-                mtrace("Could not find conversation $entry->ecid\n");
-            }
-            if ($userfrom->id == $conversation->userid) {
-                if (! $userto = $DB->get_record('user', array('id' => $conversation->recipientid))) {
-                    mtrace("Could not find use $conversation->recipientid\n");
+            if ($userfrom->id == $entry->dsuser) {
+                if (! $userto = $DB->get_record('user', array('id' => $entry->recipientid))) {
+                    mtrace("Could not find use $entry->recipientid\n");
+                    continue;
                 }
             } else {
-                if (! $userto = $DB->get_record('user', array('id' => $conversation->userid))) {
-                    mtrace("Could not find use $conversation->userid\n");
+                if (! $userto = $DB->get_record('user', array('id' => $entry->dsuser))) {
+                    mtrace("Could not find use$entry->dsuser\n");
+                    continue;
                 }
             }
 
@@ -139,10 +137,13 @@ function dialogue_cron() {
     }
 
     /// Find conversations sent to all participants and check for new participants
-    $conversation_rs = $DB->get_recordset_select('dialogue_conversations',
-                                    'grouping != 0 AND grouping IS NOT NULL',
-                                    null,
-                                    'dialogueid, grouping');
+    $sql = "SELECT dc.*, cm.id as cmid, cm.course as course FROM {dialogue_conversations} dc
+            INNER JOIN {course_modules} cm ON cm.instance = dc.dialogueid
+            INNER JOIN {modules} m ON m.id = cm.module
+            WHERE m.name = 'dialogue' AND dc.grouping != 0 AND dc.grouping IS NOT NULL
+            ORDER BY dialogueid, grouping";
+    $conversation_rs = $DB->get_recordset_sql($sql);
+
     $dialogueid = 0;
     $grouping = 0;
     $groupid = null;
@@ -157,8 +158,7 @@ function dialogue_cron() {
                 $dialogueid = $conversation->dialogueid;
                 $groupid = $conversation->groupid;
             }
-            $cm = get_coursemodule_from_instance('dialogue', $dialogueid);
-            $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+            $context = context_module::instance($conversation_rs->cmid);
 
             $users = (array) get_users_by_capability($context, 'mod/dialogue:participate',
                                                      'u.id, u.firstname, u.lastname', null, null, null, 
@@ -177,7 +177,7 @@ function dialogue_cron() {
                     foreach ($userdiff as $userid => $value) {
                         $newusers[$userid.','.$grouping] = array (
                             'userid' => $userid,
-                            'courseid' => $cm->course,
+                            'courseid' => $conversation_rs->course,
                             'grouping' => $grouping
                         );
                     }
@@ -189,11 +189,14 @@ function dialogue_cron() {
 
         $inconversation[$conversation->recipientid] = true;
     }
+    $conversation_rs->close();
 
+    //TODO: What is this part for? - it seems to duplicate the get_users_by_cap stuff above
+    //we shouldn't need to make these calls again for the same context should we?
     if (! empty($dialogueid)) {
         // Finish of any remaing users
         $cm = get_coursemodule_from_instance('dialogue', $dialogueid);
-        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+        $context = context_module::instance($cm->id);
 
         $users = (array) get_users_by_capability($context, 'mod/dialogue:participate', 
                                                  'u.id, u.firstname, u.lastname', 
@@ -215,13 +218,11 @@ function dialogue_cron() {
             }
         }
     }
-    $conversation_rs->close();
+    //TODO: CHECK above block - is this really needed? - should be able to optimise this  ^
 
     if (! empty($newusers)) {
         foreach ($newusers as $key => $newuser) {
 
-
-            
             $transaction = $DB->start_delegated_transaction();
 
             if ($conversations = $DB->get_records('dialogue_conversations', array('grouping' =>
@@ -263,7 +264,7 @@ function dialogue_cron() {
                     /// Are there embedded images
                     $fs = get_file_storage();
                     $oldcm = get_coursemodule_from_instance('dialogue', $srcentry->dialogueid);
-                    $oldcontext = get_context_instance(CONTEXT_MODULE, $oldcm->id);
+                    $oldcontext = context_module::instance($oldcm->id);
                     $oldentryid = $srcentry->id;
  
                     if ($files = $fs->get_area_files($oldcontext->id, 'mod_dialogue', 'entry', $oldentryid)) {
