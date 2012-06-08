@@ -53,28 +53,32 @@ function dialogue_cron() {
 
     global $DB, $CFG, $USER;
 
-    $context_cache = array();
     // delete any closed conversations which have expired
     dialogue_delete_expired_conversations();
 
     // Finds all dialogue entries that have yet to be mailed out, and mails them
-    $sql =  "SELECT e.* FROM {dialogue_entries} e ".
-            "INNER JOIN {dialogue} d ON e.dialogueid = d.id ".
-            "WHERE e.timecreated + d.edittime * 60 < :timenow AND e.mailed = 0 ";
+    $sql =  "SELECT e.id as eid, e.userid as euserid, e.conversationid as ecid,
+             d.id as did, d.course as course, d.name as dname, c.shortname as cname, cm.id as cmid
+             FROM {dialogue_entries} e
+             INNER JOIN {dialogue} d ON e.dialogueid = d.id
+             INNER JOIN {course} c ON c.id = d.course
+             INNER JOIN {course_modules} cm ON cm.course = c.id AND cm.instance = d.id
+             INNER JOIN {modules} m ON m.id = cm.module
+             WHERE e.timecreated + d.edittime * 60 < :timenow AND e.mailed = 0 AND m.name = 'dialogue'";
     
     if ($entries = $DB->get_records_sql($sql, array('timenow' => time()))) {
         foreach ($entries as $entry) {
 
-            echo "Processing dialogue entry $entry->id\n";
+            mtrace("Processing dialogue entry $entry->eid");
 
-            if (! $userfrom = $DB->get_record('user', array('id' => $entry->userid))) {
-                mtrace("Could not find user $entry->userid\n");
+            if (! $userfrom = $DB->get_record('user', array('id' => $entry->euserid))) {
+                mtrace("Could not find user $entry->euserid\n");
                 continue;
             }
             // get conversation record
             if (! $conversation = $DB->get_record('dialogue_conversations', array('id' =>
-                                            $entry->conversationid))) {
-                mtrace("Could not find conversation $entry->conversationid\n");
+                                            $entry->ecid))) {
+                mtrace("Could not find conversation $entry->ecid\n");
             }
             if ($userfrom->id == $conversation->userid) {
                 if (! $userto = $DB->get_record('user', array('id' => $conversation->recipientid))) {
@@ -88,51 +92,36 @@ function dialogue_cron() {
 
             $USER->lang = $userto->lang;
 
-            if (! $dialogue = $DB->get_record('dialogue', array('id' => $conversation->dialogueid))) {
-                echo "Could not find dialogue id $conversation->dialogueid\n";
-                continue;
-            }
-            if (! $course = $DB->get_record('course', array('id' => $dialogue->course))) {
-                echo "Could not find course $dialogue->course\n";
-                continue;
-            }
-            if (! $cm = get_coursemodule_from_instance('dialogue', $dialogue->id, $course->id)) {
-                echo "Course Module ID was incorrect\n";
-            }
-            if (empty($context_cache[$course->id])) {
-                $context_cache[$course->id] = get_context_instance(CONTEXT_COURSE, $course->id);
-            }
-
-            if (! has_capability('mod/dialogue:participate', $context_cache[$course->id], $userfrom->id)
-                 && ! has_capability('mod/dialogue:manage', $context_cache[$course->id], $userfrom->id)) {
-                $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->id));
+            $coursecontext = context_course::instance($entry->course);
+            if (! has_capability('mod/dialogue:participate', $coursecontext, $userfrom->id)
+                 && ! has_capability('mod/dialogue:manage', $coursecontext, $userfrom->id)) {
+                $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->eid));
                 continue; // Not an active participant
             }
-            if (! has_capability('mod/dialogue:participate', $context_cache[$course->id], $userto->id)
-                && ! has_capability('mod/dialogue:manage', $context_cache[$course->id], $userto->id)) {
-                $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->id));
+            if (! has_capability('mod/dialogue:participate', $coursecontext, $userto->id)
+                && ! has_capability('mod/dialogue:manage', $coursecontext, $userto->id)) {
+                $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->eid));
                 continue; // Not an active participant
             }
 
             $strdialogues = get_string('modulenameplural', 'dialogue');
-            $strdialogue = get_string('modulename', 'dialogue');
 
-            $dialogueinfo = new object();
+            $dialogueinfo = new stdClass();
             $dialogueinfo->userfrom = fullname($userfrom);
-            $dialogueinfo->dialogue = format_string($dialogue->name);
-            $dialogueinfo->url = "$CFG->wwwroot/mod/dialogue/view.php?id=$cm->id";
+            $dialogueinfo->dialogue = format_string($entry->name);
+            $dialogueinfo->url = "$CFG->wwwroot/mod/dialogue/view.php?id=$entry->cmid";
 
-            $postsubject = "$course->shortname: $strdialogues: $dialogueinfo->dialogue: ".
+            $postsubject = "$entry->cname: $strdialogues: $dialogueinfo->dialogue: ".
                                          get_string('newentry', 'dialogue');
-            $posttext = "$course->shortname -> $strdialogues -> $dialogueinfo->dialogue\n";
+            $posttext = "$entry->cname -> $strdialogues -> $dialogueinfo->dialogue\n";
             $posttext .= "---------------------------------------------------------------------\n";
             $posttext .= get_string('dialoguemail', 'dialogue', $dialogueinfo)." \n";
             $posttext .= "---------------------------------------------------------------------\n";
             if ($userto->mailformat == 1) { // HTML
                 $posthtml = "<p><font face=\"sans-serif\">".
-                "<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->".
-                "<a href=\"$CFG->wwwroot/mod/dialogue/index.php?id=$course->id\">dialogues</a> ->".
-                "<a href=\"$CFG->wwwroot/mod/dialogue/view.php?id=$cm->id\">" . $dialogueinfo->dialogue . "</a></font></p>";
+                "<a href=\"$CFG->wwwroot/course/view.php?id=$entry->course\">$entry->cname</a> ->".
+                "<a href=\"$CFG->wwwroot/mod/dialogue/index.php?id=$entry->course\">dialogues</a> ->".
+                "<a href=\"$CFG->wwwroot/mod/dialogue/view.php?id=$entry->cmid\">" . $dialogueinfo->dialogue . "</a></font></p>";
                 $posthtml .= "<hr /><font face=\"sans-serif\">";
                 $posthtml .= '<p>'.get_string('dialoguemailhtml', 'dialogue', $dialogueinfo).'</p>';
                 $posthtml .= "</font><hr />";
@@ -141,10 +130,10 @@ function dialogue_cron() {
             }
             
             if (! email_to_user($userto, $userfrom, $postsubject, $posttext, $posthtml)) {
-                mtrace("Error: dialogue cron: Could not send out mail for id $entry->id to user $userto->id ($userto->email)\n");
+                mtrace("Error: dialogue cron: Could not send out mail for id $entry->eid to user $userto->id ($userto->email)\n");
             }
-            if (! $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->id))) {
-                mtrace("Could not update the mailed field for id $entry->id\n");
+            if (! $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->eid))) {
+                mtrace("Could not update the mailed field for id $entry->eid\n");
             }
         }
     }
@@ -559,24 +548,18 @@ function dialogue_count_entries($dialogue, $conversation, $user = '') {
  */
 function dialogue_delete_expired_conversations() {
     global $DB;
+    $sql = "SELECT d.id AS dialogueid, dc.id as conversationid FROM {dialogue_conversations} dc
+            INNER JOIN {dialogue} d ON dc.dialogueid = d.id
+            WHERE dc.closed = 1 AND d.deleteafter IS NOT NULL AND d.deleteafter > 0
+            AND dc.timemodified < (".time()." - (d.deleteafter * :timenow))";
 
-    if ($dialogues = $DB->get_records('dialogue')) {
-        foreach ($dialogues as $dialogue) {
-            if ($dialogue->deleteafter) {
-                $expirytime = time() - $dialogue->deleteafter * 86400;
-                if ($conversations = $DB->get_records_select('dialogue_conversations',
-                    "(timemodified < :expirytime) AND (dialogueid = :dialogueid) AND (closed = 1)",
-                    array('expirytime' => $expirytime, 'dialogueid' => $dialogue->id))) {
-                    echo "\nDeleting expired conversations for Dialogue id ".$dialogue->id;
-                    foreach ($conversations as $conversation) {
-                        $DB->delete_records('dialogue_conversations', array('id' =>
-                                       $conversation->id, 'dialogueid' => $dialogue->id));
-                        $DB->delete_records('dialogue_entries', array('conversationid' =>
-                                       $conversation->id, 'dialogueid' => $dialogue->id));
-                    }
-                }
-            }
-        }
+    $dialogues = $DB->get_records_sql($sql, array('timenow' => time()));
+    foreach ($dialogues as $dialogue) {
+        mtrace("Deleting expired conversations for Dialogue id ".$dialogue->dialogueid);
+        $DB->delete_records('dialogue_conversations',
+            array('id' => $dialogue->conversationid, 'dialogueid' => $dialogue->dialogueid));
+        $DB->delete_records('dialogue_entries',
+            array('conversationid' => $dialogue->conversationid, 'dialogueid' => $dialogue->dialogueid));
     }
 }
 
