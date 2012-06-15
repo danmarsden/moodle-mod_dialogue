@@ -662,15 +662,15 @@ function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
         foreach ($conversations as $conversation) {
             if ($USER->id == $conversation->userid) {
                 if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
-                    print_error("User's record not found");
+                    $with = $USER; // incomplete record need cleanup function
                 }
             } else if ($USER->id == $conversation->recipientid) {
                 if (! $with = $DB->get_record('user', array('id' => $conversation->userid))) {
-                    print_error("User's record not found");
+                    $with = $USER; // incomplete record need cleanup function
                 }
             } else {
                 if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
-                    print_error("User's record not found");
+                    $with = $USER; // incomplete record need cleanup function
                 }
             }
 
