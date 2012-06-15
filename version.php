@@ -23,8 +23,8 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$module->version  = 2011110901;
-$module->requires = 2010112400;  // Requires this Moodle version 2.x
-$module->release  = '2.0.4+';  // Human-friendly version name
-$module->maturity = MATURITY_STABLE;            // this version's maturity level
+$module->version  = 2011111200;
+$module->requires = 2011111200; // Requires this Moodle version 2.2.x
+$module->release  = '2.2.0+'; // Human-friendly version name
+$module->maturity = MATURITY_STABLE; // this version's maturity level
 $module->cron     = 60;
