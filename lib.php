@@ -87,7 +87,7 @@ function dialogue_cron() {
 
             $USER->lang = $userto->lang;
 
-            $coursecontext = get_context_instance('dialogue', $entry->course);
+            $coursecontext = context_course::instance($entry->course);
             if (! has_capability('mod/dialogue:participate', $coursecontext, $userfrom->id)
                  && ! has_capability('mod/dialogue:manage', $coursecontext, $userfrom->id)) {
                 $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->eid));
@@ -236,7 +236,7 @@ function dialogue_cron() {
                         /// Are there embedded images
                         $fs = get_file_storage();
                         $oldcm = get_coursemodule_from_instance('dialogue', $srcentry->dialogueid);
-                        $oldcontext = get_context_instance(CONTEXT_MODULE, $oldcm->id);
+                        $oldcontext = context_module::instance($oldcm->id);
                         $oldentryid = $srcentry->id;
  
                         if ($files = $fs->get_area_files($oldcontext->id, 'mod_dialogue', 'entry', $oldentryid)) {
