@@ -427,13 +427,24 @@ function dialogue_delete_instance($id) {
     if (! $dialogue = $DB->get_record('dialogue', array('id' => $id))) {
         return false;
     }
-
-    $DB->delete_records('dialogue_conversations', array('dialogueid' => $dialogue->id));
+    if (! $cm = get_coursemodule_from_instance('dialogue', $dialogue->id)) {
+        return false;
+    }
+    $entryids = $DB->get_records('dialogue_entries', array('dialogueid' => $dialogue->id), null, 'id');
+    if ($entryids) {
+        $entryids = array_keys($entryids);
+        list($insql, $inparams) = $DB->get_in_or_equal($entryids);
+        $DB->delete_records_select('dialogue_read', "entryid $insql", $inparams);
+    }
     $DB->delete_records('dialogue_entries', array('dialogueid' => $dialogue->id));
+    $DB->delete_records('dialogue_conversations', array('dialogueid' => $dialogue->id));
     $DB->delete_records('dialogue', array('id' => $dialogue->id));
+    // now get rid of all files
+    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $fs = get_file_storage();
+    $fs->delete_area_files($context->id);
 
     return true;
-
 }
 
 /**
