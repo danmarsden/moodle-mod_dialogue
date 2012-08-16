@@ -36,18 +36,18 @@ class backup_dialogue_activity_structure_step extends backup_activity_structure_
         // Define each element separated
         $dialogue = new backup_nested_element('dialogue', array('id'), array(
             'course', 'deleteafter', 'dialoguetype', 'multipleconversations',
-            'maildefault', 'timemodified', 'name', 'intro', 'introformat', 'edittime'));
-        
+            'maildefault', 'timemodified', 'name', 'intro', 'introformat', 'edittime', 'recipients'));
+
         $conversations = new backup_nested_element('conversations');
         $conversation = new backup_nested_element('conversation', array('id'), array(
             'dialogueid', 'userid', 'recipientid', 'lastid', 'lastrecipientid', 'timemodified',
             'closed', 'seenon', 'ctype', 'format', 'subject', 'groupid', 'grouping'));
-        
+
         $entries = new backup_nested_element('entries');
         $entry = new backup_nested_element('entry', array('id'), array(
             'dialogueid', 'conversationid', 'userid', 'recipientid', 'timecreated',
             'timemodified', 'mailed', 'text', 'format', 'trust', 'attachment'));
-        
+
         $readentries = new backup_nested_element('read_entries');
         $read = new backup_nested_element('read_entry', array('id'), array(
         	'entryid', 'userid', 'firstread', 'lastread', 'conversationid'));
@@ -61,7 +61,7 @@ class backup_dialogue_activity_structure_step extends backup_activity_structure_
         $readentries->add_child($read);
 
 
-        
+
         // Define sources
         $dialogue->set_source_table('dialogue', array('id' => backup::VAR_ACTIVITYID));
         // All these source definitions only happen if we are including user info
@@ -77,12 +77,12 @@ class backup_dialogue_activity_structure_step extends backup_activity_structure_
         $entry->annotate_ids('user', 'userid');
         $entry->annotate_ids('user', 'recipientid');
         $read->annotate_ids('user', 'userid');
-        
+
         // Define file annotations
         $dialogue->annotate_files('mod_dialogue', 'intro', null); // This file area hasn't itemid
         $entry->annotate_files('mod_dialogue', 'entry', 'id');
         $entry->annotate_files('mod_dialogue', 'attachment', 'id');
-                
+
         // Return the root element, wrapped into standard activity structure
         return $this->prepare_activity_structure($dialogue);
     }

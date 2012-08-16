@@ -36,7 +36,7 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('dialogue', '/activity/dialogue');
-        if ($userinfo) {     
+        if ($userinfo) {
             $paths[] = new restore_path_element('conversation', '/activity/dialogue/conversations/conversation');
             $paths[] = new restore_path_element('entry', '/activity/dialogue/conversations/conversation/entries/entry');
             $paths[] = new restore_path_element('read', '/activity/dialogue/conversations/conversation/read_entries/read_entry');
@@ -55,7 +55,7 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
 
         $newitemid = $DB->insert_record('dialogue', $data);
         $this->apply_activity_instance($newitemid);
-        
+
     }
 
     protected function process_conversation($data) {
@@ -63,12 +63,12 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
 
         $data = (object)$data;
         $oldid = $data->id;
-        
+
         $data->dialogueid = $this->get_new_parentid('dialogue');
-        
+
         $newitemid = $DB->insert_record('dialogue_conversations', $data);
         $this->set_mapping('dialogue_conversation', $oldid, $newitemid);
-        
+
     }
 
     protected function process_entry($data) {
@@ -76,7 +76,7 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
 
         $data = (object)$data;
         $oldid = $data->id;
-        
+
         $data->dialogueid = $this->get_new_parentid('dialogue');
         $data->conversationid = $this->get_mappingid('dialogue_conversation', $data->conversationid);
 
@@ -84,19 +84,20 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
 
         $newitemid = $DB->insert_record('dialogue_entries', $data);
         $this->set_mapping('entry', $oldid, $newitemid, true);
-        
+
     }
 
     protected function process_read($data) {
         global $DB;
 
         $data = (object)$data;
-        
+
         $data->conversationid = $this->get_mappingid('dialogue_conversation', $data->conversationid);
         $data->entryid = $this->get_mappingid('entry', $data->entryid);
+        $data->userid = $this->get_mappingid('user', $data->userid);
 
         $newitemid = $DB->insert_record('dialogue_read', $data);
-        
+
     }
 
     protected function after_execute() {
