@@ -36,7 +36,7 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('dialogue', '/activity/dialogue');
-        if ($userinfo) {     
+        if ($userinfo) {
             $paths[] = new restore_path_element('conversation', '/activity/dialogue/conversations/conversation');
             $paths[] = new restore_path_element('entry', '/activity/dialogue/conversations/conversation/entries/entry');
             $paths[] = new restore_path_element('read', '/activity/dialogue/conversations/conversation/read_entries/read_entry');
@@ -65,6 +65,12 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         $oldid = $data->id;
         
         $data->dialogueid = $this->get_new_parentid('dialogue');
+        $data->userid = $this->get_mappingid('user', $data->userid);
+        $data->recipientid = $this->get_mappingid('user', $data->recipientid);
+        $data->lastid = $this->get_mappingid('user', $data->lastid);
+        $data->lastrecipientid = $this->get_mappingid('user', $data->lastrecipientid);
+        $data->groupid = $this->get_mappingid('group', $data->groupid , 0);
+        $data->grouping = $this->get_mappingid('grouping', $data->grouping , 0);
         
         $newitemid = $DB->insert_record('dialogue_conversations', $data);
         $this->set_mapping('dialogue_conversation', $oldid, $newitemid);
@@ -81,6 +87,7 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         $data->conversationid = $this->get_mappingid('dialogue_conversation', $data->conversationid);
 
         $data->userid = $this->get_mappingid('user', $data->userid);
+        $data->recipientid = $this->get_mappingid('user', $data->recipientid);
 
         $newitemid = $DB->insert_record('dialogue_entries', $data);
         $this->set_mapping('entry', $oldid, $newitemid, true);
@@ -94,6 +101,7 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         
         $data->conversationid = $this->get_mappingid('dialogue_conversation', $data->conversationid);
         $data->entryid = $this->get_mappingid('entry', $data->entryid);
+        $data->userid = $this->get_mappingid('user', $data->userid);
 
         $newitemid = $DB->insert_record('dialogue_read', $data);
         

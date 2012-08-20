@@ -74,6 +74,10 @@ class backup_dialogue_activity_structure_step extends backup_activity_structure_
         // Define id annotations
         $conversation->annotate_ids('user', 'userid');
         $conversation->annotate_ids('user', 'recipientid');
+        $conversation->annotate_ids('user', 'lastid');
+        $conversation->annotate_ids('user', 'lastrecipientid');
+        $conversation->annotate_ids('group', 'groupid');
+        $conversation->annotate_ids('grouping', 'grouping');
         $entry->annotate_ids('user', 'userid');
         $entry->annotate_ids('user', 'recipientid');
         $read->annotate_ids('user', 'userid');
