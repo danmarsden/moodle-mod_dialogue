@@ -261,6 +261,11 @@
                 $groupid = 0;
                 $grouping = 0;
             }
+            // Dirty Hack
+            $notparticipating = get_users_by_capability($context, 'moodle/course:view', 'u.id, u.firstname, u.lastname');
+            if ($recipients and $notparticipating) {
+                $recipients = array_diff_key($recipients, $notparticipating);
+            }
             if ($recipients) {
                 $n = 0;
                 foreach ($recipients as $recipient) {
