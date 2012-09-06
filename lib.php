@@ -87,7 +87,7 @@ function dialogue_cron() {
 
             $USER->lang = $userto->lang;
 
-            $coursecontext = get_context_instance('dialogue', $entry->course);
+            $coursecontext = get_context_instance(CONTEXT_COURSE, $entry->course);
             if (! has_capability('mod/dialogue:participate', $coursecontext, $userfrom->id)
                  && ! has_capability('mod/dialogue:manage', $coursecontext, $userfrom->id)) {
                 $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->eid));
