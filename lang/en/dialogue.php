@@ -135,8 +135,8 @@ $string['cannotaddall'] = 'Cannot Open a dialogue with all participants';
 $string['dialoguetype'] = 'Type of Dialogue';
 $string['dialoguetype_help'] = '@TODO';
 $string['multipleconversations'] = 'Allow more than one Dialogue with the same person';
-$string['multipleconversations_help'] = '@TODO';
-$string['maildefault_help'] = '@TODO';
+$string['multipleconversations_help'] = 'This option determines whether you can have more than one conversation with a given person within a dialogue tool.';
+$string['maildefault_help'] = 'This option selects whether mail notifications of dialogue postings should be mailed to the participants.';
 
 $string['closedialogue_help'] =
 '<h1>Closing Dialogues</h1>
@@ -192,13 +192,4 @@ $string['multiple_help'] = '<h1>Multiple Dialogues</h1>
     facility. Some people may be &quot;pestered&quot; by others
     opening many unwanted dialogues with them.</p>';
 
-$string['maildefault'] = '<h1>Set Mail Notification</h1>
-<p>This option controls whether notification messages are sent. If this
-   option is set to &quot;Yes&quot; a short email is sent to the recipient
-   of a new entry. The email message does not contain the text of the entry,
-   simply a sentence to say a new entry has been added and a link to the
-   dialogue.</p>
-
-<p>Note this option applies to all the dialogues active in the dialogue
-    instance. The option can be changed at anytime.</p>
-';
+$string['maildefault'] = '<h1>Set Mail Notification</h1>';
