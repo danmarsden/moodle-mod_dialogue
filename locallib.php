@@ -588,7 +588,6 @@ function dialogue_print_conversation($dialogue, $conversation) {
  * @param   object  $dialogue
  * @param   int     $groupid    of the group to filter conversations by (default: 0)
  * @param   string  $type       'open' (default) or 'closed'
- * @todo    remove the embedded style for 'th', make it a class driven thing in the theme
  */
 function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
     global $CFG, $DB, $USER, $OUTPUT;
@@ -608,7 +607,6 @@ function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
     
     $dialoguemanagers = array_keys(get_users_by_capability($context, 'mod/dialogue:manage'));
 
-    echo '<style>th.header { text-align: left; }</style>';
     require_once($CFG->libdir.'/tablelib.php');
     $tablecolumns = array('picture', 'subject', 'fullname', 'total', 'unread', 'lastentry');
     $tableheaders = array('',
