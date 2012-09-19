@@ -115,6 +115,7 @@ $string['edittime'] = 'Edit time (minutes)';
 $string['edittime_help'] = 'Edit time help';
 $string['otherdialogues'] = 'Other dialogues';
 $string['replyupdated'] = 'Reply updated';
+$string['dialogue:addinstance'] = 'Add a new dialogue';
 $string['dialogue:open'] = 'Open';
 $string['dialogue:participate'] = 'Participate';
 $string['dialogue:manage'] = 'Manage';
