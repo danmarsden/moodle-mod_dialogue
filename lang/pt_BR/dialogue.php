@@ -1,6 +1,4 @@
-<?PHP // $Id$ 
-      // dialogue.php - created with Moodle 1.6.1 (2006050510)
-
+<?php
 
 $string['addmynewentries'] = 'Adicionar novas mensagens';
 $string['addmynewentry'] = 'Adicionar minha nova mensagem';
@@ -71,4 +69,3 @@ $string['viewallentries'] = 'Veja {$a} mensagens de diálogo';
 $string['unread'] = 'Mensagens não lidas';
 $string['attachment'] = 'Anexo';
 $string['edittime'] = 'Tempo de edição';
-?>
