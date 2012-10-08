@@ -35,7 +35,7 @@ $string['closedialogue_help'] = '<p>You can close a dialogue at any time. Closin
     if you want to continue to &quot;talk&quot; with this person. That person
     will re-appear in the list of people you can start dialogues with.</p>';
 $string['closeddialogues'] = 'Closed Dialogues';
-$string['confirmclosure'] = '<p>You are about to close a dialogue with {$a}. Closed dialogues cannot be reopened. If you close this dialogue you can view it but not add to it, and you will have to start another dialogue to contnue &quot;talking&quot; this person.<br /><br />Are you sure you want to close this dialogue?';
+$string['confirmclosure'] = 'You are about to close a dialogue with {$a}. Closed dialogues cannot be reopened. If you close this dialogue you can view it but not add to it, and you will have to start another dialogue to contnue &quot;talking&quot; this person.<br /><br />Are you sure you want to close this dialogue?';
 $string['configtrackreadentries'] = 'Set to \'yes\' if you want to track read/unread for each user.';
 $string['trackdialogue'] = 'Track unread entries';
 $string['deleteafter'] = 'Delete Closed Dialogues after (Days)';
