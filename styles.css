@@ -19,4 +19,4 @@
 .modified {font-size: 0.8em;font-weight: bold;}
 .dialogue-entry .commands {float: right;}
 
-
+#page-mod-dialogue-view th.header { text-align: left; }
