@@ -95,7 +95,7 @@ function xmldb_dialogue_upgrade($oldversion=0) {
                             }
                         }
                     }
-                    $DB->set_field('dialogue_entries', 'text', $content, array('id'=> $entry->id));
+                    $DB->set_field('dialogue_entries', 'text', $text, array('id'=> $entry->id));
                 }
 
                 
