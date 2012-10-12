@@ -39,7 +39,7 @@ class mod_dialogue_open_form extends moodleform {
         $context = $this->_customdata['context'];
         $maxbytes = $COURSE->maxbytes; // Could also use $CFG->maxbytes if you are not coding within a course context
         $editoroptions = array('subdirs'=>false, 'maxfiles'=>1, 'maxbytes'=>$maxbytes, 'trusttext'=>true, 'context'=>$context,'accepted_types'=>'image');
-        $attachmentoptions = array('subdirs'=>false, 'maxfiles'=>1, 'maxbytes'=>$maxbytes);
+        $attachmentoptions = array('subdirs'=>false, 'maxfiles'=> $CFG->dialogue_maxattachments, 'maxbytes'=>$maxbytes);
 
         $names = (array) $this->_customdata['names'];
         $names = array('' => get_string('select').'...') + $names;
