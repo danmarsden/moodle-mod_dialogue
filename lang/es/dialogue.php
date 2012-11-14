@@ -12,10 +12,10 @@ $string['confirmclosure'] = 'Está a punto de cerrar su diálogo con {$a}. Los d
 $string['deleteafter'] = 'Borrar diálogos cerrados después de (Días)';
 $string['dialogueclosed'] = 'Diálogo cerrado';
 $string['dialogueintro'] = 'Introducción al diálogo';
-$string['dialoguemail'] = '{$a->userfrom} ha respondido a su intervención en el diálogo \'{$a->dialogue}\'
+$string['dialoguemessage'] = '{$a->userfrom} ha respondido a su intervención en el diálogo \'{$a->dialogue}\'
 Puede verlo junto a su intervención en:
     {$a->url}';
-$string['dialoguemailhtml'] = 'El usuario {$a->userfrom} ha respondido a su intervención en el diálogo \'<i>{$a->dialogue}</i>\'<br /><br />
+$string['dialoguemessagehtml'] = 'El usuario {$a->userfrom} ha respondido a su intervención en el diálogo \'<i>{$a->dialogue}</i>\'<br /><br />
 Puede verlo adjunto <a href="{$a->url}">aquí</a>.';
 $string['dialoguename'] = 'Nombre del diálogo';
 $string['dialogueopened'] = 'Diálogo abierto con {$a}';

@@ -42,18 +42,22 @@ $string['deleteafter'] = 'Delete Closed Dialogues after (Days)';
 $string['deleteafter_help'] = 'Delete Closed Dialogues after (Days)';
 $string['dialogueclosed'] = 'Dialogue Closed';
 $string['dialogueintro'] = 'Dialogue Introduction';
-$string['dialoguemail'] = '{$a->userfrom} has posted a new entry in your
+$string['dialoguemessage'] = '{$a->userfrom} has posted a new entry in your
 
 dialogue entry for \'{$a->dialogue}\'
 
 You can see it appended to your dialogue entry:
 
     {$a->url}';
-$string['dialoguemailhtml'] = '{$a->userfrom} has posted a new entry in your
+$string['dialoguemessagehtml'] = '{$a->userfrom} has posted a new entry in your
 
 dialogue entry for \'<i>{$a->dialogue}</i>\'<br /><br />
 
 You can see it appended to your <a href="{$a->url}">dialogue</a>.';
+
+$string['dialoguemessageshort'] = '{$a->userfrom} posted a new entry for dialogue \'{$a->dialogue}\'.
+    See it at <a href="{$a->url}" />';
+
 $string['dialoguename'] = 'Dialogue name';
 $string['dialogueopened'] = 'Dialogue opened with {$a->name}</p><p>You have $a->edittime mins to edit it if you want to make any changes.</p>';
 $string['dialoguewith'] = 'Dialogue with {$a}';
@@ -62,9 +66,7 @@ $string['erroremptymessage'] = 'Error: empty message.';
 $string['firstentry'] = 'First Entry';
 $string['furtherinformation'] = 'Further Information';
 $string['lastentry'] = 'Last Entry';
-$string['maildefault'] = 'Mail Default';
-$string['mailnotification'] = 'Mail Notification';
-$string['mailnotification_help'] = 'Mail Notification Help';
+$string['notifydefault'] = 'Notification of new entry';
 $string['modulename'] = 'Dialogue';
 $string['modulenameplural'] = 'Dialogues';
 $string['namehascloseddialogue'] = '{$a} has closed dialogue';
@@ -192,13 +194,17 @@ $string['multiple_help'] = '<h1>Multiple Dialogues</h1>
     facility. Some people may be &quot;pestered&quot; by others
     opening many unwanted dialogues with them.</p>';
 
-$string['maildefault'] = '<h1>Set Mail Notification</h1>
+$string['notifydefault_help'] = '<h1>Set Notification for new entries</h1>
 <p>This option controls whether notification messages are sent. If this
-   option is set to &quot;Yes&quot; a short email is sent to the recipient
-   of a new entry. The email message does not contain the text of the entry,
+   option is set to &quot;Yes&quot; a message is sent to the recipient
+   of a new entry. The notification message does not contain the text of the entry,
    simply a sentence to say a new entry has been added and a link to the
    dialogue.</p>
+   
+<p>You should also review your Messaing settings in your Profile. </p>
 
 <p>Note this option applies to all the dialogues active in the dialogue
     instance. The option can be changed at anytime.</p>
 ';
+
+$string['messageprovider:post'] = 'Dialogue notifications';
