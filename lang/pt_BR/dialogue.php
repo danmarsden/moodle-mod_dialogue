@@ -12,10 +12,10 @@ $string['confirmclosure'] = 'Você está encerrando um diálogo com {$a}. Diálo
 $string['deleteafter'] = 'Excluir diálogos encerrados após (dias)';
 $string['dialogueclosed'] = 'Diálogo Encerrado';
 $string['dialogueintro'] = 'Introdução ao Diálogo';
-$string['dialoguemail'] = '{$a->userfrom} enviou uma nova mensagem de diálogo para \'{$a->dialogue}\'.
+$string['dialoguemessage'] = '{$a->userfrom} enviou uma nova mensagem de diálogo para \'{$a->dialogue}\'.
 Você pode acessar esta mensagem no seguinte endereço: 
 {$a->url}';
-$string['dialoguemailhtml'] = '{$a->userfrom} enviou uma nova mensagem de diálogo para \'<i>{$a->dialogue}</i>\'<br /><br />
+$string['dialoguemessagehtml'] = '{$a->userfrom} enviou uma nova mensagem de diálogo para \'<i>{$a->dialogue}</i>\'<br /><br />
 Você pode acessar esta mensagem no seguinte <a href="{$a->url}">diálogo</a>.';
 $string['dialoguename'] = 'Nome do diálogo';
 $string['dialogueopened'] = 'Diálogo aberto com {$a}';

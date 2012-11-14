@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,17 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Code fragment to define the module version etc.
- * This fragment is called by /admin/index.php
- *
- * @package mod-dialogue
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 defined('MOODLE_INTERNAL') || die();
 
-$module->version  = 2012111403;
-$module->requires = 2011111200; // Requires this Moodle version 2.2.x
-$module->release  = '2.2.0+'; // Human-friendly version name
-$module->maturity = MATURITY_STABLE; // this version's maturity level
-$module->cron     = 60;
+$messageproviders = array (
+    /// Ordinary message
+    'post' => array()
+);
+
+?>
