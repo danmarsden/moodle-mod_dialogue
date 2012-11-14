@@ -13,12 +13,12 @@ $string['confirmclosure'] = 'Stai per terminare un dialogo con {$a}. Una volta t
 $string['deleteafter'] = 'Cancella i dialoghi terminati dopo (Giorni)';
 $string['dialogueclosed'] = 'Dialogo terminato';
 $string['dialogueintro'] = 'Introduzione dialogo';
-$string['dialoguemail'] = '{$a->userform} ha spedito un nuovo messaggio al vostro dialogo \'{$a->dialogue}\'
+$string['dialoguemessage'] = '{$a->userform} ha spedito un nuovo messaggio al vostro dialogo \'{$a->dialogue}\'
 
 Puoi vederlo aggiunto al vostro dialogo:
 
 {$a->url}';
-$string['dialoguemailhtml'] = '{$a->userform} ha spedito un nuovo messaggio al vostro dialogo \'<i>{$a->dialogue}</i>\'<br /><br />
+$string['dialoguemessagehtml'] = '{$a->userform} ha spedito un nuovo messaggio al vostro dialogo \'<i>{$a->dialogue}</i>\'<br /><br />
 Puoi vederlo aggiunto al vostro <a href="{$a->url}">dialogo</a>.';
 $string['dialoguename'] = 'Nome dialogo';
 $string['dialogueopened'] = 'Dialogo aperto con {$a}';
