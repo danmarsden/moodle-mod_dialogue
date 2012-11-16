@@ -457,6 +457,7 @@ function dialogue_print_conversation($dialogue, $conversation) {
                         
                     }
                 }
+                $a = new stdClass();
                 $a->timestamp = userdate($entry->timecreated);
                 $a->picture = '';
                 if ($author->picture) {
@@ -464,6 +465,7 @@ function dialogue_print_conversation($dialogue, $conversation) {
                 }
                 $modifiedstamp = get_string('onyouwrote', 'dialogue', $a);
             } else {
+                $a = new stdClass();
                 $a->timestamp = userdate($entry->timecreated);
                 $a->author = fullname($author);
                 $a->picture = '';
@@ -473,7 +475,7 @@ function dialogue_print_conversation($dialogue, $conversation) {
                 $modifiedstamp = get_string('onwrote', 'dialogue', $a);
             }
             
-            $options = new stdClass;
+            $options = new stdClass();
             $options->para    = false;
             $options->trusted = $entry->trust;
             $options->context = $context;

@@ -277,6 +277,7 @@
                                  get_string('notextentered', 'dialogue'));
                     }
                     unset($conversation);
+                    $conversation = new stdClass();
                     $conversation->dialogueid = $dialogue->id;
                     $conversation->userid = $USER->id;
                     $conversation->recipientid = $recipient->id;
@@ -293,6 +294,7 @@
 
                     // now add the entry
                     unset($entry);
+                    $entry = new stdClass();
                     $entry->dialogueid = $dialogue->id;
                     $entry->conversationid = $conversation->id;
                     $entry->userid = $USER->id;

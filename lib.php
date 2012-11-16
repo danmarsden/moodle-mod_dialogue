@@ -254,7 +254,7 @@ function dialogue_cron() {
                                 }
                             }
                         }
-                        $read = new stdClass;
+                        $read = new stdClass();
                         $lastread = time();
                         $read->conversationid = $conversationid;
                         $read->entryid = $entry->id;
@@ -310,7 +310,7 @@ function dialogue_print_recent_activity($course, $viewfullnames, $timestart) {
 
     // have a look for new entries
     $addentrycontent = false;
-    $tempmod = new object();         // Create a temp valid module structure (only need courseid, moduleid)
+    $tempmod = new stdClass();         // Create a temp valid module structure (only need courseid, moduleid)
     $tempmod->course = $course->id;
     if ($logs = dialogue_get_add_entry_logs($course, $timestart)) {
         // got some, see if any belong to a visible module
