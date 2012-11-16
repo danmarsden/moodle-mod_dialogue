@@ -53,18 +53,21 @@ function dialogue_cron() {
 
     global $DB, $CFG, $USER;
 
-    // Finds all dialogue entries that have yet to be mailed out, and mails them
-    $sql =  "SELECT e.id as eid, e.userid as euserid, e.conversationid as ecid, ds.recipientid as recipientid, ds.userid as dsuser, 
-             d.id as did, d.course as course, d.name as dname, c.shortname as cname, cm.id as cmid
+    // Finds all dialogue entries that have yet to be notified out, and mails them
+    $sql =  "SELECT e.id as eid, d.edittime, e.userid as euserid, e.conversationid as ecid, ds.recipientid as recipientid, ds.userid as dsuser, 
+             d.id as did, d.course as course, d.name as dname, c.shortname as cname, cm.id as cmid, ds.id as cid
              FROM {dialogue_entries} e
              INNER JOIN {dialogue} d ON e.dialogueid = d.id
              INNER JOIN {dialogue_conversations} ds ON ds.id = e.conversationid
              INNER JOIN {course} c ON c.id = d.course
              INNER JOIN {course_modules} cm ON cm.course = c.id AND cm.instance = d.id
              INNER JOIN {modules} m ON m.id = cm.module
-             WHERE e.timecreated + d.edittime * 60 < :timenow AND e.mailed = 0 AND m.name = 'dialogue'";
-    
-    if ($entries = $DB->get_records_sql($sql, array('timenow' => time()))) {
+             WHERE e.timecreated + d.edittime * 60 < :timenow AND e.notified = 0 AND m.name = 'dialogue'";
+
+    $entries = $DB->get_records_sql($sql, array('timenow' => time()));
+        
+    if ($entries) {
+        
         foreach ($entries as $entry) {
 
             mtrace("Processing dialogue entry $entry->eid");
@@ -90,45 +93,54 @@ function dialogue_cron() {
             $coursecontext = context_course::instance($entry->course);
             if (! has_capability('mod/dialogue:participate', $coursecontext, $userfrom->id)
                  && ! has_capability('mod/dialogue:manage', $coursecontext, $userfrom->id)) {
-                $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->eid));
+                $DB->set_field('dialogue_entries', 'notified', '1', array('id' => $entry->eid));
                 continue; // Not an active participant
             }
             if (! has_capability('mod/dialogue:participate', $coursecontext, $userto->id)
                 && ! has_capability('mod/dialogue:manage', $coursecontext, $userto->id)) {
-                $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->eid));
+                $DB->set_field('dialogue_entries', 'notified', '1', array('id' => $entry->eid));
                 continue; // Not an active participant
             }
 
             $strdialogues = get_string('modulenameplural', 'dialogue');
-
+            
             $dialogueinfo = new stdClass();
             $dialogueinfo->userfrom = fullname($userfrom);
-            $dialogueinfo->dialogue = format_string($entry->name);
-            $dialogueinfo->url = "$CFG->wwwroot/mod/dialogue/view.php?id=$entry->cmid";
+            $dialogueinfo->dialogue = format_string($entry->dname);
+            $dialogueinfo->url = "$CFG->wwwroot/mod/dialogue/dialogues.php?id=$entry->cmid&action=printdialogue&cid=$entry->cid";
 
-            $postsubject = "$entry->cname: $strdialogues: $dialogueinfo->dialogue: ".
-                                         get_string('newentry', 'dialogue');
+            $subject = "$entry->cname: $strdialogues: $dialogueinfo->dialogue: ".
+                       get_string('newentry', 'dialogue');
+                        
             $posttext = "$entry->cname -> $strdialogues -> $dialogueinfo->dialogue\n";
             $posttext .= "---------------------------------------------------------------------\n";
-            $posttext .= get_string('dialoguemail', 'dialogue', $dialogueinfo)." \n";
+            $posttext .= get_string('dialoguemessage', 'dialogue', $dialogueinfo)." \n";
             $posttext .= "---------------------------------------------------------------------\n";
-            if ($userto->mailformat == 1) { // HTML
-                $posthtml = "<p><font face=\"sans-serif\">".
-                "<a href=\"$CFG->wwwroot/course/view.php?id=$entry->course\">$entry->cname</a> ->".
-                "<a href=\"$CFG->wwwroot/mod/dialogue/index.php?id=$entry->course\">dialogues</a> ->".
-                "<a href=\"$CFG->wwwroot/mod/dialogue/view.php?id=$entry->cmid\">" . $dialogueinfo->dialogue . "</a></font></p>";
-                $posthtml .= "<hr /><font face=\"sans-serif\">";
-                $posthtml .= '<p>'.get_string('dialoguemailhtml', 'dialogue', $dialogueinfo).'</p>';
-                $posthtml .= "</font><hr />";
-            } else {
-                $posthtml = '';
-            }
+                        
+            $posthtml = "<p><font face=\"sans-serif\">".
+            "<a href=\"$CFG->wwwroot/course/view.php?id=$entry->course\">$entry->cname</a> -&gt;".
+            "<a href=\"$CFG->wwwroot/mod/dialogue/index.php?id=$entry->course\">dialogues</a> -&gt;".
+            "<a href=\"$CFG->wwwroot/mod/dialogue/view.php?id=$entry->cmid\">" . $dialogueinfo->dialogue . "</a></font></p>";
+            $posthtml .= "<hr /><font face=\"sans-serif\">";
+            $posthtml .= '<p>'.get_string('dialoguemessagehtml', 'dialogue', $dialogueinfo).'</p>';
+            $posthtml .= "</font><hr />";
+                        
+            $eventdata = new stdClass();
+            $eventdata->component         = 'mod_dialogue';
+            $eventdata->name              = 'post'; 
+            $eventdata->userfrom          = $userfrom;
+            $eventdata->userto            = $userto;
+            $eventdata->subject           = $subject;
+            $eventdata->fullmessage       = $posttext;
+            $eventdata->fullmessageformat = FORMAT_HTML;
+            $eventdata->fullmessagehtml   = $posthtml;
+            $eventdata->smallmessage      = get_string('dialoguemessageshort', 'dialogue', $dialogueinfo);
+            $eventdata->notification      = 1;
             
-            if (! email_to_user($userto, $userfrom, $postsubject, $posttext, $posthtml)) {
-                mtrace("Error: dialogue cron: Could not send out mail for id $entry->eid to user $userto->id ($userto->email)\n");
-            }
-            if (! $DB->set_field('dialogue_entries', 'mailed', '1', array('id' => $entry->eid))) {
-                mtrace("Could not update the mailed field for id $entry->eid\n");
+            $mid = message_send($eventdata);
+            
+            if (! $DB->set_field('dialogue_entries', 'notified', '1', array('id' => $entry->eid))) {
+                mtrace("Could not update the notified field for id $entry->eid\n");
             }
         }
     }
@@ -225,7 +237,7 @@ function dialogue_cron() {
                         $entry->conversationid = $conversationid;
                         $entry->timecreated = $conversation->timemodified;
                         $entry->recipientid = $conversation->recipientid;
-                        $entry->mailed = false;
+                        $entry->notified = false;
                     
                         try {
                             $entry->id = $DB->insert_record('dialogue_entries', $entry);

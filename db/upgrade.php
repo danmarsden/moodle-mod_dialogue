@@ -189,6 +189,29 @@ function xmldb_dialogue_upgrade($oldversion=0) {
     /// dialogue savepoint reached
         upgrade_mod_savepoint(true, 2010123106, 'dialogue');
     }
+    
+    if ($oldversion < 2012111402) {
+
+        // Rename maildefault to notifydefault
+        $table = new xmldb_table('dialogue');
+        $field = new xmldb_field('maildefault', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '1', 'multipleconversations');
+        $dbman->rename_field($table, $field, 'notifydefault');
+        upgrade_mod_savepoint(true, 2012111402, 'dialogue');
+      
+    }
+    if ($oldversion < 2012111403 ) {
+
+        // Rename field mailed on table dialogue_entries to NEWNAMEGOESHERE
+        $table = new xmldb_table('dialogue_entries');
+        $field = new xmldb_field('mailed', XMLDB_TYPE_INTEGER, '4', null, null, null, '0', 'timemodified');
+
+        // Launch rename field mailed
+        $dbman->rename_field($table, $field, 'notified');
+
+        // dialogue savepoint reached
+        upgrade_mod_savepoint(true, 2012111403, 'dialogue');
+    }
+
 
     return true;
 }
