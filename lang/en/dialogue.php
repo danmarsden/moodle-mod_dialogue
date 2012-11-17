@@ -68,7 +68,7 @@ $string['erroremptymessage'] = 'Error: empty message.';
 $string['firstentry'] = 'First Entry';
 $string['furtherinformation'] = 'Further Information';
 $string['lastentry'] = 'Last Entry';
-$string['notifydefault'] = '<h1>Notification of new entry</h1>';
+$string['notifydefault'] = 'Notification of new entry';
 $string['modulename'] = 'Dialogue';
 $string['modulenameplural'] = 'Dialogues';
 $string['namehascloseddialogue'] = '{$a} has closed dialogue';
@@ -138,7 +138,6 @@ $string['cannotadd'] = 'Cannot Open a dialogue unless you are a member of this g
 $string['cannotaddall'] = 'Cannot Open a dialogue with all participants';
 
 $string['dialoguetype'] = 'Type of Dialogue';
-$string['dialoguetype_help'] = '@TODO';
 $string['multipleconversations'] = 'Allow more than one Dialogue with the same person';
 $string['multipleconversations_help'] = 'This option determines whether you can have more than one conversation with a given person within a dialogue tool.';
 
