@@ -24,7 +24,7 @@
     require_once('locallib.php');
     require_once('dialogue_open_form.php');
     require_once('dialogue_reply_form.php');
-
+    
     // get parameters
     $params = new stdClass();
     $params->id = required_param('id',PARAM_INT);
@@ -169,13 +169,16 @@
                 $editorname = "reply$conversation->id";
                 if (isset($formdata->{$editorname}['text'])) {
                     unset($item);
+                    
+                    $item = new stdClass();
+                    
                     $item->dialogueid = $dialogue->id;
                     $item->conversationid = $conversation->id;
                     $item->userid = $USER->id;
                     $item->timecreated = $timenow;
                     $item->timemodified = $item->timecreated;
                     // reverse the dialogue mail default
-                    $item->mailed = ! $dialogue->maildefault;
+                    $item->notified = ! $dialogue->notifydefault;
                     $item->text = clean_param($formdata->{$editorname}['text'], PARAM_CLEANHTML);
                     $item->format = clean_param($formdata->{$editorname}['format'], PARAM_INT);
                     $item->itemid = clean_param($formdata->{$editorname}['itemid'], PARAM_INT);
@@ -302,7 +305,7 @@
                     $entry->timecreated = $timenow;
                     $entry->timemodified = $timenow;
                     // reverse the dialogue default value
-                    $entry->mailed = ! $dialogue->maildefault; 
+                    $entry->notified = ! $dialogue->notifydefault; 
                     $entry->text = clean_param($formdata->firstentry['text'], PARAM_CLEANHTML);
                     $entry->format = clean_param($formdata->firstentry['format'], PARAM_INT);
                     $entry->itemid = clean_param($formdata->firstentry['itemid'], PARAM_INT);

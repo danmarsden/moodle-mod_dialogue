@@ -58,13 +58,12 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->setAdvanced('deleteafter');
 
         $options = array();
-        $options[0] =  get_string('no'); 
         $options[1] = get_string('yes');
-        
-        $mform->addElement('select', 'maildefault', get_string('mailnotification', 'dialogue'), $options);
-        //$mform->setHelpButton('maildefault', array('maildefault', get_string('mailnotification', 'dialogue'), 'dialogue', 'maildefault'));
-        $mform->addHelpButton('maildefault', 'maildefault', 'dialogue');
-        $mform->setAdvanced('maildefault');
+        $options[0] = get_string('no'); 
+
+        $mform->addElement('select', 'notifydefault', get_string('notifydefault', 'dialogue'), $options);
+        $mform->addHelpButton('notifydefault', 'notifydefault', 'dialogue');
+        $mform->setAdvanced('notifydefault');
 
         $options = array();
         $options[0] =  get_string('teachertostudent', 'dialogue'); 
