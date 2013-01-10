@@ -410,7 +410,7 @@ function dialogue_print_conversation($dialogue, $conversation) {
     }
     
 
-    if ($entries = $DB->get_records_select('dialogue_entries', "conversationid = ?", array($conversation->id), 'id')) {
+    if ($entries = $DB->get_records_select('dialogue_entries', "conversationid = ?", array($conversation->id), 'timecreated, id')) {
         $firstentry = true;
         foreach ($entries as $entry) {
             $canedit = false; //default
