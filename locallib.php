@@ -368,6 +368,7 @@ function dialogue_print_conversation($dialogue, $conversation) {
     $timenow = time();
     $showbutton = false;
 
+    $thisuser = null;
     //$otheruser always recipient if admin or other viewing
     if ($USER->id == $conversation->userid) {
         if (! $otheruser = $DB->get_record('user', array('id' => $conversation->recipientid))) {
@@ -378,6 +379,7 @@ function dialogue_print_conversation($dialogue, $conversation) {
             print_error("User's record not found");
         }
     } else {
+        $thisuser = $DB->get_record('user', array('id' => $conversation->userid), '*', MUST_EXIST);
         if (! $otheruser = $DB->get_record('user', array('id' => $conversation->recipientid))) {
             print_error("User's record not found");
         }
@@ -490,7 +492,14 @@ function dialogue_print_conversation($dialogue, $conversation) {
             if ($firstentry) {
                 
                 $picture = $OUTPUT->user_picture($otheruser, array('courseid'=>$course->id));
-                $conversant = get_string('dialoguewith', 'dialogue', fullname($otheruser));
+                if ($thisuser) {
+                    $stra = new stdClass();
+                    $stra->sender = s(fullname($thisuser));
+                    $stra->recipient = s(fullname($otheruser));
+                    $conversant = get_string('dialoguebetween', 'dialogue', $stra);
+                } else {
+                    $conversant = get_string('dialoguewith', 'dialogue', fullname($otheruser));
+                }
                 $conversationsubject = empty($conversation->subject) ?  $nosubject : format_string($conversation->subject);
                 
 
@@ -660,22 +669,28 @@ function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
     // list the conversations requiring a resonse from this user in full
     if ($conversations = dialogue_get_conversations($dialogue, $USER, $condition, $cond_params, $order, $groupid)) {
         foreach ($conversations as $conversation) {
+            $with = false;
+            $otherwith = false;
             if ($USER->id == $conversation->userid) {
-                if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
-                    $with = $USER; // incomplete record need cleanup function
-                }
+                $with = $DB->get_record('user', array('id' => $conversation->recipientid));
             } else if ($USER->id == $conversation->recipientid) {
-                if (! $with = $DB->get_record('user', array('id' => $conversation->userid))) {
-                    $with = $USER; // incomplete record need cleanup function
-                }
+                $with = $DB->get_record('user', array('id' => $conversation->userid));
             } else {
-                if (! $with = $DB->get_record('user', array('id' => $conversation->recipientid))) {
-                    $with = $USER; // incomplete record need cleanup function
+                if (has_capability('mod/dialogue:manage', $context, $conversation->userid)) {
+                    $with = $DB->get_record('user', array('id' => $conversation->recipientid));
+                    $otherwith = $DB->get_record('user', array('id' => $conversation->userid));
+                } else {
+                    $with = $DB->get_record('user', array('id' => $conversation->userid));
+                    $otherwith = $DB->get_record('user', array('id' => $conversation->recipientid));
                 }
+            }
+            if (!$with) {
+                $with = $USER; // incomplete record need cleanup function
             }
 
             // save sortable field values for each conversation so can sort by them later
             $names[$conversation->id] = fullname($with);
+            $othernames[$conversation->id] = $otherwith ? fullname($otherwith) : null;
             $unread[$conversation->id] = $conversation->total-$conversation->readings;
             $names_firstlast[$conversation->id] = $with->firstname.' '.$with->lastname;
             $names_lastfirst[$conversation->id] = $with->lastname.' '.$with->firstname;
@@ -725,9 +740,14 @@ function dialogue_list_conversations($dialogue, $groupid=0, $type='open') {
             $profileurl = "$CFG->wwwroot/user/view.php?id=".$ids[$conversation->id]."&amp;course=$dialogue->course";
             $entryurl = "$CFG->wwwroot/mod/dialogue/dialogues.php?id=".$cm->id."&amp;action=printdialogue&amp;cid=".$cid;
             $subject = empty($conversation->subject) ? get_string('nosubject', 'dialogue') : $conversation->subject;
+            if (!empty($othernames[$conversation->id])) {
+                $extraname = html_writer::tag('div', get_string('dialoguewith', 'dialogue', s($othernames[$conversation->id])), array('class' => 'othername'));
+            } else {
+                $extraname = '';
+            }
             $row = array($photos[$conversation->id], 
                          "<a href='$entryurl'>".$subject.'</a>',
-                         "<a href='$profileurl'>".$names[$conversation->id].'</a>',
+                         "<a href='$profileurl'>".$names[$conversation->id].'</a>' . $extraname,
                          $conversation->total,
                          $unreadcount,
                          userdate($conversation->timemodified)
