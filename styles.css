@@ -20,3 +20,5 @@
 .dialogue-entry .commands {float: right;}
 
 #page-mod-dialogue-view th.header { text-align: left; }
+
+#page-mod-dialogue-view .othername { font-size: 80%; }
