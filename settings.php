@@ -34,7 +34,7 @@ $settings->add(new admin_setting_configcheckbox('dialogue_trackreadentries', get
                    get_string('configtrackreadentries', 'dialogue'), 1));
 
 $maxattachments = array(
-    0 => new lang_string('none'),
+    0 => get_string('none'),
     1 => '1',
     2 => '2',
     3 => '3',
@@ -45,6 +45,6 @@ $maxattachments = array(
     20 => '20');
 
 $settings->add(new admin_setting_configselect('dialogue_maxattachments',
-                                              new lang_string('maxattachments', 'dialogue'),
-                                              new lang_string('configmaxattachmentshelp', 'dialogue'), 5, $maxattachments));
+                                              get_string('maxattachments', 'dialogue'),
+                                              get_string('configmaxattachmentshelp', 'dialogue'), 5, $maxattachments));
 
