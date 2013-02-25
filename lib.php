@@ -686,6 +686,7 @@ function dialogue_get_open_conversations($course) {
             if (! $cm = get_coursemodule_from_instance('dialogue', $conversation->dialogueid, $course->id)) {
                 print_error('Course Module ID was incorrect');
             }
+            $entry[$conversation->id] = new stdClass();
             $entry[$conversation->id]->dialogueid = $conversation->dialogueid;
             $entry[$conversation->id]->time = $conversation->timemodified;
             $entry[$conversation->id]->url = "view.php?id=$cm->id";
