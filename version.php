@@ -23,8 +23,9 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$module->version  = 2012111700;
-$module->requires = 2011111200; // Requires this Moodle version 2.2.x
-$module->release  = '2.2.0+'; // Human-friendly version name
-$module->maturity = MATURITY_STABLE; // this version's maturity level
-$module->cron     = 60;
+$module->component = 'mod_dialogue'; // Full name of the plugin (used for diagnostics)
+$module->version   = 2012112900;
+$module->requires  = 2012112900; // Requires this Moodle version 2.2.x
+$module->release   = '2.4'; // Human-friendly version name
+$module->maturity  = MATURITY_RC; // This version's maturity level
+$module->cron      = 60;
