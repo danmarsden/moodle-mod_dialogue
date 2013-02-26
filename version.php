@@ -27,5 +27,5 @@ $module->component = 'mod_dialogue'; // Full name of the plugin (used for diagno
 $module->version   = 2012112900;
 $module->requires  = 2012112900; // Requires this Moodle version 2.2.x
 $module->release   = '2.4'; // Human-friendly version name
-$module->maturity  = MATURITY_RC; // This version's maturity level
+$module->maturity  = MATURITY_STABLE; // This version's maturity level
 $module->cron      = 60;
