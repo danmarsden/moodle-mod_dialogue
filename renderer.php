@@ -20,12 +20,21 @@ defined('MOODLE_INTERNAL') || die();
  * A custom renderer class that extends the plugin_renderer_base and is used by
  * the dialogue module.
  *
- * @package mod_dialogue
+ * @package   mod_dialogue
+ * @copyright 2013 Troy Williams
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_dialogue_renderer extends plugin_renderer_base {
     
-
+    /**
+     * Render conversation, just the conversation
+     *
+     * @global type $PAGE
+     * @global type $OUTPUT
+     * @global type $USER
+     * @param dialogue_conversation $conversation
+     * @return string
+     */
     public function render_dialogue_conversation(dialogue_conversation $conversation) {
         global $PAGE, $OUTPUT, $USER;
 
@@ -45,17 +54,17 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                 $closeurl = clone($PAGE->url);
                 $closeurl->param('conversationid', $conversation->conversationid);
                 $closeurl->param('action', 'close');
-                $html .= html_writer::link($closeurl, new lang_string('closeconversation', 'dialogue'), array('class' => "btn btn-danger pull-right"));
+                $html .= html_writer::link($closeurl, get_string('closeconversation', 'dialogue'), array('class' => "btn btn-danger pull-right"));
             }
         }
 
         if ($conversation->state == dialogue::STATE_CLOSED) {
-            $span = html_writer::tag('span', new lang_string('closed', 'dialogue'), array('class' => "state-indicator state-closed"));
+            $span = html_writer::tag('span', get_string('closed', 'dialogue'), array('class' => "state-indicator state-closed"));
             $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
         }
 
         if ($conversation->state == dialogue::STATE_BULK_AUTOMATED) {
-            $span = html_writer::tag('span', new lang_string('bulkopener', 'dialogue'), array('class' => "state-indicator state-bulk"));
+            $span = html_writer::tag('span', get_string('bulkopener', 'dialogue'), array('class' => "state-indicator state-bulk"));
             $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
         }
 
@@ -74,11 +83,11 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $date = (object) dialogue_getdate($conversation->timemodified);
         $date->fullname = fullname($conversation->author);
         if ($date->today) {
-            $openedbyheader = new lang_string('openedbytoday', 'dialogue', $date);
+            $openedbyheader = get_string('openedbytoday', 'dialogue', $date);
         } else if ($date->currentyear) {
-            $openedbyheader = new lang_string('openedbyshortyear', 'dialogue', $date);
+            $openedbyheader = get_string('openedbyshortyear', 'dialogue', $date);
         } else {
-            $openedbyheader = new lang_string('openedbyfullyear', 'dialogue', $date);
+            $openedbyheader = get_string('openedbyfullyear', 'dialogue', $date);
         }
 
         $html .= html_writer::tag('h5', $openedbyheader, array('class' => 'conversation-heading'));
@@ -92,7 +101,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         if ($participants) {
             $html .= html_writer::start_div('participants');
             $html .= html_writer::tag('strong', count($participants));
-            $html .= '&nbsp;' . new lang_string('participants', 'dialogue');
+            $html .= '&nbsp;' . get_string('participants', 'dialogue');
             foreach ($participants as $participant) {
                 $picture = $OUTPUT->user_picture($participant, array('class' => 'userpicture img-rounded', 'size' => 20));
                 $html .= html_writer::tag('span', $picture . '&nbsp;' . fullname($participant), array('class' => 'participant'));
@@ -102,51 +111,55 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $html .= html_writer::end_div(); // end of main conversation
         $html .= html_writer::empty_tag('hr');
 
-        // unsure
-        $conversation->mark_read();
-        
-        // process replies
-        if ($conversation->replies()) {
-            foreach ($conversation->replies() as $reply) {
-                $html .= html_writer::start_div('conversation');
-                $messageid = 'm' . $reply->messageid;
-                $html .= html_writer::tag('a', '', array('id' => $messageid));
+        return $html;
+    }
 
-                $avatar = $OUTPUT->user_picture($reply->author, array('size' => true, 'class' => 'userpicture img-rounded'));
-                $html .= html_writer::div($avatar, 'conversation-object pull-left');
+    /**
+     * Render a reply related to conversation.
+     *
+     * @param dialogue_reply $reply
+     * @return string
+     */
+    public function render_dialogue_reply(dialogue_reply $reply) {
+        global $OUTPUT;
 
-                $html .= html_writer::start_div('conversation-body');
+        $html = '';
 
-                $date = (object) dialogue_getdate($reply->timemodified);
-                $date->fullname = fullname($reply->author);
-                if ($date->today) {
-                    $repliedbyheader = new lang_string('repliedbytoday', 'dialogue', $date);
-                } else if ($date->currentyear) {
-                    $repliedbyheader = new lang_string('repliedbyshortyear', 'dialogue', $date);
-                } else {
-                    $repliedbyheader = new lang_string('repliedbyfullyear', 'dialogue', $date);
-                }
+        $html .= html_writer::start_div('conversation');
+        $messageid = 'm' . $reply->messageid;
+        $html .= html_writer::tag('a', '', array('id' => $messageid));
 
+        $avatar = $OUTPUT->user_picture($reply->author, array('size' => true, 'class' => 'userpicture img-rounded'));
+        $html .= html_writer::div($avatar, 'conversation-object pull-left');
 
+        $html .= html_writer::start_div('conversation-body');
 
-
-                $html .= html_writer::tag('h5', $repliedbyheader, array('class' => 'conversation-heading'));
-                $html .= html_writer::empty_tag('hr');
-                $html .= $reply->bodyhtml;
-                $html .= $this->render_attachments($reply->attachments);
-                $html .= html_writer::end_div();
-                $html .= html_writer::end_div();
-                $reply->mark_read();
-            }
+        $date = (object) dialogue_getdate($reply->timemodified);
+        $date->fullname = fullname($reply->author);
+        if ($date->today) {
+            $repliedbyheader = get_string('repliedbytoday', 'dialogue', $date);
+        } else if ($date->currentyear) {
+            $repliedbyheader = get_string('repliedbyshortyear', 'dialogue', $date);
+        } else {
+            $repliedbyheader = get_string('repliedbyfullyear', 'dialogue', $date);
         }
+
+        $html .= html_writer::tag('h5', $repliedbyheader, array('class' => 'conversation-heading'));
+        $html .= html_writer::empty_tag('hr');
+        $html .= $reply->bodyhtml;
+        $html .= $this->render_attachments($reply->attachments);
+        $html .= html_writer::end_div();
+        $html .= html_writer::end_div();
 
         return $html;
     }
+
     /**
+     * Render attachments associated with a message - conversation or reply.
      *
      * @global type $OUTPUT
      * @param array $attachments
-     * @return type
+     * @return string
      */
     public function render_attachments(array $attachments) {
         global $OUTPUT;
@@ -154,11 +167,10 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $html = '';
 
         if ($attachments) {
-            $fs = get_file_storage();
 
             $numattachments = count($attachments);
-            $attachmentheader = ($numattachments > 1) ? new lang_string('numberattachments', 'dialogue', $numattachments) :
-                                                        new lang_string('attachment', 'dialogue');
+            $attachmentheader = ($numattachments > 1) ? get_string('numberattachments', 'dialogue', $numattachments) :
+                                                        get_string('attachment', 'dialogue');
 
             $html .= html_writer::start_div('attachments');
             $html .= html_writer::tag('h5', $attachmentheader);
@@ -186,8 +198,8 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                     $html .= html_writer::tag('b', $filename);
                     $html .= html_writer::empty_tag('br');
                     $html .= html_writer::tag('span', display_size($filesize), array('class' => 'meta-filesize'));
-                    $html .= html_writer::link($viewurl, html_writer::tag('span', new lang_string('view')));
-                    $html .= html_writer::link($downloadurl, html_writer::tag('span', new lang_string('download')));
+                    $html .= html_writer::link($viewurl, html_writer::tag('span', get_string('view')));
+                    $html .= html_writer::link($downloadurl, html_writer::tag('span', get_string('download')));
                     $html .= html_writer::end_tag('td');
                     $html .= html_writer::end_tag('tr');
                     $html .= html_writer::end_tag('tbody');
@@ -203,7 +215,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                     $html .= html_writer::tag('i', $filename);
                     $html .= html_writer::empty_tag('br');
                     $html .= html_writer::tag('span', display_size($filesize), array('class' => 'meta-filesize'));
-                    $html .= html_writer::link($downloadurl, html_writer::tag('span', new lang_string('download')));
+                    $html .= html_writer::link($downloadurl, html_writer::tag('span', get_string('download')));
                     $html .= html_writer::end_tag('td');
                     $html .= html_writer::end_tag('tr');
                     $html .= html_writer::end_tag('tbody');
