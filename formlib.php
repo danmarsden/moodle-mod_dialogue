@@ -61,15 +61,13 @@ class mod_dialogue_message_form extends moodleform {
 
 
         $mform->addElement('header', 'actionssection', get_string('actions', 'dialogue'));
+
         $actionbuttongroup = array();
+        $actionbuttongroup[] =& $mform->createElement('submit', 'send', get_string('send', 'dialogue'), array('class'=>'send-button'));
+        $actionbuttongroup[] =& $mform->createElement('submit', 'save', get_string('savedraft', 'dialogue'), array('class'=>'savedraft-button'));
+        $actionbuttongroup[] =& $mform->createElement('submit', 'cancel', get_string('cancel'), array('class'=>'cancel-button'));
 
-        $actionbuttongroup[] =& $mform->createElement('submit', 'save', get_string('savedraft', 'dialogue'), array('class'=>'btn-savedraft'));
-        $actionbuttongroup[] =& $mform->createElement('submit', 'cancel', get_string('cancel'), array('class'=>'btn-cancel'));
-        $actionbuttongroup[] =& $mform->createElement('submit', 'delete', get_string('delete'), array('class'=>'btn-delete'));
-        //$delete = html_writer::link($PAGE->url, get_string('delete'), array('class'=>'btn'));
-        //$actionbuttongroup[] =& $mform->createElement('html', $delete);
-        $actionbuttongroup[] =& $mform->createElement('submit', 'send', get_string('send', 'dialogue'), array('class'=>'btn-send pull-right'));
-
+        $actionbuttongroup[] =& $mform->createElement('submit', 'trash', get_string('trashdraft', 'dialogue'), array('class'=>'trashdraft-button pull-right'));
         $mform->addGroup($actionbuttongroup, 'actionbuttongroup', '', ' ', false);
 
         $mform->setExpanded('actionssection', true);
@@ -162,7 +160,7 @@ class mod_dialogue_message_form extends moodleform {
      * @return null
      */
     public function get_submit_action() {
-        $submitactions = array('send', 'save', 'cancel', 'delete');
+        $submitactions = array('send', 'save', 'cancel', 'trash');
         foreach($submitactions as $submitaction) {
             if (optional_param($submitaction, false, PARAM_BOOL)) {
                 return $submitaction;
@@ -207,7 +205,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
         $html .= html_writer::end_tag('div');
         $html .= html_writer::start_tag('div', array('class'=>'felement ftext'));
         $html .= html_writer::start_tag('div', array('id'=>'participant_autocomplete_field', 'class' => 'js-control yui3-aclist-field'));
-        $html .= html_writer::tag('input', '', array('id'=>'participant_autocomplete_input', 'placeholder' => 'Search for participant...' ));//, 'class'=>"centered"
+        $html .= html_writer::tag('input', '', array('id'=>'participant_autocomplete_input', 'placeholder' => get_string('searchpotentials', 'dialogue')));
         $html .= html_writer::end_tag('div');
         $html .= html_writer::end_tag('div');
         $html .= html_writer::end_tag('div');
