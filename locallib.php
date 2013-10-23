@@ -30,11 +30,16 @@ defined('MOODLE_INTERNAL') || die();
  * Sets up and provides access to dialogue module application caches.
  */
 class dialogue {
+    /** The state to indicate a open conversation and replies **/
+    const STATE_OPEN            = 'open';
+    /** The state to indicate a conversation or reply that is a draft **/
+    const STATE_DRAFT           = 'draft';
+    /** The state to indicated a conversation used in bulk creation of other
+        conversations  **/
+    const STATE_BULK_AUTOMATED  = 'bulkautomated';
+    /** The state to indicate a closed conversation and replies **/
+    const STATE_CLOSED          = 'closed';
 
-    const STATE_OPEN = 'open';
-    const STATE_DRAFT = 'draft';
-    const STATE_BULK_AUTOMATED = 'bulkautomated';
-    const STATE_CLOSED = 'closed';
     const FLAG_SENT = 'sent';
     const FLAG_READ = 'read';
     const SHOW_MINE = 'mine';
