@@ -14,81 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-//
-// Capability definitions for the dialogue module.
-//
+/**
+ * Capability definitions for the dialogue module
+ *
+ *
+ * The variable name for the capability definitions array is $capabilities
+ *
+ * @package   mod_dialogue
+ * @copyright 2013
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
-
-    'mod/dialogue:open' => array(
-
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'student' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-        'riskbitmask' => RISK_SPAM,
-    ),
-    
-    'mod/dialogue:participate' => array(
-
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'student' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-        'riskbitmask' => RISK_SPAM,
-    ),
-
-    'mod/dialogue:manage' => array(
-
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-    
-    'mod/dialogue:viewall' => array(
-
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-    
-    'mod/dialogue:participateany' => array(
-
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-    
-    'mod/dialogue:close' => array(
-
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
 
     'mod/dialogue:addinstance' => array(
         'riskbitmask' => RISK_XSS,
@@ -100,6 +39,117 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         ),
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
-    )
-);
+    ),
 
+    'mod/dialogue:bulkopenrulecreate' => array(
+        'riskbitmask' => RISK_SPAM,
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_PREVENT,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_PREVENT
+        )
+    ),
+
+    'mod/dialogue:bulkopenruleeditany' => array(
+        'riskbitmask' => RISK_SPAM,
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_PREVENT,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_PREVENT
+        )
+    ),
+
+    'mod/dialogue:close' => array(
+
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
+    'mod/dialogue:closeany' => array(
+
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_PREVENT,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_PREVENT
+        )
+    ),
+
+    'mod/dialogue:open' => array(
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
+    'mod/dialogue:receive' => array(
+
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_ALLOW,
+            'teacher' => CAP_PREVENT,
+            'editingteacher' => CAP_PREVENT,
+            'manager' => CAP_PREVENT
+        )
+    ),
+
+    'mod/dialogue:reply' => array(
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
+    'mod/dialogue:replyany' => array(
+        'riskbitmask' => RISK_PERSONAL,
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_PREVENT,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_PREVENT
+        )
+    ),
+
+    'mod/dialogue:viewany' => array(
+        'riskbitmask' => RISK_PERSONAL,
+
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_PREVENT,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_PREVENT
+        )
+    ),
+);

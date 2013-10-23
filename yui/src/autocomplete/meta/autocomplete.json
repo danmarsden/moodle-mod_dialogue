@@ -1,0 +1,14 @@
+{
+    "moodle-mod_dialogue-autocomplete": {
+        "requires": [
+            "base",
+            "node",
+            "json-parse",
+            "autocomplete",
+            "autocomplete-filters",
+            "autocomplete-highlighters",
+            "event",
+            "event-key"
+        ]
+    }
+}

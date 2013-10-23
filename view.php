@@ -14,171 +14,171 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * This page prints a particular instance of Dialogue
- * 
- * @package dialogue
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- */
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+require_once('lib.php');
+require_once('locallib.php');
 
-    require_once("../../config.php");
-    require_once("lib.php");
-    require_once("locallib.php");
-    require_once("dialogue_open_form.php");
+$id         = required_param('id', PARAM_INT);
+$state      = optional_param('state', 'open', PARAM_ALPHA);
+$show       = optional_param('show', dialogue::SHOW_MINE, PARAM_ALPHA);
+$page       = optional_param('page', 0, PARAM_INT);
+$sort       = optional_param('sort', 'latest', PARAM_ALPHANUM);
 
-    $id   = required_param('id', PARAM_INT);
-    $pane = optional_param('pane', 1, PARAM_INT);
-    $group = optional_param('group',-1, PARAM_INT);
-
-    $PAGE->set_url('/mod/dialogue/view.php', array('id' => $id, 
-                                                   'pane' => $pane,
-                                                   'group' => $group));
-
+if ($id) {
     if (! $cm = get_coursemodule_from_id('dialogue', $id)) {
-        print_error("Course Module ID was incorrect");
+        print_error('invalidcoursemodule');
     }
- 
-    if (! $course = $DB->get_record("course", array('id' => $cm->course))) {
-        print_error("Course is misconfigured");
+    if (! $activityrecord = $DB->get_record('dialogue', array('id' => $cm->instance))) {
+        print_error('invalidid', 'dialogue');
     }
-
-    if (! $dialogue = $DB->get_record("dialogue", array('id' => $cm->instance))) {
-        print_error("Course module is incorrect");
+    if (! $course = $DB->get_record('course', array('id' => $activityrecord->course))) {
+        print_error('coursemisconf');
     }
+} else {
+    print_error('missingparameter');
+}
 
-    require_login($course, false, $cm);
+$context = context_module::instance($cm->id);
 
-    $context           = get_context_instance(CONTEXT_MODULE, $cm->id); // m odule context
-    $hascapopen        = has_capability('mod/dialogue:open', $context);
-    $hascapparticipate = has_capability('mod/dialogue:participate', $context);
-    $hascapviewall     = has_capability('mod/dialogue:viewall', $context);
-    $hascapmanage      = has_capability('mod/dialogue:manage', $context);
-    $currentgroup      = groups_get_activity_group($cm, true);
-    $groupmode         = groups_get_activity_groupmode($cm);
+require_login($course, false, $cm);
 
-    /// Some capability checks.
-    if (empty($cm->visible) and !has_capability('moodle/course:viewhiddenactivities', $context)) {
-        echo $OUTPUT->notification(get_string("activityiscurrentlyhidden"));
-    }
+$pageparams = array('id' => $cm->id, 'state' => $state, 'show' => $show, 'page' => $page, 'sort' => $sort);
+$pageurl    = new moodle_url('/mod/dialogue/view.php', $pageparams);
 
+
+$PAGE->set_pagetype('mod-dialogue-view-index');
+$PAGE->set_cm($cm, $course, $activityrecord);
+$PAGE->set_context($context);
+$PAGE->set_cacheable(false);
+$PAGE->set_url($pageurl);
+$PAGE->set_title(format_string($activityrecord->name));
+$PAGE->set_heading(format_string($course->fullname));
+
+// check if needs to be upgraded
+if (dialogue_cm_needs_upgrade($cm->id)) {
+    $link = new moodle_url('/course/view.php', array('id' => $COURSE->id));
+    notice(new lang_string('upgrademessage', 'dialogue'), $link);
+    exit;
+}
+
+dialogue_load_bootstrap_js();// load javascript if not bootstrap theme
+
+$dialogue = new dialogue($cm, $course, $activityrecord);
+$total = 0;
+$rs = dialogue_get_conversation_listing($dialogue, $total);
+$pagination = new paging_bar($total, $page, dialogue::PAGINATION_PAGE_SIZE, $pageurl);
+
+$modrenderer = $PAGE->get_renderer('mod_dialogue');
+
+echo $OUTPUT->header();
+if (!empty($dialogue->activityrecord->intro)) {
+    echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
+}
+
+$groupmode = groups_get_activity_groupmode($cm);
+if ($groupmode == SEPARATEGROUPS or $groupmode == VISIBLEGROUPS) {
+    echo $OUTPUT->notification(new lang_string('groupmodenotifymessage', 'dialogue'), 'notifymessage');
+}
+$groupsurl = clone($pageurl);
+$groupsurl->remove_params('page'); // clear page
+echo groups_print_activity_menu($cm, $groupsurl, true);
+echo html_writer::empty_tag('br');
+echo $modrenderer->tab_navigation();
+echo $modrenderer->conversation_list_buttons();
+echo $modrenderer->conversation_list_sortby();
+$a = new stdClass();
+$a->state = strtolower(new lang_string($state, 'dialogue'));
+$a->show = ($show == 'mine') ? new lang_string('justmy', 'dialogue') : new lang_string('everyones', 'dialogue');
+$a->groupname = '';
+$activegroup = groups_get_activity_group($cm, true);
+if ($activegroup) {
+    $a->groupname = new lang_string('ingroup', 'dialogue', groups_get_group_name($activegroup));
+}
+$html = '';
+if (!$rs) {
+    $html .= html_writer::start_div();
+    $html .= html_writer::tag('h6', new lang_string('conversationlistdisplayheader', 'dialogue', $a));
+    $html .= html_writer::end_div();
+    $html .= $OUTPUT->notification(new lang_string('noconversationsfound', 'dialogue'), 'notifyproblem');
+} else {
     
+    $html .= html_writer::start_div('listing-meta');
+   
+    $html .= html_writer::tag('h6', new lang_string('conversationlistdisplayheader', 'dialogue', $a));
+    $a         = new stdClass();
+    $a->start  = ($page) ? $page * dialogue::PAGINATION_PAGE_SIZE : 1;
+    $a->end    = $page * dialogue::PAGINATION_PAGE_SIZE + count($rs);
+    $a->total  = $total;
+    $html .= html_writer::tag('h6', new lang_string('listpaginationheader', 'dialogue', $a), array('class'=>'pull-right'));
+    $html .= html_writer::end_div();
+    $html .= html_writer::start_tag('table', array('class'=>'table table-hover table-condensed'));
+    $html .= html_writer::start_tag('tbody');
     
-    add_to_log($course->id, "dialogue", "view", "view.php?id=$cm->id", $dialogue->id, $cm->id);
-
-    $strdialogue = get_string("modulename", "dialogue");
-    $strdialogues = get_string("modulenameplural", "dialogue");
-
-    $PAGE->set_context($context);
-    $PAGE->set_title(format_string($dialogue->name));
-    $PAGE->set_heading(format_string($course->fullname));
-
-    echo $OUTPUT->header();
-    
-    if (!$hascapparticipate) { // no access
-        echo $OUTPUT->notification(get_string("notavailable", "dialogue"));
-        echo $OUTPUT->footer($course);
-        die;
-    }
-    /// find out current groups mode
-    groups_print_activity_menu($cm, new moodle_url($CFG->wwwroot . '/mod/dialogue/view.php', array('id' => $cm->id,
-                                                                                                   'pane' => $pane)));
-    $currentgroup = groups_get_activity_group($cm);
-    $groupmode = groups_get_activity_groupmode($cm);
-
-    /// print intro text
-    echo $OUTPUT->box(format_module_intro('dialogue', $dialogue, $cm->id), 'generalbox', 'intro');
-
-    // get some stats
-    $countopen = dialogue_count_open($dialogue, $USER, $hascapviewall, $currentgroup);
-    $countclosed = dialogue_count_closed($dialogue, $USER, $hascapviewall, $currentgroup);
-    // set up tab table
-    $names[0] = get_string("pane0", "dialogue");
-    if ($countopen == 1) {
-        $names[1] = get_string("pane1one", "dialogue");
-    } else {
-        $names[1] = get_string("pane1", "dialogue", $countopen);
-    }
-    if ($countclosed == 1) {
-        $names[3] = get_string("pane3one", "dialogue");
-    } else {
-        $names[3] = get_string("pane3", "dialogue", $countclosed);
-    }
-
-    $tabs = array();
-    if ($hascapopen) {
-        $URL = "view.php?id=$cm->id&amp;pane=".DIALOGUEPANE_OPEN;
-        $groupmode = groups_get_activity_groupmode($cm, $course);
-        if (($groupmode == SEPARATEGROUPS) || ($groupmode == VISIBLEGROUPS)) { 
-            // pass the user's groupid if in groups mode to view.php
-            // NOTE: this defaults to users first group, needs to be updated to handle grouping mode also
-            // ULPGC ecastro activity_group handles grouping & group
-            if($firstgroup = groups_get_activity_group($cm, true)) {
-                $URL .= "&amp;group=" . $firstgroup;
-            }
+    foreach($rs as $record) {
+        $html .= html_writer::start_tag('tr', array('id'=>'item-'.$record->id));
+        if ($record->state == dialogue::STATE_CLOSED) {
+            $label = html_writer::tag('span', new lang_string('closed', 'dialogue'),
+                                      array('class'=>'label label-important'));
+            $html .= html_writer::tag('td', $label);
         }
-        $tabs[0][] =  new tabobject (0, $URL, $names[0]);
+        
+        $unreadcount = $record->unread;
+        //$unreadcount = $unreadcounts[$record->conversationid];
+
+        $badgeclass = ($unreadcount) ? 'badge label-info' : 'hidden' ;
+        $badge = html_writer::span($unreadcount, $badgeclass, array('title'=>new lang_string('numberunread', 'dialogue', $unreadcount)));
+        $html .= html_writer::tag('td', $badge);
+
+        $author = dialogue_get_user_details($dialogue, $record->authorid);
+        $avatar = $OUTPUT->user_picture($author, array('class'=> 'userpicture img-rounded', 'size' => 48));
+        $html .= html_writer::tag('td', $avatar);
+        $html .= html_writer::tag('td', fullname($author));
+
+        $subject = empty($record->subject) ? new lang_string('nosubject', 'dialogue') : $record->subject;
+        $subject = html_writer::tag('strong', $subject);
+        $shortenedbody = dialogue_shorten_html($record->body);
+        $shortenedbody = html_writer::tag('span', $shortenedbody);
+        $participantshtml = '';
+
+        $participants = $dialogue->get_participants($record->conversationid);
+        foreach($participants as $participantid) {
+            if ($author->id == $participantid) {
+                continue;
+            }
+            //$participant = $dialogue->get_user_brief_details($participantid);
+            $participant = dialogue_get_user_details($dialogue, $participantid);
+            $picture = $OUTPUT->user_picture($participant, array('class'=>'userpicture img-rounded', 'size'=>16));
+            $participanthtml = html_writer::tag('span', $picture.'&nbsp;'.fullname($participant));
+            $participantshtml .=  $participanthtml;
+        }
+
+        $t = dialogue_listing_summary($record->subject, $record->body);
+        $html .= html_writer::tag('td', $t.'<br/>'.$participantshtml);
+        //$html .= html_writer::tag('td', $subject.' - '.$shortenedbody.'<br/>'.$participantshtml);
+        $date = (object) dialogue_getdate($record->timemodified);
+        if ($date->today) {
+            $timemodified = $date->time;
+        } else if ($date->currentyear) {
+            $timemodified = new lang_string('dateshortyear', 'dialogue', $date);
+        } else {
+            $timemodified = new lang_string('datefullyear', 'dialogue', $date);
+        }
+        $html .= html_writer::tag('td', $timemodified, array('title' => userdate($record->timemodified)));
+
+        $viewurlparams = array('id' => $cm->id, 'conversationid' => $record->conversationid, 'action' => 'view');
+        $viewlink = html_writer::link(new moodle_url('conversation.php', $viewurlparams),
+                                      new lang_string('view'), array('class'=>'nonjs-control-show'));
+
+        $html .= html_writer::tag('td', $viewlink);
+
+        $html .= html_writer::end_tag('tr');
     }
-    $tabs[0][] =  new tabobject (1, "view.php?id=$cm->id&amp;pane=".DIALOGUEPANE_CURRENT, $names[1]);
-    $tabs[0][] =  new tabobject (3, "view.php?id=$cm->id&amp;pane=".DIALOGUEPANE_CLOSED, $names[3]);
-
-    print_tabs($tabs, $pane, NULL, NULL, false);
-    echo "<br />\n";
-
-    $names = dialogue_get_available_users($dialogue, $context, 0);
-
-    switch ($pane) {
-        case 0: // Open dialogue
-            if (! $hascapopen) {
-                echo $OUTPUT->notification(get_string("notavailable", "dialogue"));
-                echo $OUTPUT->continue_button("view.php?id=$cm->id");
-                break;
-            }
-            if ($groupmode && ! $hascapmanage) {
-                if ($group>0) {
-                    $members = groups_get_members($group, 'u.id');
-                    if (! in_array($USER->id, array_keys($members))) {
-                        echo $OUTPUT->notification(get_string("cannotadd", "dialogue"));
-                        echo $OUTPUT->continue_button("view.php?id=$cm->id");
-                        break;
-                    }
-                } else {
-                        echo $OUTPUT->notification(get_string("cannotaddall", "dialogue"));
-                        echo $OUTPUT->continue_button("view.php?id=$cm->id");
-                        break;
-                }
-            }
-            if ($names) {
-                // setup form for opening a new conversation
-                $mform = new mod_dialogue_open_form('dialogues.php', array('context'=>$context,
-                                                                           'names'=>$names,
-                                                                           ));
-                //$draftitemid = file_get_unused_draft_itemid();
-
-                //$draftitemid = file_get_submitted_draft_itemid('attachment');
-                //print_object($draftitemid);
-                //file_prepare_draft_area($draftitemid, $context->id, 'mod_glossary', 'attachment', null);
-
-                $mform->set_data(array('id' => $cm->id, 
-                                       'action' => 'openconversation'));
-                //,
-                  //                     'attachment' => $draftitemid));
-                $mform->display();
-
-            } else {
-                echo $OUTPUT->notification(get_string("noavailablepeople", "dialogue"));
-                echo $OUTPUT->continue_button("view.php?id=$cm->id");
-            }
-            break;
-
-        case 1: // Current dialogues
-        case 2:
-            // print active conversations requiring a reply from the other person.
-            dialogue_list_conversations($dialogue, $currentgroup, 'open');
-            break;
-
-        case 3: // Closed dialogues
-            dialogue_list_conversations($dialogue, $currentgroup, 'closed');
-            break;
-    }
-
-    echo $OUTPUT->footer($course);
+    $html .= html_writer::end_tag('tbody');
+    $html .= html_writer::end_tag('table');
+    $html .= $OUTPUT->render($pagination); // just going to use standard pagebar, to much work to bootstrap it.
+}
+echo $html;
+echo $OUTPUT->footer($course);
+$logurl = new moodle_url('view.php', array('id' =>  $cm->id));
+add_to_log($course->id, 'dialogue', 'view', $logurl->out(false), $activityrecord->name, $cm->id);
+exit;

@@ -16,35 +16,38 @@
 
 /**
  * Configure site-wide settings specific to the Dialogue modue
- * 
- * Note: the only setting currently relates to unread-post tracking - this will only be 
+ *
+ * Note: the only setting currently relates to unread-post tracking - this will only be
  * supported in your courses if you have applied the patch in CONTRIB-1134 which modifies
- * course/lib.php to check and display unread post counts in the course/topic area. 
+ * course/lib.php to check and display unread post counts in the course/topic area.
  * If you havent applied that patch this setting will still be stored in Moodle but it
  * will have no effect on the display of your courses, ie users will not see an unread
  * posts count
- *  
- * @package dialogue
+ *
+ * @package mod_dialogue
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  */
 require_once($CFG->dirroot.'/mod/dialogue/lib.php');
 
 // whether to provide unread post count
-$settings->add(new admin_setting_configcheckbox('dialogue_trackreadentries', get_string('trackdialogue', 'dialogue'),
-                   get_string('configtrackreadentries', 'dialogue'), 1));
+$settings->add(new admin_setting_configcheckbox('dialogue/trackunread', new lang_string('configtrackunread', 'dialogue'),
+                   '', 1));
+// Default total maxbytes of attached files
+if (isset($CFG->maxbytes)) {
+    $settings->add(new admin_setting_configselect('dialogue/maxbytes', new lang_string('maxattachmentsize', 'dialogue'),
+                   new lang_string('configmaxbytes', 'dialogue'), 512000, get_max_upload_sizes($CFG->maxbytes)));
+}
 
-$maxattachments = array(
-    0 => get_string('none'),
-    1 => '1',
-    2 => '2',
-    3 => '3',
-    4 => '4',
-    5 => '5',
-    10 => '10',
-    15 => '15',
-    20 => '20');
+$choices = array(0,1,2,3,4,5,6,7,8,9,10,20);
+// Default number of attachments allowed per post in all dialogues
+$settings->add(new admin_setting_configselect('dialogue/maxattachments', new lang_string('maxattachments', 'dialogue'),
+               new lang_string('configmaxattachments', 'dialogue'), 5, $choices));
 
-$settings->add(new admin_setting_configselect('dialogue_maxattachments',
-                                              get_string('maxattachments', 'dialogue'),
-                                              get_string('configmaxattachmentshelp', 'dialogue'), 5, $maxattachments));
+if ($hassiteconfig) { // needs this condition or there is error on login page
+    if (get_config('dialogue', 'upgraderequired')) {
+        $ADMIN->add('root', new admin_externalpage('dialogueupgradehelper',
+            $name = new lang_string('dialogueupgradehelper', 'dialogue'),
+            new moodle_url('/mod/dialogue/upgrade/index.php')));
 
+    }
+}

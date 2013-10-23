@@ -1,98 +1,114 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/dialogue/db" VERSION="20120518" COMMENT="XMLDB file for Moodle mod/dialogue"
+<XMLDB PATH="mod/dialogue/db" VERSION="20130501" COMMENT="XMLDB file for Moodle mod/dialogue"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
-  <TABLES>
-    <TABLE NAME="dialogue" COMMENT="Dialogue" NEXT="dialogue_conversations">
+<TABLES>
+    <TABLE NAME="dialogue" COMMENT="Dialogue course module instance information and settings">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="course"/>
-        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="deleteafter"/>
-        <FIELD NAME="deleteafter" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="course" NEXT="dialoguetype"/>
-        <FIELD NAME="dialoguetype" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="deleteafter" NEXT="multipleconversations"/>
-        <FIELD NAME="multipleconversations" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="dialoguetype" NEXT="notifydefault"/>
-        <FIELD NAME="notifydefault" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="multipleconversations" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="notifydefault" NEXT="name"/>
-        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="timemodified" NEXT="intro"/>
-        <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Default comment for the field, please edit me" PREVIOUS="name" NEXT="introformat"/>
-        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="text format of intro field" PREVIOUS="intro" NEXT="edittime"/>
-        <FIELD NAME="edittime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="introformat"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="intro" TYPE="text" LENGTH="medium" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        <FIELD NAME="multipleconversations" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        <FIELD NAME="maxattachments" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        <FIELD NAME="maxbytes" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        <FIELD NAME="notifications" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" DEFAULT="1"/>
+        <FIELD NAME="notificationcontent" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
       </FIELDS>
       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for label"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="dialogue_conversations" COMMENT="Dialogue Conversations" PREVIOUS="dialogue" NEXT="dialogue_entries">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="id of the table, please edit me" NEXT="dialogueid"/>
-        <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default comment for the field, please edit me" PREVIOUS="dialogueid" NEXT="recipientid"/>
-        <FIELD NAME="recipientid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid" NEXT="lastid"/>
-        <FIELD NAME="lastid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="recipientid" NEXT="lastrecipientid"/>
-        <FIELD NAME="lastrecipientid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="lastid" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="lastrecipientid" NEXT="closed"/>
-        <FIELD NAME="closed" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="seenon"/>
-        <FIELD NAME="seenon" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="closed" NEXT="ctype"/>
-        <FIELD NAME="ctype" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="seenon" NEXT="format"/>
-        <FIELD NAME="format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="ctype" NEXT="subject"/>
-        <FIELD NAME="subject" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" PREVIOUS="format" NEXT="groupid"/>
-        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="subject" NEXT="grouping"/>
-        <FIELD NAME="grouping" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="groupid"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="primary key of the table, please edit me"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="dialogue_conversations_timemodified_idx" UNIQUE="false" FIELDS="timemodified" NEXT="dialogue_conversations_dialogueid_idx"/>
-        <INDEX NAME="dialogue_conversations_dialogueid_idx" UNIQUE="false" FIELDS="dialogueid" PREVIOUS="dialogue_conversations_timemodified_idx" NEXT="dialogue_conversations_userid_idx"/>
-        <INDEX NAME="dialogue_conversations_userid_idx" UNIQUE="false" FIELDS="userid" PREVIOUS="dialogue_conversations_dialogueid_idx" NEXT="dialogue_conversations_recipientid_idx"/>
-        <INDEX NAME="dialogue_conversations_recipientid_idx" UNIQUE="false" FIELDS="recipientid" PREVIOUS="dialogue_conversations_userid_idx" NEXT="dialogue_conversations_groupid_idx"/>
-        <INDEX NAME="dialogue_conversations_groupid_idx" UNIQUE="false" FIELDS="groupid" PREVIOUS="dialogue_conversations_recipientid_idx" NEXT="dialogue_conversations_grouping_idx"/>
-        <INDEX NAME="dialogue_conversations_grouping_idx" UNIQUE="false" FIELDS="grouping" PREVIOUS="dialogue_conversations_groupid_idx"/>
+    <TABLE NAME="dialogue_conversations" COMMENT="Dialogue conversation information">
+        <FIELDS>
+            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+            <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+            <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        </FIELDS>
+        <KEYS>
+            <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        </KEYS>
+        <INDEXES>
+            <INDEX NAME="dialogueid" UNIQUE="false" FIELDS="dialogueid"/>
+        </INDEXES>
+    </TABLE>
+    <TABLE NAME="dialogue_participants" COMMENT="Parcipants involved in a conversation">
+        <FIELDS>
+            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+            <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        </FIELDS>
+        <KEYS>
+            <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        </KEYS>
+        <INDEXES>
+            <INDEX NAME="userid-dialogueid" UNIQUE="false" FIELDS="userid, dialogueid"/>
+            <INDEX NAME="userid-conversationid" UNIQUE="false" FIELDS="userid, conversationid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="dialogue_entries" COMMENT="Dialogue entries" PREVIOUS="dialogue_conversations" NEXT="dialogue_read">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="id of the table, please edit me" NEXT="dialogueid"/>
-        <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="conversationid"/>
-        <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="dialogueid" NEXT="userid"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="conversationid" NEXT="recipientid"/>
-        <FIELD NAME="recipientid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid" NEXT="timecreated"/>
-        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="recipientid" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="timecreated" NEXT="notified"/>
-        <FIELD NAME="notified" TYPE="int" LENGTH="4" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="text"/>
-        <FIELD NAME="text" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="notified" NEXT="format"/>
-        <FIELD NAME="format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="text" NEXT="trust"/>
-        <FIELD NAME="trust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="format" NEXT="attachment"/>
-        <FIELD NAME="attachment" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" PREVIOUS="trust"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="primary key of the table, please edit me"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="dialogue_entries_conversationid_idx" UNIQUE="false" FIELDS="conversationid" NEXT="dialogue_entries_dialogueid_idx"/>
-        <INDEX NAME="dialogue_entries_dialogueid_idx" UNIQUE="false" FIELDS="dialogueid" PREVIOUS="dialogue_entries_conversationid_idx" NEXT="dialogue_entries_userid_idx"/>
-        <INDEX NAME="dialogue_entries_userid_idx" UNIQUE="false" FIELDS="userid" PREVIOUS="dialogue_entries_dialogueid_idx" NEXT="dialogue_entries_recipientid_idx"/>
-        <INDEX NAME="dialogue_entries_recipientid_idx" UNIQUE="false" FIELDS="recipientid" PREVIOUS="dialogue_entries_userid_idx"/>
-      </INDEXES>
+    <TABLE NAME="dialogue_bulk_opener_rules" COMMENT="Conversation bulk opener rules">
+        <FIELDS>
+            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+            <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="type" TYPE="char" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
+            <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="includefuturemembers" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="cutoffdate" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="lastrun" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        </FIELDS>
+        <KEYS>
+            <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        </KEYS>
     </TABLE>
-    <TABLE NAME="dialogue_read" COMMENT="Records when dialogue entries were viewed" PREVIOUS="dialogue_entries">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="entryid"/>
-        <FIELD NAME="entryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="entryid" NEXT="firstread"/>
-        <FIELD NAME="firstread" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="userid" NEXT="lastread"/>
-        <FIELD NAME="lastread" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="firstread" NEXT="conversationid"/>
-        <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="lastread"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="dialogueread_entryid_userid_uk"/>
-        <KEY NAME="dialogueread_entryid_userid_uk" TYPE="unique" FIELDS="entryid, userid" PREVIOUS="primary" NEXT="dialogueread_conversation_fk"/>
-        <KEY NAME="dialogueread_conversation_fk" TYPE="foreign" FIELDS="conversationid" REFTABLE="dialogue_conversations" REFFIELDS="id" PREVIOUS="dialogueread_entryid_userid_uk"/>
-      </KEYS>
+    <TABLE NAME="dialogue_messages" COMMENT="Contains all mesages">
+        <FIELDS>
+            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+            <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="conversationindex" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="authorid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="body" TYPE="text" LENGTH="medium" NOTNULL="true" SEQUENCE="false" />
+            <FIELD NAME="bodyformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+            <FIELD NAME="bodytrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+            <FIELD NAME="attachments" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="state" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+            <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        </FIELDS>
+        <KEYS>
+            <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        </KEYS>
+        <INDEXES>
+            <INDEX NAME="authorid" UNIQUE="false" FIELDS="authorid"/>
+        </INDEXES>
+    </TABLE>
+    <TABLE NAME="dialogue_flags" COMMENT="Flags set against a dialogue, conversation or message e.g read">
+        <FIELDS>
+            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+            <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="messageid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="flag" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" />
+            <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        </FIELDS>
+        <KEYS>
+            <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        </KEYS>
+        <INDEXES>
+            <INDEX NAME="userid-dialogueid" UNIQUE="false" FIELDS="userid, dialogueid"/>
+            <INDEX NAME="userid-conversationid" UNIQUE="false" FIELDS="userid, conversationid"/>
+            <INDEX NAME="userid-messageid" UNIQUE="false" FIELDS="userid, messageid"/>
+      </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>

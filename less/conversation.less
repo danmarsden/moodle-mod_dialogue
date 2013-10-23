@@ -1,0 +1,89 @@
+// Media objects
+// Source: http://stubbornella.org/content/?p=497
+// --------------------------------------------------
+
+@userpicturesize: 64px;
+
+// Common styles
+// -------------------------
+
+// Clear the floats
+.conversation,
+.conversation-body {
+  overflow: hidden;
+  *overflow: visible;
+  zoom: 1;
+}
+
+// Proper spacing between instances of .conversation
+.conversation,
+.conversation .conversation {
+  margin-top: 15px;
+}
+.conversation:first-child {
+  margin-top: 0;
+}
+
+// For images and videos, set to block
+.conversation-object {
+  display: block;
+}
+
+.conversation-object img.userpicture {
+  width: @userpicturesize;
+  height: @userpicturesize;
+}
+
+// Reset margins on headings for tighter default spacing
+.conversation-heading {
+  margin: 0 0 5px;
+}
+
+.conversation-heading .heading {
+  display: inline-block;
+  margin: 0;
+}
+
+.conversation-body {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.3em;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  padding: 0.8em;
+}
+
+.conversation hr {
+  margin: 3px 0;
+}
+.conversation .attachments span {
+  margin: 0 3px;
+}
+
+
+// Media image alignment
+// -------------------------
+
+.conversation > .pull-left {
+  margin-right: 10px;
+}
+.conversation > .pull-right {
+  margin-left: 10px;
+}
+
+.conversation .participants {
+  margin-top: 10px;
+  margin-left: 10px + @userpicturesize;
+}
+
+.conversation .participants span.participant {
+  margin: 0 5px;
+}
+// Media list variation
+// -------------------------
+
+// Undo default ul/ol styles
+.conversation-list {
+  margin-left: 0;
+  list-style: none;
+}
+
+

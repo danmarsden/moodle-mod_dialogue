@@ -14,21 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Definition of log events
- *
- * @package    mod
- * @subpackage dialogue
- * @copyright  2010 Petr Skoda (http://skodak.org)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $logs = array(
+    // dialogue instance log actions
+    array('module'=>'dialogue', 'action'=>'add', 'mtable'=>'dialogue', 'field'=>'name'),
+    array('module'=>'dialogue', 'action'=>'update', 'mtable'=>'dialogue', 'field'=>'name'),
     array('module'=>'dialogue', 'action'=>'view', 'mtable'=>'dialogue', 'field'=>'name'),
-    array('module'=>'dialogue', 'action'=>'add entry', 'mtable'=>'dialogue_entries', 'field'=>'id'),
-    array('module'=>'dialogue', 'action'=>'edit entry', 'mtable'=>'dialogue_entries', 'field'=>'id'),
-    array('module'=>'dialogue', 'action'=>'closed', 'mtable'=>'dialogue_conversations', 'field'=>'id'),
+    array('module'=>'dialogue', 'action'=>'view by role', 'mtable'=>'dialogue', 'field'=>'name'),
+    array('module'=>'dialogue', 'action'=>'view all', 'mtable'=>'dialogue', 'field'=>'name'),
+    // conversation log actions
+    array('module'=>'dialogue', 'action'=>'close conversation', 'mtable'=>'dialogue_conversations', 'field'=>'subject'),
+    array('module'=>'dialogue', 'action'=>'delete conversation', 'mtable'=>'dialogue_conversations', 'field'=>'subject'),
+    array('module'=>'dialogue', 'action'=>'open conversation', 'mtable'=>'dialogue_conversations', 'field'=>'subject'),
+    array('module'=>'dialogue', 'action'=>'view conversation', 'mtable'=>'dialogue_conversations', 'field'=>'subject'),
+    // reply log actions
+    array('module'=>'dialogue', 'action'=>'reply', 'mtable'=>'dialogue_conversations', 'field'=>'subject'),
 );
-

@@ -1,0 +1,10 @@
+{
+    "name": "moodle-mod_dialogue-autocomplete",
+    "builds": {
+        "moodle-mod_dialogue-autocomplete": {
+            "jsfiles": [
+                "autocomplete.js"
+            ]
+        }
+    }
+}

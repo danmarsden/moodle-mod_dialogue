@@ -1,0 +1,112 @@
+body .js-control {
+    display: none;
+}
+body.jsenabled .js-control {
+    display: inline-block;
+}
+body.jsenabled .nonjs-control, body.jsenabled .nonjs-control input {
+    display: none;
+}
+
+/** Bootstrap **/
+// Core variables and mixins
+@import "bootstrap/variables.less"; // Modify this for custom colors, font-sizes, etc
+@import "bootstrap/mixins.less";
+
+// CSS Reset
+@import "bootstrap/reset.less";
+
+// Grid system and page structure
+@import "bootstrap/scaffolding.less";
+//@import "bootstrap/grid.less";
+//@import "bootstrap/layouts.less";
+
+// Base CSS
+//@import "type.less";
+//@import "code.less";
+@import "bootstrap/forms.less";
+@import "bootstrap/tables.less";
+
+// Components: common
+
+@import "bootstrap/dropdowns.less";
+
+
+// Components: Buttons & Alerts
+@import "bootstrap/buttons.less";
+@import "bootstrap/button-groups.less";
+@import "bootstrap/alerts.less"; // Note: alerts share common CSS with buttons and thus have styles in buttons.less
+
+// Components: Nav
+@import "bootstrap/navs.less";
+
+// Components: Misc
+@import "bootstrap/thumbnails.less";
+@import "bootstrap/media.less";
+@import "bootstrap/labels-badges.less";
+
+
+// Utility classes
+@import "bootstrap/utilities.less"; // Has to be last to override when necessary
+
+// Custom
+@import "autocomplete.less";
+
+// Hide from screenreaders and browsers
+// Credit: HTML5 Boilerplate
+.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+/* listing meta */
+.listing-meta h6 {
+   display: inline-block
+}
+
+.listing-meta:before {
+   content: "";
+   display: block;
+   clear: both;
+}
+
+/* dropdown group - contains both js and no-js controls */
+.dropdown-group {
+   display: inline-block;
+}
+.dropdown-group > span {
+   margin-right: 10px;
+}
+.btn-group + .dropdown-group > span {
+   margin-left: 10px
+}
+
+.participation {
+    margin-top: 10px;
+}
+.participation + span {
+    display: inline-block;
+    margin: 0 10px 0 0;
+}
+
+/* Custom buttons */
+.btn-create {
+  .btn;
+  .btn-primary;
+  /*.buttonBackground(@btnPrimaryBackground, @btnPrimaryBackgroundHighlight);*/
+}
+// @todo Important need to keep consistant colours
+a.btn:link,
+a.btn:visited {
+  /*color: #555555;*/
+}
+
+a.btn-create:link,
+a.btn-create:visited {
+  color: white;
+}
+
+
+// Custom
+@import "conversation.less";
+@import "stateindicator.less";

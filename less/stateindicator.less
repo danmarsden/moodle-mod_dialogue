@@ -1,0 +1,38 @@
+@label-color:           #fff;
+@state-closed:          #d9534f;
+@state-draft:           #f0ad4e;
+@state-bulk:            #5bc0de;
+
+.state-indicator {
+  display: inline;
+  padding: .2em .6em .3em;
+  font-size: 75%;
+  font-weight: bold;
+  line-height: 1;
+  color: @label-color;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: .25em;
+
+  // Empty labels collapse automatically (not available in IE8)
+  &:empty {
+    display: none;
+  }
+}
+
+.state-indicator-variant(@color) {
+  background-color: @color;
+}
+
+.state-closed {
+  .state-indicator-variant(@state-closed);
+}
+
+.state-draft {
+  .state-indicator-variant(@state-draft);
+}
+
+.state-bulk {
+  .state-indicator-variant(@state-bulk);
+}

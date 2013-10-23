@@ -59,7 +59,7 @@ class backup_dialogue_activity_task extends backup_activity_task {
         $search="/(".$base."\/mod\/dialogue\/index.php\?id\=)([0-9]+)/";
         $content= preg_replace($search, '$@DIALOGUEINDEX*$2@$', $content);
 
-        // Link to dialogue view by moduleid
+        // Link to dialogue view by course module id
         $search="/(".$base."\/mod\/dialogue\/view.php\?id\=)([0-9]+)/";
         $content= preg_replace($search, '$@DIALOGUEVIEWBYID*$2@$', $content);
 
