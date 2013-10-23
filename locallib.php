@@ -39,6 +39,9 @@ class dialogue {
     const STATE_BULK_AUTOMATED  = 'bulkautomated';
     /** The state to indicate a closed conversation and replies **/
     const STATE_CLOSED          = 'closed';
+    /** The state to indicate a draft conversation or reply that has been
+     *  discarded **/
+    const STATE_TRASHED         = 'trashed';
 
     const FLAG_SENT = 'sent';
     const FLAG_READ = 'read';
@@ -196,42 +199,6 @@ class dialogue {
         }
         $this->_course = $course;
     }
-    /*
-    public function get_user_brief_details($id) {
-        global $DB;
-        $requiredfields = user_picture::fields('u');
-
-        if (!isset($this->cache['userbriefdetails'])) {
-            $cache = cache::make('mod_dialogue', 'userbriefdetails');
-            $users = get_enrolled_users($this->context, null, null, $requiredfields);
-            foreach($users as &$user) {
-                $this->user_extra_details($user);
-            }
-            $cache->set_many($users);
-            $this->cache['userbriefdetails'] = $cache;
-        }
-        $user = $this->cache['userbriefdetails']->get($id);
-        if (!$user) {
-            $sql = "SELECT $requiredfields
-                      FROM {user} u
-                     WHERE u.id = ?";
-            $user = $DB->get_record_sql($sql, array($id), MUST_EXIST);
-            $this->cache['userbriefdetails']->set($user->id, $user);
-        }
-        return $user;
-    }
-    private function user_extra_details(&$user) {
-        global $PAGE;
-        $user->fullname = fullname($user);
-        $userpic = new user_picture($user);
-        $imageurl = $userpic->get_url($PAGE);
-        $user->imageurl = $imageurl->out();
-        if (empty($user->imagealt)) {
-            $user->imagealt = get_string('pictureof', '', fullname($user));
-        }
-
-    }
-*/
 
     public function get_participants($conversationid) {
         global $DB;
@@ -613,6 +580,24 @@ class dialogue_message implements renderable {
         return true;
     }
 
+    /**
+     * Message is marked as trash so can be deleted at a later time.
+     *
+     * @global stdClass $DB
+     * @throws moodle_exception
+     */
+    public function trash() {
+        global $DB;
+
+        // can only only trash drafts
+        if ($this->state != dialogue::STATE_DRAFT) {
+            throw new moodle_exception('onlydraftscanbetrashed', 'dialogue');
+        }
+
+        // update state to trashed
+        $this->_state = dialogue::STATE_TRASHED;
+        $DB->set_field('dialogue_messages', 'state', $this->_state, array('id' => $this->_messageid));
+    }
 }
 
 /**
@@ -842,6 +827,8 @@ class dialogue_conversation extends dialogue_message {
         $context = $this->dialogue->context;
         $dialogueid = $this->dialogue->dialogueid;
 
+        require_capability('mod/dialogue:open', $context);
+
         $form = new mod_dialogue_conversation_form();
         // setup important hiddens
         $form->set_data(array('id' => $cm->id));
@@ -874,7 +861,7 @@ class dialogue_conversation extends dialogue_message {
                                     'M.mod_dialogue.autocomplete.init', array($cm->id, $json));
 
         $form->update_selectgroup('p_select', $optiongroup, $selected);
-//$form->update_selectgroup('p', $optiongroup, $selected);
+
         // set bulk open bulk
         $bulkopenrule = $this->bulkopenrule; // insure loaded by using magic
         //print_object($bulkopenrule);
@@ -902,7 +889,7 @@ class dialogue_conversation extends dialogue_message {
 
         // remove any unecessary buttons
         if (($USER->id != $this->author->id) or is_null($this->conversationid)) {
-            $form->remove_from_group('delete', 'actionbuttongroup');
+            $form->remove_from_group('trash', 'actionbuttongroup');
         }
 
         // attach initialised form to conversation class and return
