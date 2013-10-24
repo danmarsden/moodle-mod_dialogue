@@ -33,5 +33,9 @@ $definitions = array(
             'conversationviewed',
         ),
     ),
-    
+    // Session UI params to application state
+    'params' => array(
+        'mode' => cache_store::MODE_SESSION,
+        'persistent' => true,
+    ),
 );
