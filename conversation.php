@@ -87,7 +87,7 @@ if ($action == 'create' or $action == 'edit') {
                 redirect($returnurl, get_string('changessaved'));
             case 'trash':
                 $conversation->trash();
-                redirect($returnurl, get_string('conversationtrashed', 'dialogue'));
+                redirect($returnurl, get_string('draftconversationtrashed', 'dialogue'));
         }
     }
 
