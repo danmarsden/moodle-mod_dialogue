@@ -50,7 +50,8 @@ require_login($course, false, $cm);
 
 $pageparams   = array('id' => $id, 'conversationid' => $conversationid, 'action' => $action);
 $pageurl      = new moodle_url('/mod/dialogue/conversation.php', $pageparams);
-$returnurl    = new moodle_url('/mod/dialogue/view.php', array('id'=>$cm->id));
+$returnurl    = new moodle_url('/mod/dialogue/view.php', array('id' => $cm->id));
+$draftsurl    = new moodle_url('/mod/dialogue/drafts.php', array('id' => $cm->id));
 
 $PAGE->set_pagetype('mod-dialogue-conversation');
 $PAGE->set_cm($cm, $course, $activityrecord);
@@ -84,10 +85,10 @@ if ($action == 'create' or $action == 'edit') {
                 break; // leave switch to display form page
             case 'save':
                 $conversation->save_form_data();
-                redirect($returnurl, get_string('changessaved'));
+                redirect($draftsurl, get_string('changessaved'));
             case 'trash':
                 $conversation->trash();
-                redirect($returnurl, get_string('draftconversationtrashed', 'dialogue'));
+                redirect($draftsurl, get_string('draftconversationtrashed', 'dialogue'));
         }
     }
 
