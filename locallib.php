@@ -20,7 +20,9 @@ defined('MOODLE_INTERNAL') || die();
  * Library of extra functions for the dialogue module not part of the standard add-on module API set
  * but used by scripts in the mod/dialogue folder
  *
- * @package mod_dialogue
+ * @package   mod_dialogue
+ * @copyright 2013 Troy Williams
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
@@ -1431,6 +1433,43 @@ function dialogue_add_user_picture_fields(stdClass &$user) {
             $user->imagealt = get_string('pictureof', '', $user->fullname);
         }
         return;
+}
+
+/**
+ * Cache a param for course module instance. Keyed on combination of course module
+ * id and name. Return default if null.
+ *
+ * User experience - display ui controls etc
+ *
+ * @global stdClass $PAGE
+ * @param string $name
+ * @param mixed $value
+ * @param mixed $default
+ * @return mixed
+ */
+function dialogue_get_cached_param($name, $value, $default) {
+    global $PAGE;
+
+    if (!isset($PAGE->cm->id)) {
+        return $default;
+    }
+
+    $cache = cache::make('mod_dialogue', 'params');
+    $cacheparam = $name . '-' . $PAGE->cm->id;
+
+    if (is_null($value)) {
+        $cachevalue = $cache->get($cacheparam);
+        if ($cachevalue) {
+            return $cachevalue;
+        }
+    }
+
+    if ($value) {
+        $cache->set($cacheparam, $value);
+        return $value;
+    }
+
+    return $default;
 }
 
 /**
