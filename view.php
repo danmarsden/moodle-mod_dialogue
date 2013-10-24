@@ -19,8 +19,8 @@ require_once('lib.php');
 require_once('locallib.php');
 
 $id         = required_param('id', PARAM_INT);
-$state      = optional_param('state', 'open', PARAM_ALPHA);
-$show       = optional_param('show', dialogue::SHOW_MINE, PARAM_ALPHA);
+$state      = optional_param('state', null, PARAM_ALPHA);
+$show       = optional_param('show', null, PARAM_ALPHA);
 $page       = optional_param('page', 0, PARAM_INT);
 $sort       = optional_param('sort', 'latest', PARAM_ALPHANUM);
 
@@ -42,9 +42,13 @@ $context = context_module::instance($cm->id);
 
 require_login($course, false, $cm);
 
+// use cached params for toggle button groups
+$state      = dialogue_get_cached_param('state', $state, dialogue::STATE_OPEN);
+$show       = dialogue_get_cached_param('show', $show, dialogue::SHOW_MINE);
+
+// now set params on pageurl will later be set on $PAGE
 $pageparams = array('id' => $cm->id, 'state' => $state, 'show' => $show, 'page' => $page, 'sort' => $sort);
 $pageurl    = new moodle_url('/mod/dialogue/view.php', $pageparams);
-
 
 $PAGE->set_pagetype('mod-dialogue-view-index');
 $PAGE->set_cm($cm, $course, $activityrecord);
@@ -57,7 +61,7 @@ $PAGE->set_heading(format_string($course->fullname));
 // check if needs to be upgraded
 if (dialogue_cm_needs_upgrade($cm->id)) {
     $link = new moodle_url('/course/view.php', array('id' => $COURSE->id));
-    notice(new lang_string('upgrademessage', 'dialogue'), $link);
+    notice(get_string('upgrademessage', 'dialogue'), $link);
     exit;
 }
 
@@ -68,7 +72,7 @@ $total = 0;
 $rs = dialogue_get_conversation_listing($dialogue, $total);
 $pagination = new paging_bar($total, $page, dialogue::PAGINATION_PAGE_SIZE, $pageurl);
 
-$modrenderer = $PAGE->get_renderer('mod_dialogue');
+$renderer = $PAGE->get_renderer('mod_dialogue');
 
 echo $OUTPUT->header();
 if (!empty($dialogue->activityrecord->intro)) {
@@ -77,39 +81,49 @@ if (!empty($dialogue->activityrecord->intro)) {
 
 $groupmode = groups_get_activity_groupmode($cm);
 if ($groupmode == SEPARATEGROUPS or $groupmode == VISIBLEGROUPS) {
-    echo $OUTPUT->notification(new lang_string('groupmodenotifymessage', 'dialogue'), 'notifymessage');
+    echo $OUTPUT->notification(get_string('groupmodenotifymessage', 'dialogue'), 'notifymessage');
 }
 $groupsurl = clone($pageurl);
 $groupsurl->remove_params('page'); // clear page
 echo groups_print_activity_menu($cm, $groupsurl, true);
 echo html_writer::empty_tag('br');
-echo $modrenderer->tab_navigation();
-echo $modrenderer->conversation_list_buttons();
-echo $modrenderer->conversation_list_sortby();
+
+// render tab navigation, toggle button groups and order by dropdown
+echo $renderer->tab_navigation();
+echo $renderer->state_button_group();
+echo $renderer->show_button_group();
+echo $renderer->conversation_list_sortby();
+
 $a = new stdClass();
-$a->state = strtolower(new lang_string($state, 'dialogue'));
-$a->show = ($show == 'mine') ? new lang_string('justmy', 'dialogue') : new lang_string('everyones', 'dialogue');
+$a->state = ($state == dialogue::STATE_OPEN) ?
+            get_string(dialogue::STATE_OPEN, 'dialogue') :
+            get_string(dialogue::STATE_CLOSED, 'dialogue');
+$a->show  = ($show == dialogue::SHOW_MINE) ?
+            get_string('justmy', 'dialogue') :
+            get_string('everyones', 'dialogue');
 $a->groupname = '';
 $activegroup = groups_get_activity_group($cm, true);
 if ($activegroup) {
-    $a->groupname = new lang_string('ingroup', 'dialogue', groups_get_group_name($activegroup));
+    $a->groupname = get_string('ingroup', 'dialogue', groups_get_group_name($activegroup));
 }
+
 $html = '';
 if (!$rs) {
     $html .= html_writer::start_div();
-    $html .= html_writer::tag('h6', new lang_string('conversationlistdisplayheader', 'dialogue', $a));
+    $html .= html_writer::tag('h6', get_string('conversationlistdisplayheader', 'dialogue', $a));
     $html .= html_writer::end_div();
-    $html .= $OUTPUT->notification(new lang_string('noconversationsfound', 'dialogue'), 'notifyproblem');
+    $html .= $OUTPUT->notification(get_string('noconversationsfound', 'dialogue'), 'notifyproblem');
 } else {
-    
+
+    $unreadcounts = dialogue_get_unread_count($dialogue);
     $html .= html_writer::start_div('listing-meta');
    
-    $html .= html_writer::tag('h6', new lang_string('conversationlistdisplayheader', 'dialogue', $a));
+    $html .= html_writer::tag('h6', get_string('conversationlistdisplayheader', 'dialogue', $a));
     $a         = new stdClass();
     $a->start  = ($page) ? $page * dialogue::PAGINATION_PAGE_SIZE : 1;
     $a->end    = $page * dialogue::PAGINATION_PAGE_SIZE + count($rs);
     $a->total  = $total;
-    $html .= html_writer::tag('h6', new lang_string('listpaginationheader', 'dialogue', $a), array('class'=>'pull-right'));
+    $html .= html_writer::tag('h6', get_string('listpaginationheader', 'dialogue', $a), array('class'=>'pull-right'));
     $html .= html_writer::end_div();
     $html .= html_writer::start_tag('table', array('class'=>'table table-hover table-condensed'));
     $html .= html_writer::start_tag('tbody');
@@ -117,16 +131,16 @@ if (!$rs) {
     foreach($rs as $record) {
         $html .= html_writer::start_tag('tr', array('id'=>'item-'.$record->id));
         if ($record->state == dialogue::STATE_CLOSED) {
-            $label = html_writer::tag('span', new lang_string('closed', 'dialogue'),
+            $label = html_writer::tag('span', get_string('closed', 'dialogue'),
                                       array('class'=>'label label-important'));
             $html .= html_writer::tag('td', $label);
         }
         
-        $unreadcount = $record->unread;
-        //$unreadcount = $unreadcounts[$record->conversationid];
+        //$unreadcount = $record->unread;
+        $unreadcount = $unreadcounts[$record->conversationid];
 
         $badgeclass = ($unreadcount) ? 'badge label-info' : 'hidden' ;
-        $badge = html_writer::span($unreadcount, $badgeclass, array('title'=>new lang_string('numberunread', 'dialogue', $unreadcount)));
+        $badge = html_writer::span($unreadcount, $badgeclass, array('title'=>get_string('numberunread', 'dialogue', $unreadcount)));
         $html .= html_writer::tag('td', $badge);
 
         $author = dialogue_get_user_details($dialogue, $record->authorid);
@@ -134,7 +148,7 @@ if (!$rs) {
         $html .= html_writer::tag('td', $avatar);
         $html .= html_writer::tag('td', fullname($author));
 
-        $subject = empty($record->subject) ? new lang_string('nosubject', 'dialogue') : $record->subject;
+        $subject = empty($record->subject) ? get_string('nosubject', 'dialogue') : $record->subject;
         $subject = html_writer::tag('strong', $subject);
         $shortenedbody = dialogue_shorten_html($record->body);
         $shortenedbody = html_writer::tag('span', $shortenedbody);
@@ -145,7 +159,6 @@ if (!$rs) {
             if ($author->id == $participantid) {
                 continue;
             }
-            //$participant = $dialogue->get_user_brief_details($participantid);
             $participant = dialogue_get_user_details($dialogue, $participantid);
             $picture = $OUTPUT->user_picture($participant, array('class'=>'userpicture img-rounded', 'size'=>16));
             $participanthtml = html_writer::tag('span', $picture.'&nbsp;'.fullname($participant));
@@ -159,15 +172,15 @@ if (!$rs) {
         if ($date->today) {
             $timemodified = $date->time;
         } else if ($date->currentyear) {
-            $timemodified = new lang_string('dateshortyear', 'dialogue', $date);
+            $timemodified = get_string('dateshortyear', 'dialogue', $date);
         } else {
-            $timemodified = new lang_string('datefullyear', 'dialogue', $date);
+            $timemodified = get_string('datefullyear', 'dialogue', $date);
         }
         $html .= html_writer::tag('td', $timemodified, array('title' => userdate($record->timemodified)));
 
         $viewurlparams = array('id' => $cm->id, 'conversationid' => $record->conversationid, 'action' => 'view');
         $viewlink = html_writer::link(new moodle_url('conversation.php', $viewurlparams),
-                                      new lang_string('view'), array('class'=>'nonjs-control-show'));
+                                      get_string('view'), array('class'=>'nonjs-control-show'));
 
         $html .= html_writer::tag('td', $viewlink);
 
@@ -181,4 +194,3 @@ echo $html;
 echo $OUTPUT->footer($course);
 $logurl = new moodle_url('view.php', array('id' =>  $cm->id));
 add_to_log($course->id, 'dialogue', 'view', $logurl->out(false), $activityrecord->name, $cm->id);
-exit;
