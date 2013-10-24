@@ -289,83 +289,6 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         return $html;
     }
 
-    public function conversation_list_buttons(){
-        global $PAGE;
-
-        $url = $PAGE->url;
-        $stateurl = clone($url);
-        $html = '';
-        $openlink = '';
-        $closedlink = '';
-
-        // get current state
-        $state = $stateurl->get_param('state');
-        // state open, disable and enable closed button.
-        if ($state == dialogue::STATE_OPEN) {
-            $stateurl->param('state', dialogue::STATE_CLOSED);
-
-            $openlink = html_writer::link('#', html_writer::tag('span', get_string('open', 'dialogue')),
-                                                                  array('class'=>'btn btn-small disabled'));
-
-            $closedlink = html_writer::link($stateurl, html_writer::tag('span', get_string('closed', 'dialogue')),
-                                                                    array('class'=>'btn btn-small'));
-
-        }
-        // state closed, disable and enable open button.
-        if ($state == dialogue::STATE_CLOSED) {
-            $stateurl->param('state', dialogue::STATE_OPEN);
-
-            $openlink = html_writer::link($stateurl, html_writer::tag('span', get_string('open', 'dialogue')),
-                                                                 array('class'=>'btn btn-small'));
-
-            $closedlink = html_writer::link('#', html_writer::tag('span', get_string('closed', 'dialogue')),
-                                                                  array('class'=>'btn btn-small disabled'));
-
-        }
-        $html .= html_writer::start_div('btn-group');
-        $html .= $openlink; // open state link
-        $html .= $closedlink; // close state link
-        $html .= html_writer::end_div();
-
-        // not allowed
-        if (!has_capability('mod/dialogue:viewany', $PAGE->context)) {
-            return $html;
-        }
-
-        $showurl = clone($url);
-        $minelink = '';
-        $everyonelink = '';
-
-        // get current display option mine/everyone
-        $show = $showurl->get_param('show');
-        // disable show mine button, enable show everyone
-        if ($show == dialogue::SHOW_MINE) {
-            $showurl->param('show', dialogue::SHOW_EVERYONE);
-
-            $minelink = html_writer::link('#', html_writer::tag('span', get_string('mine', 'dialogue')),
-                                                                  array('class'=>'btn btn-small disabled'));
-
-            $everyonelink = html_writer::link($showurl, html_writer::tag('span', get_string('everyone', 'dialogue')),
-                                                                    array('class'=>'btn btn-small'));
-        }
-        // disable show everyone button, enable show mine
-        if ($show == dialogue::SHOW_EVERYONE) {
-            $showurl->param('show', dialogue::SHOW_MINE);
-
-            $minelink = html_writer::link($showurl, html_writer::tag('span', get_string('mine', 'dialogue')),
-                                                                  array('class'=>'btn btn-small'));
-
-            $everyonelink = html_writer::link('#', html_writer::tag('span', get_string('everyone', 'dialogue')),
-                                                                    array('class'=>'btn btn-small disabled'));
-        }
-        $html .= html_writer::start_div('btn-group');
-        $html .= $minelink; // show mine link
-        $html .= $everyonelink; // show everyone's link
-        $html .= html_writer::end_div();
-
-        return $html;
-    }
-
     public function show_button_group() {
         global $PAGE;
 
@@ -374,7 +297,12 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $minelink = '';
         $everyonelink = '';
 
-        // get current display option mine/everyone
+        // return '' user doesn't have view any capability
+        if (!has_capability('mod/dialogue:viewany', $PAGE->context)) {
+            return $html;
+        }
+
+        // get show option from url param
         $show = $showurl->get_param('show');
         // disable show mine button, enable show everyone
         if ($show == dialogue::SHOW_MINE) {
@@ -412,7 +340,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $openlink = '';
         $closedlink = '';
 
-        // get current state
+        // get state from url param
         $state = $stateurl->get_param('state');
         // state open, disable and enable closed button.
         if ($state == dialogue::STATE_OPEN) {
