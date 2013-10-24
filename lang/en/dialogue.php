@@ -19,6 +19,7 @@ $string['dialogue:viewany'] = 'View any conversation in a dialogue course module
 $string['cachedef_userdetails'] = 'User brief details, all enrolled users';
 $string['cachedef_participants'] = 'Participants id\'s (basic information)';
 $string['cachedef_unreadcounts'] = 'Users unread message counts in conversations';
+$string['cachedef_params'] = 'Params - user interface';
 
 $string['configtrackunread'] = 'Track unread dialogue messages on course homepage';
 $string['configmaxattachments'] = 'Default maximum number of attachments allowed per post.';
@@ -38,6 +39,10 @@ $string['conversations'] = 'Conversations';
 $string['drafts'] = 'Drafts';
 $string['draft'] = 'Draft';
 
+$string['onlydraftscanbetrashed'] = 'Only drafts can be trashed';
+$string['draftconversationtrashed'] = 'Draft conversation trashed';
+$string['draftreplytrashed'] = 'Draft reply trashed';
+
 
 $string['open'] = 'Open';
 $string['closed'] = 'Closed';
@@ -55,7 +60,9 @@ $string['matchingpeople'] = 'Matching people ({$a})';
 $string['subject'] = 'Subject';
 $string['send'] = 'Send';
 $string['savedraft'] = 'Save draft';
+$string['trashdraft'] = 'Trash draft';
 $string['attachments'] = 'Attachments';
+$string['searchpotentials'] = ' Search potentials...';
 
 $string['messages'] = 'messages';
 $string['unread'] = 'Unread';
@@ -123,6 +130,7 @@ $string['draftreply'] = 'Draft reply';
 
 $string['closeconversation'] = 'Close conversation';
 $string['conversationclosed'] = 'Conversation is closed';
+$string['conversationdiscarded'] = 'Conversation discarded';
 $string['bulkopenrule'] = 'Bulk open rule';
 $string['actions'] = 'Actions';
 
