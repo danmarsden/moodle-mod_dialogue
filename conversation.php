@@ -143,15 +143,14 @@ if ($conversation->replies()) {
 }
 
 // output reply form if meets criteria
-$canreply = ((has_capability('mod/dialogue:reply', $context)) or
-             has_capability('mod/dialogue:replyany', $context) and
-             $conversation->state == dialogue::STATE_OPEN and
-             $conversation->is_participant());
+$hasreplycapability = (has_capability('mod/dialogue:reply', $context) or
+                       has_capability('mod/dialogue:replyany', $context));
 
-if ($canreply) {
-   $reply = $conversation->reply();
-   $form = $reply->initialise_form();
-   $form->display();
+// conversation is open and user can reply... then output reply form
+if ($hasreplycapability and $conversation->state == dialogue::STATE_OPEN) {
+    $reply = $conversation->reply();
+    $form = $reply->initialise_form();
+    $form->display();
 }
 echo $OUTPUT->footer($course);
 $logurl = new moodle_url('conversation.php', array('id' =>  $cm->id, 'conversationid' => $conversation->conversationid));
