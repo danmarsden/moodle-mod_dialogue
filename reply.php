@@ -15,14 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *
+ * edit a reply in a conversation.
  *
  * @package   mod_dialogue
+ * @copyright 2013 Troy Williams
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-require_once('lib.php');
-require_once('locallib.php');
+require_once($CFG->dirroot . '/mod/dialogue/lib.php');
+require_once($CFG->dirroot . '/mod/dialogue/locallib.php');
+require_once($CFG->dirroot . '/mod/dialogue/formlib.php');
 
 $id             = required_param('id', PARAM_INT);
 $conversationid = required_param('conversationid', PARAM_INT);
@@ -34,13 +36,6 @@ $cm = get_coursemodule_from_id('dialogue', $id);
 if (! $cm) {
     print_error('invalidcoursemodule');
 }
-/*
- * Do we need check here or in class????
-$conversationrecord = $DB->get_record('dialogue_conversations', array('id'=>$conversationid));
-if (! $conversationrecord) {
-    print_error('invalidid', 'dialogue');
-}
- */
 $activityrecord = $DB->get_record('dialogue', array('id' => $cm->instance));
 if (! $activityrecord) {
     print_error('invalidid', 'dialogue');
@@ -57,6 +52,7 @@ require_capability('mod/dialogue:reply', $context);
 $pageparams   = array('id' => $id, 'conversationid' => $conversationid, 'action' => $action);
 $pageurl      = new moodle_url('/mod/dialogue/reply.php', $pageparams);
 $returnurl    = new moodle_url('/mod/dialogue/view.php', array('id' => $id));
+$draftsurl    = new moodle_url('/mod/dialogue/drafts.php', array('id' => $id));
 
 $PAGE->set_pagetype('mod-dialogue-reply');
 $PAGE->set_cm($cm, $course, $activityrecord);
@@ -66,69 +62,47 @@ $PAGE->set_url($pageurl);
 
 $dialogue = new dialogue($cm, $course, $activityrecord);
 $conversation = new dialogue_conversation($dialogue, $conversationid);
+$reply = new dialogue_reply($dialogue, $conversation, $replyid);
 
-switch ($action) {
-    case 'create':
-        $reply = $conversation->reply();
-        break;
-    case 'edit':
-        if (!$replyid) {
-            throw new moodle_exception(get_string('missingparameter', 'error'));
-        }
-        //$reply = $conversation->replies($replyid);
-        $reply = new dialogue_reply($dialogue, $conversation, $replyid);
-        break;
-    case 'view':
-        print_error('not implemented');
-    case 'delete':
-        if (!empty($confirm) && confirm_sesskey()) {
-            $reply = new dialogue_reply($dialogue, $conversation, $replyid);
-            $reply->delete();
-            redirect($returnurl, get_string('replydeleted', 'dialogue'));
-        }
-        exit;
-    default:
-        throw new moodle_exception('action not known');
-}
-
-$canview = ($reply->is_author());
-if (!$canview) {
+if (!$reply->is_author()) {
     throw new moodle_exception("You do not have permission to view this reply it doesn't
                                 belong to you!");
 }
-
-// setup form
+// initialise and check form submission
 $form = $reply->initialise_form();
 if ($form->is_submitted()) {
     $formaction = $form->get_submit_action();
     switch ($formaction) {
         case 'cancel':
-                redirect($returnurl);
+            redirect($returnurl);
         case 'send':
             if ($form->is_validated()){
                 $reply->save_form_data();
                 $reply->send();
                 redirect($returnurl, get_string('replysent', 'dialogue'));
             }
-            break; // display form
+            break; // leave switch to display form page
         case 'save':
             if ($form->is_validated()) {
                 $reply->save_form_data();
-                redirect($returnurl, get_string('changessaved'));
+                redirect($draftsurl, get_string('changessaved'));
             }
-            break; // display form
-       case 'delete':
-                echo $OUTPUT->header($activityrecord->name);
-                $pageurl->param('action', 'delete');
-                $pageurl->param('confirm', $replyid);
-                echo $OUTPUT->confirm(get_string('replydeleteconfirm', 'dialogue', $conversation->subject),
-                                      $pageurl, $returnurl);
-                echo $OUTPUT->footer();
-                exit;
+            break; // leave switch to display form page
+       case 'trash':
+            $reply->trash();
+            redirect($draftsurl, get_string('draftreplytrashed', 'dialogue'));
     }
 }
+$renderer = $PAGE->get_renderer('mod_dialogue');
 echo $OUTPUT->header();
-$modrenderer = $PAGE->get_renderer('mod_dialogue');
-echo $modrenderer->render($conversation);
+// render conversation
+echo $renderer->render($conversation);
+// render replies
+if ($conversation->replies()) {
+    foreach ($conversation->replies() as $reply) {
+        echo $renderer->render($reply);
+    }
+}
+// output form
 $form->display();
 echo $OUTPUT->footer($course);
