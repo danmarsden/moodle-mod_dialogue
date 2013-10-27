@@ -154,7 +154,7 @@ if (!$rs) {
         $shortenedbody = html_writer::tag('span', $shortenedbody);
         $participantshtml = '';
 
-        $participants = $dialogue->get_participants($record->conversationid);
+        $participants = dialogue_get_conversation_participants($dialogue, $record->conversationid);
         foreach($participants as $participantid) {
             if ($author->id == $participantid) {
                 continue;
