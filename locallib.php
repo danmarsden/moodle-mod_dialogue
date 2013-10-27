@@ -61,8 +61,6 @@ class dialogue {
     protected $_cm      = null;
     protected $_context = null;
 
-    protected $cache    = array();
-
     /**
      * Constructor for dialogue class, requires course module to load
      * context, passing optional course and activity record objects will
@@ -200,30 +198,6 @@ class dialogue {
             throw new coding_exception('The course you are trying to set does not seem to correspond to the cm that has been set.');
         }
         $this->_course = $course;
-    }
-
-    public function get_participants($conversationid) {
-        global $DB;
-
-        if (!isset($this->cache['participants'])) {
-
-            $cache = cache::make('mod_dialogue', 'participants');
-            $participants = $DB->get_records('dialogue_participants', array('dialogueid' => $this->activityrecord->id), 'conversationid');
-            while ($participants) {
-                $participant = array_shift($participants);
-                $group = $cache->get($participant->conversationid);
-                if ($group) {
-                    $group[] = $participant->userid;
-                } else {
-                    $group = array($participant->userid);
-                }
-                $cache->set($participant->conversationid, $group);
-            }
-
-            $this->cache['participants'] = $cache;
-        }
-
-        return $this->cache['participants']->get($conversationid);
     }
 
 }
@@ -1373,6 +1347,43 @@ function dialogue_search_potentials(dialogue $dialogue, $query = '', $activegrou
 }
 
 /**
+ * Uses cache to eliminate multiple database calls when rendering listing pages
+ * such as view. Currently using request type cache needs work.
+ *
+ * @todo move to application cache, rework code with invalid event or clear
+ *  on reply in class.
+ *
+ * @global stdClass $DB
+ * @staticvar null $cache
+ * @param dialogue $dialogue
+ * @param int $conversationid
+ * @return array
+ */
+function dialogue_get_conversation_participants(dialogue $dialogue, $conversationid) {
+    global $DB;
+
+    static $cache = null;
+
+    if (!isset($cache)) {
+        $cache = cache::make('mod_dialogue', 'participants');
+        $participants = $DB->get_records('dialogue_participants', array('dialogueid' => $dialogue->activityrecord->id), 'conversationid');
+        while ($participants) {
+            $participant = array_shift($participants);
+            $group = $cache->get($participant->conversationid);
+            if ($group) {
+                $group[] = $participant->userid;
+            } else {
+                $group = array($participant->userid);
+            }
+            $cache->set($participant->conversationid, $group);
+        }
+
+    }
+
+    return $cache->get($conversationid);
+}
+
+/**
  *
  * @global type $DB
  * @global type $PAGE
@@ -1778,16 +1789,14 @@ function dialogue_get_conversation_listing(dialogue $dialogue, &$total = null) {
         $userfilterwheres[] = "(dp.userid = :mineuserid)";
         $userfilterparams['mineuserid'] = $USER->id;
     }
+
+    $groupfilterjoin = '';
     if ($currentgroup) {
-        $members = array_keys(groups_get_members($currentgroup, 'u.id'));
-        if (!$members) {
-            $members = array(0); // return empty hack.
-        }
-        list($groupsqlin, $groupparams) = $DB->get_in_or_equal($members, SQL_PARAMS_NAMED, 'gp');
-        $userfilterjoin = 'INNER JOIN {dialogue_participants} dp ON dp.conversationid = dm.conversationid';
-        $userfilterwheres[] = "(dp.userid $groupsqlin)";
-        $userfilterparams = $userfilterparams + $groupparams;
+        $groupfilterjoin = ' JOIN {groups_members} gm ON gm.userid = dm.authorid ';
+        $userfilterwheres[] = "(gm.groupid = :groupid)";
+        $userfilterparams['groupid'] = $currentgroup;
     }
+
     $where = '';
     if ($userfilterwheres) {
         $where = 'WHERE ' . implode(' AND ', $userfilterwheres);
@@ -1796,10 +1805,10 @@ function dialogue_get_conversation_listing(dialogue $dialogue, &$total = null) {
     //$selectsql = "SELECT $fields $basesql $userfilterjoin $where $orderby";
     //$params = $baseparams + $userfilterparams;
 
-    $selectsql = "SELECT $fields, $unreadfieldsql $basesql $userfilterjoin $where $orderby";
+    $selectsql = "SELECT $fields, $unreadfieldsql $basesql $userfilterjoin $groupfilterjoin $where $orderby";
     $params = $baseparams + $userfilterparams + $unreadfieldparams;
 
-    $countsql = "SELECT COUNT(1) $basesql $userfilterjoin $where";
+    $countsql = "SELECT COUNT(1) $basesql $userfilterjoin $groupfilterjoin $where";
 
     $total = $DB->count_records_sql($countsql, $params);
 
