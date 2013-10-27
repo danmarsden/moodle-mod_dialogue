@@ -128,13 +128,12 @@ if (!$rs) {
         $shortenedbody = html_writer::tag('span', $shortenedbody);
         $participantshtml = '';
 
-        $participants = $dialogue->get_participants($record->conversationid);
+        $participants = dialogue_get_conversation_participants($dialogue, $record->conversationid);
         foreach($participants as $participantid) {
             if ($author->id == $participantid) {
                 continue;
             }
             $participant = dialogue_get_user_details($dialogue, $participantid);
-            //$participant = $dialogue->get_user_brief_details($participantid);
             $picture = $OUTPUT->user_picture($participant, array('class'=>'userpicture img-rounded', 'size'=>16));
             $participanthtml = html_writer::tag('span', $picture.'&nbsp;'.fullname($participant), array('class' => 'participant'));
             $participantshtml .=  $participanthtml;
