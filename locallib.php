@@ -1484,6 +1484,75 @@ function dialogue_get_cached_param($name, $value, $default) {
 }
 
 /**
+ * Returns array of conversaion unread counts for user in dialogue course module
+ *
+ * @todo needs work, should be keyed on conversationid, may cache data source
+ *
+ * @global stdClass $USER
+ * @global stdClass $DB
+ * @param dialogue $dialogue
+ * @param boolean $returncached
+ * @return array
+ */
+function dialogue_unread_counts(dialogue $dialogue, $returncached = true) {
+    global $USER, $DB;
+
+    $cache = cache::make('mod_dialogue', 'unreadcounts');
+
+    $iscached = $cache->get($dialogue->cm->id);
+    if ($iscached and $returncached) {
+        return $iscached;
+    }
+
+    $params = array();
+    $joins  = array();
+    $wheres = array();
+
+    $sql = "SELECT dc.id, (SELECT COUNT(dm.id)
+                             FROM {dialogue_messages} dm
+                            WHERE dm.conversationid = dc.id) -
+                          (SELECT COUNT(DISTINCT(df.conversationid, df.messageid, df.userid))
+                             FROM {dialogue_flags} df
+                            WHERE df.conversationid = dc.id
+                              AND df.flag = :dfreadflag
+                              AND df.userid = :dfuserid) AS unread
+              FROM {dialogue_conversations} dc";
+
+    $params['dfreadflag'] = dialogue::FLAG_READ;
+    $params['dfuserid']   = $USER->id;
+
+    $wheres[] = "dc.dialogueid = :dialogueid";
+    $params['dialogueid'] = $dialogue->activityrecord->id;
+
+    if (!has_capability('mod/dialogue:viewany', $dialogue->context)) {
+            $joins[] = " JOIN {dialogue_participants} dp ON dp.conversationid = dc.id";
+            $wheres[] = "dp.userid = :userid";
+            $params['userid'] = $USER->id;
+    }
+
+    if ($joins) {
+        $sql .= implode("\n ", $joins);
+    }
+
+    if ($wheres) {
+        $sql .= " WHERE " . implode(" AND ", $wheres);
+    }
+
+    $conversations = array();
+    $rs = $DB->get_recordset_sql($sql, $params);
+    if ($rs->valid()) {
+        foreach ($rs as $record) {
+            $conversations[$record->id] = $record->unread;
+        }
+    }
+    $rs->close();
+
+    $cache->set($dialogue->cm->id, $conversations);
+    return $conversations;
+
+}
+
+/**
  * 
  * @global type $USER
  * @global type $DB
