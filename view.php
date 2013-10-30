@@ -64,7 +64,7 @@ if (dialogue_cm_needs_upgrade($cm->id)) {
     notice(get_string('upgrademessage', 'dialogue'), $link);
     exit;
 }
-print_object($cm);
+
 dialogue_load_bootstrap_js();// load javascript if not bootstrap theme
 
 $dialogue = new dialogue($cm, $course, $activityrecord);
@@ -115,7 +115,7 @@ if (!$rs) {
     $html .= $OUTPUT->notification(get_string('noconversationsfound', 'dialogue'), 'notifyproblem');
 } else {
 
-    $unreadcounts = dialogue_unread_counts($dialogue, false);
+    $unreadcounts = dialogue_unread_counts($dialogue);
 
     $html .= html_writer::start_div('listing-meta');
    
