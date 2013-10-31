@@ -431,7 +431,7 @@ class dialogue_message implements renderable {
 
         $admin = get_admin(); // possible cronjob
         if ($USER->id != $admin->id and $USER->id != $this->_authorid) {
-            throw new moodle_exception("And you sir, are you waiting to receive my limp penis?");
+            throw new moodle_exception("This doesn't belong to you!");
         }
 
         $context = $this->dialogue->context; // needed for filelib functions
@@ -841,7 +841,7 @@ class dialogue_conversation extends dialogue_message {
 
         // set bulk open bulk
         $bulkopenrule = $this->bulkopenrule; // insure loaded by using magic
-        //print_object($bulkopenrule);
+
         if (!empty($bulkopenrule) and has_capability('mod/dialogue:bulkopenrulecreate', $context)) {
             // format for option item e.g. course-1, group-1
             $groupinformation = $bulkopenrule['type'] . '-' . $bulkopenrule['sourceid'];
@@ -1056,7 +1056,7 @@ class dialogue_conversation extends dialogue_message {
         } else {
             $this->clear_participants();
         }
-        //print_object($data);exit;
+
         // set bulk open rule
         if (empty($data->bulkopenrule)) {
             $this->set_bulk_open_rule(); // pass no parameters will set to nothing
@@ -1123,8 +1123,6 @@ class dialogue_conversation extends dialogue_message {
 
         if (!empty($this->_bulkopenrule)) {
             // clearout participants as this is now a template which will be copied
-            // $this->_participants = array();
-            //exit('fuct');
             $this->_state = dialogue::STATE_BULK_AUTOMATED;
             // update state to bulk automated
             $DB->set_field('dialogue_messages', 'state', $this->_state, array('id' => $this->_messageid));
@@ -1278,7 +1276,7 @@ class dialogue_reply extends dialogue_message {
 
         // check permission
         if ($USER->id != $this->_authorid or !has_capability('mod/dialogue:reply', $context)) {
-            throw new moodle_exception("And you sir, are you waiting to receive my limp penis?");
+            throw new moodle_exception("This doesn't belong to you!");
         }
 
         $sql = "SELECT MAX(dm.conversationindex)
@@ -1565,77 +1563,6 @@ function dialogue_unread_counts(dialogue $dialogue, $returncached = true) {
 }
 
 /**
- * 
- * @global type $USER
- * @global type $DB
- * @param dialogue $dialogue
- * @return type
- */
-function dialogue_get_unread_count(dialogue $dialogue) {
-    global $USER, $DB;
-
-    $cache = cache::make('mod_dialogue', 'unreadcounts');
-    $unreadstatuscache = $cache->get($dialogue->cm->id);
-
-    if (!$unreadstatuscache) {
-        //mtrace('build unread status cache');
-
-        $params = array();
-        $joins  = array();
-        $wheres = array();
-
-        $states = array(dialogue::STATE_OPEN, dialogue::STATE_CLOSED);
-
-        list($insql, $inparams) = $DB->get_in_or_equal($states, SQL_PARAMS_NAMED, 'state');
-
-        $sql = "SELECT dc.id, (SELECT COUNT(dm.id)
-	                         FROM {dialogue_messages} dm
-                                WHERE dm.conversationid = dc.id
-                                  AND dm.state $insql) -
-                              (SELECT COUNT(DISTINCT(df.conversationid, df.messageid, df.userid))
-                                 FROM {dialogue_flags} df
-                                WHERE df.conversationid = dc.id
-                                  AND df.flag = :dfreadflag
-                                  AND df.userid = :dfuserid) AS unread
-                  FROM {dialogue_conversations} dc";
-
-        $params = $params + $inparams;
-
-        $params['dfreadflag'] = dialogue::FLAG_READ;
-        $params['dfuserid']   = $USER->id;
-
-        $wheres[] = "dc.dialogueid = :dialogueid";
-        $params['dialogueid'] = $dialogue->activityrecord->id;
-
-        if (!has_capability('mod/dialogue:viewany', $dialogue->context)) {
-            $joins[] = " JOIN {dialogue_participants} dp ON dp.conversationid = dc.id";
-            $wheres[] = "dp.userid = :userid";
-            $params['userid'] = $USER->id;
-        }
-
-        if ($joins) {
-            $sql .= implode("\n ", $joins);
-        }
-
-        if ($wheres) {
-            $sql .= " WHERE " . implode(" AND ", $wheres);
-        }
-
-        $conversations = array();
-        $rs = $DB->get_recordset_sql($sql, $params);
-        if ($rs->valid()) {
-            foreach ($rs as $record) {
-                $conversations[$record->id] = $record->unread;
-            }
-        }
-        $rs->close();
-        $cache->set($dialogue->cm->id, $conversations);
-
-    }
-    return $cache->get($dialogue->cm->id);
-}
-
-/**
  *
  * @global type $PAGE
  * @global type $DB
@@ -1765,8 +1692,7 @@ function dialogue_get_conversation_listing_by_role(dialogue $dialogue, &$total =
 
     
     $selectsql = "$select $from $where $orderby";
-//mtrace("$selectsql");
-//print_object($params);
+
     $records = array();
     if ($total) { // don't bother running select if total zero
         $limit = dialogue::PAGINATION_PAGE_SIZE;
