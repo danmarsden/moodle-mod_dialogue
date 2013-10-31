@@ -586,6 +586,7 @@ class dialogue_conversation extends dialogue_message {
     protected $_participants = null;
     protected $_replies = null;
     protected $_bulkopenrule = null;
+    protected $_receivedby = null;
 
     /**
      *
@@ -896,6 +897,17 @@ class dialogue_conversation extends dialogue_message {
         return $this->_participants;
     }
 
+    protected function magic_get_receivedby() {
+        global $DB;
+
+        if (is_null($this->_receivedby)) {
+            $params = array('conversationid' => $this->conversationid,
+                            'flag' => dialogue::FLAG_SENT);
+
+            $this->_receivedby = $DB->get_records('dialogue_flags', $params, null, 'userid, timemodified');
+        }
+        return $this->_receivedby;
+    }
     /**
      * Do not call this method directly
      *
