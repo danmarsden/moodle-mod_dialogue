@@ -130,7 +130,7 @@ function dialogue_cron() {
         mtrace('Disabled in config');
         return true;
     }
-    //print_object($PAGE);exit;
+
     mtrace('1. Dealing with bulk open rules...');
     
     $sql = "SELECT dbor.*
@@ -232,21 +232,6 @@ function dialogue_cm_info_view(cm_info $cm) {
     }
 }
 
-
-function dialogue_extend_settings_navigation($settings, $dialoguenode) {
-    global $PAGE, $CFG;
-
-
-
-    $url = new moodle_url('/mod/dialogue/options.php', array('id'=>$PAGE->cm->id));
-        $node = navigation_node::create(get_string('options'),
-                new moodle_url($url, array('mode'=>'group')),
-                navigation_node::TYPE_USER, null, null);
-    //    $dialoguenode->add_node($node);//, $beforekey
-    $profilenode = $PAGE->navigation->find('myprofile', navigation_node::TYPE_USER);
-    $profilenode->add_node($node);
-//$usernode = $this->rootnodes['myprofile'];
-}
 /**
  * Return a small object with summary information about what a user has done
  * with a given particular instance of this module
