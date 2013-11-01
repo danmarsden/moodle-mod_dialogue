@@ -76,6 +76,24 @@ class mod_dialogue_message_form extends moodleform {
     }
 
     /**
+     * Intercept the display of form so can format errors as notifications
+     *
+     * @global type $OUTPUT
+     */
+    public function display() {
+        global $OUTPUT;
+
+        if ($this->_form->_errors) {
+            foreach($this->_form->_errors as $error) {
+                echo $OUTPUT->notification($error, 'notifyproblem');
+            }
+            unset($this->_form->_errors);
+        }
+
+        parent::display();
+    }
+
+    /**
      * Helper method, because removeElement can't handle groups and there no
      * method to do this, how suckful!
      *
@@ -90,6 +108,7 @@ class mod_dialogue_message_form extends moodleform {
             }
         }
     }
+
     /**
      * Helper method
      * @param type $name
@@ -139,6 +158,7 @@ class mod_dialogue_message_form extends moodleform {
             'return_types' => FILE_INTERNAL
         );
     }
+
     /**
      *
      * @param type $data
@@ -316,10 +336,23 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
     public function validation($data, $files) {
 
         $errors = parent::validation($data, $files);
-
+        if (optional_param_array('p', array(), PARAM_INT)) {
+            // js people search
+            $people = optional_param_array('p', array(), PARAM_INT);
+            if (isset($people['clear'])) {
+                $data['people'] = array();
+            } else {
+                $data['people'] = $people;
+            }
+        } else if (optional_param('p_select', array(), PARAM_INT)) {
+            // nonjs people search select
+            $data['people'] = optional_param('p_select', array(), PARAM_INT);
+        } else {
+            $data['people'] = array();
+        }
         if (empty($data['groupinformation'])) {
-            if (empty($data['p_select'])) {
-                $errors['p_select'] = get_string('errornoparticipant', 'dialogue');
+            if (empty($data['people'])) {
+                $errors['participant_autocomplete_field'] = get_string('errornoparticipant', 'dialogue');
             }
         }
         if (empty($data['subject'])) {
