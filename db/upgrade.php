@@ -48,6 +48,7 @@ function xmldb_dialogue_upgrade($oldversion=0) {
     // Migration step 3 - copy old dialogue instances to new table
     if ($oldversion < 2013050103) {
         require_once($CFG->dirroot . '/mod/dialogue/upgrade/upgradelib.php');
+        raise_memory_limit(MEMORY_EXTRA);
         // copy old dialogue data to new table
         $rs = $DB->get_recordset('dialogue_old');
         if ($rs->valid()) {
@@ -66,7 +67,7 @@ function xmldb_dialogue_upgrade($oldversion=0) {
                 $dialogue->multipleconversations    = $olddialogue->multipleconversations;
                 $dialogue->timemodified             = $olddialogue->timemodified;
                 
-                $DB->insert_record_raw('dialogue', $dialogue);
+                $DB->insert_record_raw('dialogue', $dialogue, true, false, true);
             }
             // !Important reset sequence
             $dbman->reset_sequence(new xmldb_table('dialogue'));
