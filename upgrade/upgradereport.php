@@ -126,7 +126,7 @@ foreach ($rs as $record) {
     $table->add_data($data);
 }
 // output the list
-echo $OUTPUT->heading(new lang_string('upgradenoneedupgrade', 'dialogue', $matches));
+echo $OUTPUT->heading(get_string('upgradenoneedupgrade', 'dialogue', intval($matches)));
 $table->print_html();
 echo $OUTPUT->render($pagination);
 echo $OUTPUT->footer();
