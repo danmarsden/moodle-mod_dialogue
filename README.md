@@ -22,6 +22,7 @@ GNU General Public License for more details: http://www.gnu.org/copyleft/gpl.htm
 Contributions
 -------------
 Originally written by Ray Kingdon
+
 Rewritten by Troy Williams for The University of Waikato - 2013
 
 Contributions by many others
