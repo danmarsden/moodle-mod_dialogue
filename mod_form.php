@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
+require_once ($CFG->dirroot.'/mod/dialogue/locallib.php');
 require_once ($CFG->dirroot.'/course/moodleform_mod.php');
 
 class mod_dialogue_mod_form extends moodleform_mod {
@@ -55,6 +56,27 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->addHelpButton('maxattachments', 'maxattachments', 'dialogue');
         $mform->setDefault('maxattachments', $pluginconfig->maxattachments);
 
+        $mform->addElement('header', 'legacy', get_string('legacy', 'dialogue'));
+        $radiogroup = array();
+        $radiogroup[] = $mform->createElement('radio',
+                                              'legacytype',
+                                              '',
+                                              get_string('teachertostudent', 'dialogue'),
+                                              dialogue::LEGACY_TYPE_TEACHER2STUDENT);
+
+        $radiogroup[] = $mform->createElement('radio',
+                                              'legacytype',
+                                              '',
+                                              get_string('studenttostudent', 'dialogue'),
+                                              dialogue::LEGACY_TYPE_STUDENT2STUDENT);
+
+        $radiogroup[] = $mform->createElement('radio',
+                                              'legacytype',
+                                              '',
+                                              get_string('everyone', 'dialogue'),
+                                              dialogue::LEGACY_TYPE_EVERYONE);
+        $mform->setDefault('legacytype', -1);
+        $mform->addGroup($radiogroup, 'radiogroup', null, null, false);
 
         $this->standard_grading_coursemodule_elements();
 
