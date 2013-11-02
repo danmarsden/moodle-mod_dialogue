@@ -1969,6 +1969,10 @@ function dialogue_apply_legacy_permissions($context, $type) {
 
     switch ($type) {
         case dialogue::LEGACY_TYPE_TEACHER2STUDENT: // should already be setup like this - @todo
+            role_change_permission($teacherrole->id, $context, 'mod/dialogue:open', CAP_INHERIT);
+            role_change_permission($teacherrole->id, $context, 'mod/dialogue:receive', CAP_INHERIT);
+            role_change_permission($studentrole->id, $context, 'mod/dialogue:open', CAP_INHERIT);
+            role_change_permission($studentrole->id, $context, 'mod/dialogue:receive', CAP_INHERIT);
             break;
         case dialogue::LEGACY_TYPE_STUDENT2STUDENT:
             role_change_permission($studentrole->id, $context, 'mod/dialogue:open', CAP_ALLOW);
