@@ -43,42 +43,64 @@ function dialogue_supports($feature) {
 }
 
 /**
+ * Adds a dialogue instance
+ *
  * Given an object containing all the necessary data,
  * (defined by the form in mod.html) this function
  * will create a new instance and return the id number
  * of the new instance.
  *
- * @param object $dialogue the data that came from the form.
- * @return mixed the id of the new instance on success,
- *          false or a string error message on failure.
+ * @param stdClass $data
+ * @param mod_dialogue_mod_form $form
+ * @return int The instance id of the new dialogue or false on failure
  */
+
 function dialogue_add_instance($dialogue) {
-    global $DB;
+    global $CFG, $DB;
+    require_once($CFG->dirroot . '/mod/dialogue/locallib.php');
 
-    $dialogue->timemodified = time();
+    $data->timecreated = time();
+    $data->timemodified = $data->timecreated;
 
-    return $DB->insert_record('dialogue', $dialogue);
+    $result =  $DB->insert_record('dialogue', $data);
+
+    if (isset($data->legacytype)) {
+        $context = context_module::instance($data->coursemodule);
+        dialogue_apply_legacy_permissions($context, $data->legacytype);
+    }
+
+    return $result;
 }
 
 /**
- * Updates a Dialogue
+ * Updates a dialogue instance
  *
  * Given an object containing all the necessary data, (defined by the form in
  * mod.html) this function will update an existing instance with new data.
- * @param   object  $dialogue object
- * @return  bool    true on success
+ *
+ * @param stdClass $data
+ * @param mod_dialogue_mod_form $form
+ * @return bool true on success
  */
-function dialogue_update_instance($dialogue) {
-    global $DB;
+function dialogue_update_instance($data, $mform) {
+    global $CFG, $DB;
+    require_once($CFG->dirroot . '/mod/dialogue/locallib.php');
 
-    $dialogue->timemodified = time();
-    $dialogue->id = $dialogue->instance;
+    $data->timemodified = time();
+    $data->id = $data->instance;
 
-    return $DB->update_record('dialogue', $dialogue);
+    $DB->update_record('dialogue', $data);
+
+    if (isset($data->legacytype)) {
+        $context = context_module::instance($data->coursemodule);
+        dialogue_apply_legacy_permissions($context, $data->legacytype);
+    }
+
+    return true;
 }
 
 /**
- * Deletes a Dialogue activity
+ * Deletes a dialogue instance
  *
  * Given an ID of an instance of this module, this function will permanently
  * delete the instance and any data that depends on it.
