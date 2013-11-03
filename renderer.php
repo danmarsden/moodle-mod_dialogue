@@ -96,7 +96,38 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $html .= $this->render_attachments($conversation->attachments);
         $html .= html_writer::end_div();
         //$html .= html_writer::end_div();
-        //if () automated/open
+
+        // Display list of people who have received this conversation.
+        // @todo - display rest of information, which group, has completed? etc
+        if ($conversation->state == dialogue::STATE_BULK_AUTOMATED) {
+            $receivers = $conversation->receivedby;
+            if ($receivers) {
+                $html .= html_writer::start_div('participants receivedby');
+                $count = count($receivers);
+                if ($count == 1) {
+                    $openedwithstring = get_string('conversationopenedwith', 'dialogue');
+                } else {
+                    $openedwithstring = get_string('conversationsopenedwith', 'dialogue', $count);
+                }
+                $html .= html_writer::span($openedwithstring);
+                $html .= html_writer::start_tag('table', array('class'=>'table')); //table-condensed
+                $html .= html_writer::start_tag('tbody');
+                $sentonstring = new lang_string('senton', 'dialogue');
+                foreach ($receivers as $receivedby) {
+                    $person = dialogue_get_user_details($conversation->dialogue, $receivedby->userid);
+                    $html .= html_writer::start_tag('tr');
+                    $picture = $OUTPUT->user_picture($person, array('class' => 'userpicture img-rounded', 'size' => 20));
+                    $html .= html_writer::tag('td', $picture);
+                    $html .= html_writer::tag('td', fullname($person));
+                    $html .= html_writer::tag('td', $sentonstring . userdate($receivedby->timemodified));
+                    $html .= html_writer::end_tag('tr');
+                }
+                $html .= html_writer::end_tag('tbody');
+                $html .= html_writer::end_tag('table');
+                $html .= html_writer::end_div();
+            }
+        }
+        // This should only display on open and closed conversations @todo - tidy + css
         $participants = $conversation->participants;
         if ($participants) {
             $html .= html_writer::start_div('participants');
