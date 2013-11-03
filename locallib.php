@@ -58,6 +58,7 @@ class dialogue {
     
     protected $_course  = null;
     protected $_module  = null;
+    protected $_config  = null;
     protected $_cm      = null;
     protected $_context = null;
 
@@ -141,6 +142,14 @@ class dialogue {
         global $DB;
 
         $this->_course = $DB->get_record('course', array('id'=>$this->_cm->course), '*', MUST_EXIST);
+    }
+
+    protected function magic_get_config() {
+
+        if (is_null($this->_config)) {
+            $this->_config = get_config('dialogue');
+        }
+        return $this->_config;
     }
 
     protected function magic_get_cm() {
@@ -1812,8 +1821,11 @@ function dialogue_get_conversation_listing(dialogue $dialogue, &$total = null) {
     //$selectsql = "SELECT $fields $basesql $userfilterjoin $where $orderby";
     //$params = $baseparams + $userfilterparams;
 
-    $selectsql = "SELECT $fields, $unreadfieldsql $basesql $userfilterjoin $groupfilterjoin $where $orderby";
-    $params = $baseparams + $userfilterparams + $unreadfieldparams;
+    //$selectsql = "SELECT $fields, $unreadfieldsql $basesql $userfilterjoin $groupfilterjoin $where $orderby";
+    //$params = $baseparams + $userfilterparams + $unreadfieldparams;
+
+    $selectsql = "SELECT $fields $basesql $userfilterjoin $groupfilterjoin $where $orderby";
+    $params = $baseparams + $userfilterparams;
 
     $countsql = "SELECT COUNT(1) $basesql $userfilterjoin $groupfilterjoin $where";
 
