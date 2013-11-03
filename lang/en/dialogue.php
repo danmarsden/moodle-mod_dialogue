@@ -24,6 +24,7 @@ $string['cachedef_params'] = 'Params - user interface';
 $string['configtrackunread'] = 'Track unread dialogue messages on course homepage';
 $string['configmaxattachments'] = 'Default maximum number of attachments allowed per post.';
 $string['configmaxbytes'] = 'Default maximum size for all dialogue attachments on the site (subject to course limits and other local settings)';
+$string['configviewbyrole'] = 'Experimental: adds another view option, conversations are listed by a selected role';
 $string['maxattachments'] = 'Maximum number of attachments';
 $string['maxattachments_help'] = 'This setting specifies the maximum number of files that can be attached to a dialogue post.';
 $string['maxattachmentsize'] = 'Maximum attachment size';
@@ -32,7 +33,8 @@ $string['maxattachmentsize_help'] = 'This setting specifies the largest size of 
 $string['dialoguename'] = 'Dialogue name';
 $string['dialogueintro'] = 'Dialogue Introduction';
 $string['pluginadministration'] = 'Dialogue administration';
-
+$string['conversationopenedwith'] = '<strong>1</strong> conversation opened with: ';
+$string['conversationsopenedwith'] = '<strong>{$a}</strong> conversations opened with: ';
 
 $string['bulkopenrules'] = 'Bulk open rules';
 $string['conversations'] = 'Conversations';
@@ -160,7 +162,7 @@ $string['viewbyrole'] = 'View by role';
 $string['ago'] = 'ago';
 
 $string['participants'] = 'participants';
-
+$string['senton'] = '<small><strong>Sent on: </strong></small>';
 
 // dropdowns
 $string['sortedby'] = 'Sorted by: {$a} ';
@@ -194,3 +196,8 @@ $string['upgradeiscompleted'] = 'Upgrade is completed';
 $string['upgradenoneedupgrade'] = '{$a} dialogues need to be upgraded';
 $string['upgradereport'] = 'List dialogues still to upgrade';
 $string['upgradereportdescription'] = 'This will show a report of all the dialogues on the system that still need to be upgraded to schema';
+
+$string['legacy'] = 'Legacy';
+$string['teachertostudent'] = 'Teacher to student';
+$string['studenttostudent'] = 'Student to student';
+$string['everybody'] = 'Everybody (free for all)';
