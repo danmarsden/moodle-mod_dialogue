@@ -89,7 +89,7 @@ echo groups_print_activity_menu($cm, $groupsurl, true);
 echo html_writer::empty_tag('br');
 
 // render tab navigation, toggle button groups and order by dropdown
-echo $renderer->tab_navigation();
+echo $renderer->tab_navigation($dialogue);
 echo $renderer->state_button_group();
 echo $renderer->show_button_group();
 echo $renderer->conversation_list_sortby();

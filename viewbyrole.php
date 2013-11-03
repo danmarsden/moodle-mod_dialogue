@@ -76,6 +76,10 @@ $PAGE->set_heading(format_string($course->fullname));
 dialogue_load_bootstrap_js();
 
 $dialogue = new dialogue($cm, $course, $activityrecord);
+if (!$dialogue->config->viewbyrole) {
+    print_error('This functionaility is not enabled, contact your Moodle Administrator');
+}
+
 $total = 0;
 $rs = dialogue_get_conversation_listing_by_role($dialogue, $total);
 $pagination = new paging_bar($total, $page, dialogue::PAGINATION_PAGE_SIZE, $pageurl);
@@ -171,7 +175,7 @@ if (!empty($dialogue->activityrecord->intro)) {
     echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
 }
 
-echo $modrenderer->tab_navigation();
+echo $modrenderer->tab_navigation($dialogue);
 echo $modrenderer->state_button_group();
 echo $modrenderer->role_selector();
 

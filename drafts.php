@@ -56,14 +56,14 @@ $rs = dialogue_get_draft_listing($dialogue, $total);
 $pagination = new paging_bar($total, $page, dialogue::PAGINATION_PAGE_SIZE, $pageurl);
 
 // get the dialogue module render
-$modrenderer = $PAGE->get_renderer('mod_dialogue');
+$renderer = $PAGE->get_renderer('mod_dialogue');
 
 echo $OUTPUT->header();
 if (!empty($dialogue->activityrecord->intro)) {
     echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
 }
 
-echo $modrenderer->tab_navigation();
+echo $renderer->tab_navigation($dialogue);
 $html = '';
 if (!$rs) {
     $html .= $OUTPUT->notification(get_string('nodraftsfound', 'dialogue'), 'notifyproblem');

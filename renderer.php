@@ -499,9 +499,13 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         return $html;
 
     }
-    
-    public function tab_navigation() {
+
+    public function tab_navigation(dialogue $dialogue) {
         global $PAGE;
+
+        $config  = $dialogue->config;
+        $context = $dialogue->context;
+        $cm      = $dialogue->cm;
 
         $html = '';
         $currentpage = basename($PAGE->url->out_omit_querystring(), '.php');
@@ -510,34 +514,34 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         // Main view
         $active = ($currentpage == 'view') ? array('class'=>'active') : array();
         $html .= html_writer::start_tag('li', $active);
-        $viewurl = new moodle_url('view.php', array('id'=>$PAGE->cm->id));
+        $viewurl = new moodle_url('view.php', array('id'=>$cm->id));
         $html .= html_writer::link($viewurl, get_string('viewconversations', 'dialogue'));
         $html .= html_writer::end_tag('li');
-        
-        if (has_capability('mod/dialogue:viewany', $PAGE->context)) {
+
+        if ($config->viewbyrole and has_capability('mod/dialogue:viewany', $context)) {
             $active = ($currentpage == 'viewbyrole') ? array('class'=>'active') : array();
             $html .= html_writer::start_tag('li', $active);
-            $viewurl = new moodle_url('viewbyrole.php', array('id'=>$PAGE->cm->id));
+            $viewurl = new moodle_url('viewbyrole.php', array('id'=>$cm->id));
             $html .= html_writer::link($viewurl, get_string('viewbyrole', 'dialogue'));
             $html .= html_writer::end_tag('li');
         }
         // Drafts
         $active = ($currentpage == 'drafts') ? array('class'=>'active') : array();
         $html .= html_writer::start_tag('li', $active);
-        $draftsurl = new moodle_url('drafts.php', array('id'=>$PAGE->cm->id));
+        $draftsurl = new moodle_url('drafts.php', array('id'=>$cm->id));
         $html .= html_writer::link($draftsurl, get_string('drafts', 'dialogue'));
         $html .= html_writer::end_tag('li');
-        // 
-        if (has_capability('mod/dialogue:bulkopenruleeditany', $PAGE->context)) { //@TODO better named cap
+        //
+        if (has_capability('mod/dialogue:bulkopenruleeditany', $context)) { //@TODO better named cap
             $active = ($currentpage == 'bulkopenrules') ? array('class'=>'active') : array();
             $html .= html_writer::start_tag('li', $active);
-            $bulkopenrulesurl = new moodle_url('bulkopenrules.php', array('id'=>$PAGE->cm->id));
+            $bulkopenrulesurl = new moodle_url('bulkopenrules.php', array('id'=>$cm->id));
             $html .= html_writer::link($bulkopenrulesurl, get_string('bulkopenrules', 'dialogue'));
             $html .= html_writer::end_tag('li');
         }
 
-        if (has_capability('mod/dialogue:open', $PAGE->context)) {
-            $createurl = new moodle_url('conversation.php', array('id'=>$PAGE->cm->id, 'action'=>'create'));
+        if (has_capability('mod/dialogue:open', $context)) {
+            $createurl = new moodle_url('conversation.php', array('id'=>$cm->id, 'action'=>'create'));
             $html .= html_writer::link($createurl, get_string('create'), array('class'=>'btn-create pull-right'));//array('class'=>'btn btn-primary pull-right')
         }
         $html .= html_writer::end_tag('ul');
@@ -545,5 +549,4 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         return $html;
     }
 
-
-}
+} // end of renderer class
