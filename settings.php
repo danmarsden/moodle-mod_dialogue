@@ -43,6 +43,10 @@ $choices = array(0,1,2,3,4,5,6,7,8,9,10,20);
 $settings->add(new admin_setting_configselect('dialogue/maxattachments', new lang_string('maxattachments', 'dialogue'),
                new lang_string('configmaxattachments', 'dialogue'), 5, $choices));
 
+// Experimental view by role
+$settings->add(new admin_setting_configcheckbox('dialogue/viewbyrole', new lang_string('viewbyrole', 'dialogue'),
+               new lang_string('configviewbyrole', 'dialogue'), 0));
+
 if ($hassiteconfig) { // needs this condition or there is error on login page
     if (get_config('dialogue', 'upgraderequired')) {
         $ADMIN->add('root', new admin_externalpage('dialogueupgradehelper',
