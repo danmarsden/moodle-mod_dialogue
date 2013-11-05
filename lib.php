@@ -55,7 +55,7 @@ function dialogue_supports($feature) {
  * @return int The instance id of the new dialogue or false on failure
  */
 
-function dialogue_add_instance($dialogue) {
+function dialogue_add_instance($data) {
     global $CFG, $DB;
     require_once($CFG->dirroot . '/mod/dialogue/locallib.php');
 
