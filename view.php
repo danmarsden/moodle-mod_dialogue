@@ -114,9 +114,6 @@ if (!$rs) {
     $html .= html_writer::end_div();
     $html .= $OUTPUT->notification(get_string('noconversationsfound', 'dialogue'), 'notifyproblem');
 } else {
-
-    $unreadcounts = dialogue_unread_counts($dialogue);
-
     $html .= html_writer::start_div('listing-meta');
    
     $html .= html_writer::tag('h6', get_string('conversationlistdisplayheader', 'dialogue', $a));
@@ -137,10 +134,11 @@ if (!$rs) {
             $html .= html_writer::tag('td', $label);
         }
         
-        //$unreadcount = $record->unread;
-        $unreadcount = $unreadcounts[$record->conversationid];
-
-        $badgeclass = ($unreadcount) ? 'badge label-info' : 'hidden' ;
+        $unreadcount = $record->unread;
+        $badgeclass = 'hidden';
+        if ($unreadcount > 0) {
+            $badgeclass = 'badge label-info';
+        }
         $badge = html_writer::span($unreadcount, $badgeclass, array('title'=>get_string('numberunread', 'dialogue', $unreadcount)));
         $html .= html_writer::tag('td', $badge);
 

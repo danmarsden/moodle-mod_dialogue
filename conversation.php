@@ -155,5 +155,3 @@ if ($hasreplycapability and $conversation->state == dialogue::STATE_OPEN) {
 echo $OUTPUT->footer($course);
 $logurl = new moodle_url('conversation.php', array('id' =>  $cm->id, 'conversationid' => $conversation->conversationid));
 add_to_log($course->id, 'dialogue', 'view conversation', $logurl->out(false), $conversation->subject, $cm->id);
-// purge unread counts
-cache_helper::purge_by_event('conversationviewed');

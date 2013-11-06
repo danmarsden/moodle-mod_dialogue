@@ -25,14 +25,6 @@ $definitions = array(
         'mode' => cache_store::MODE_REQUEST,
         'persistent' => true,
     ),
-    // User unread message counts in conversations for a dialogue course module.
-    'unreadcounts' => array(
-        'mode' => cache_store::MODE_SESSION,
-        'persistent' => true,
-        'invalidationevents' => array(
-            'conversationviewed',
-        ),
-    ),
     // Session UI params to application state
     'params' => array(
         'mode' => cache_store::MODE_SESSION,

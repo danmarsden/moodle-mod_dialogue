@@ -239,8 +239,7 @@ function dialogue_cm_info_view(cm_info $cm) {
     }
 
     if ($usetracking) {
-        $unreadcounts = dialogue_unread_counts(new dialogue($cm));
-        $unread = array_sum($unreadcounts);
+        $unread = dialogue_cm_unread_total(new dialogue($cm));
         if ($unread) {
             $out = '<span class="unread"> <a href="' . $cm->get_url() . '">';
             if ($unread == 1) {

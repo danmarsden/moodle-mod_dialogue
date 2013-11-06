@@ -1503,25 +1503,15 @@ function dialogue_get_cached_param($name, $value, $default) {
 }
 
 /**
- * Returns array of conversaion unread counts for user in dialogue course module
- *
- * @todo needs work, should be keyed on conversationid, may cache data source
+ * Get a users total unread message count for a dialogue course module.
  *
  * @global stdClass $USER
  * @global stdClass $DB
  * @param dialogue $dialogue
- * @param boolean $returncached
- * @return array
+ * @return int
  */
-function dialogue_unread_counts(dialogue $dialogue, $returncached = true) {
+function dialogue_cm_unread_total(dialogue $dialogue) {
     global $USER, $DB;
-
-    $cache = cache::make('mod_dialogue', 'unreadcounts');
-
-    $iscached = $cache->get($dialogue->cm->id);
-    if ($iscached and $returncached) {
-        return $iscached;
-    }
 
     $params = array();
     $joins  = array();
@@ -1557,18 +1547,9 @@ function dialogue_unread_counts(dialogue $dialogue, $returncached = true) {
         $sql .= " WHERE " . implode(" AND ", $wheres);
     }
 
-    $conversations = array();
-    $rs = $DB->get_recordset_sql($sql, $params);
-    if ($rs->valid()) {
-        foreach ($rs as $record) {
-            $conversations[$record->id] = $record->unread;
-        }
-    }
-    $rs->close();
+    $keyvalues = $DB->get_records_sql_menu($sql, $params);
 
-    $cache->set($dialogue->cm->id, $conversations);
-    return $conversations;
-
+    return array_sum($keyvalues);
 }
 
 /**
@@ -1818,14 +1799,11 @@ function dialogue_get_conversation_listing(dialogue $dialogue, &$total = null) {
         $where = 'WHERE ' . implode(' AND ', $userfilterwheres);
     }
 
-    //$selectsql = "SELECT $fields $basesql $userfilterjoin $where $orderby";
+    $selectsql = "SELECT $fields, $unreadfieldsql $basesql $userfilterjoin $groupfilterjoin $where $orderby";
+    $params = $baseparams + $userfilterparams + $unreadfieldparams;
+
+    //$selectsql = "SELECT $fields $basesql $userfilterjoin $groupfilterjoin $where $orderby";
     //$params = $baseparams + $userfilterparams;
-
-    //$selectsql = "SELECT $fields, $unreadfieldsql $basesql $userfilterjoin $groupfilterjoin $where $orderby";
-    //$params = $baseparams + $userfilterparams + $unreadfieldparams;
-
-    $selectsql = "SELECT $fields $basesql $userfilterjoin $groupfilterjoin $where $orderby";
-    $params = $baseparams + $userfilterparams;
 
     $countsql = "SELECT COUNT(1) $basesql $userfilterjoin $groupfilterjoin $where";
 
