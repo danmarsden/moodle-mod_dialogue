@@ -23,6 +23,7 @@ $state      = optional_param('state', null, PARAM_ALPHA);
 $show       = optional_param('show', null, PARAM_ALPHA);
 $page       = optional_param('page', 0, PARAM_INT);
 $sort       = optional_param('sort', 'latest', PARAM_ALPHANUM);
+$direction  = optional_param('direction', 'asc', PARAM_ALPHA);
 
 if ($id) {
     if (! $cm = get_coursemodule_from_id('dialogue', $id)) {
@@ -68,8 +69,13 @@ if (dialogue_cm_needs_upgrade($cm->id)) {
 dialogue_load_bootstrap_js();// load javascript if not bootstrap theme
 
 $dialogue = new dialogue($cm, $course, $activityrecord);
-$total = 0;
-$rs = dialogue_get_conversation_listing($dialogue, $total);
+$conversationlist = new dialogue_conversations($dialogue, $state);
+if ($show == dialogue::SHOW_EVERYONE) {
+    $conversationlist->set_view_any();
+}
+$conversationlist->set_order($sort, $direction);
+$total = $conversationlist->matches();
+$rs = $conversationlist->fetch_page($page);
 $pagination = new paging_bar($total, $page, dialogue::PAGINATION_PAGE_SIZE, $pageurl);
 
 $renderer = $PAGE->get_renderer('mod_dialogue');
