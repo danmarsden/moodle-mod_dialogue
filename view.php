@@ -98,7 +98,8 @@ echo html_writer::empty_tag('br');
 echo $renderer->tab_navigation($dialogue);
 echo $renderer->state_button_group();
 echo $renderer->show_button_group();
-echo $renderer->conversation_list_sortby();
+$sortoptions = dialogue_conversations::get_sort_options();
+echo $renderer->list_sortby($sortoptions, $sort, $direction);
 
 $a = new stdClass();
 $a->state = ($state == dialogue::STATE_OPEN) ?

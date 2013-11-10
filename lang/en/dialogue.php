@@ -166,15 +166,12 @@ $string['senton'] = '<small><strong>Sent on: </strong></small>';
 
 // dropdowns
 $string['sortedby'] = 'Sorted by: {$a} ';
-$string['latest'] = 'latest';
-$string['unread'] = 'unread';
-$string['oldest'] = 'oldest';
-$string['authoraz'] = 'author (a&raquo;z)';
-$string['authorza'] = 'author (z&raquo;a)';
-$string['lastnameaz'] = 'lastname (a&raquo;z)';
-$string['lastnameza'] = 'lastname (z&raquo;a)';
-$string['firstnameaz'] = 'firstname (a&raquo;z)';
-$string['firstnameza'] = 'firstname (z&raquo;a)';
+$string['unread'] = 'Unread';
+$string['latest'] = 'Latest';
+$string['oldest'] = 'Oldest';
+$string['author'] = 'Author';
+$string['firstname'] = 'First name';
+$string['lastname'] = 'Last name';
 
 $string['lastranon'] = 'Last ran on ';
 $string['hasnotrun'] = 'Has not run yet';

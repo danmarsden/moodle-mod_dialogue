@@ -448,6 +448,78 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         
     }
 
+    /**
+     * Builds and returns HTML needed to render the sort by drop down for conversation
+     * lists.
+     *
+     * @global stdClass $PAGE
+     * @global stdClass $OUTPUT
+     * @param array $options
+     * @param string $sort
+     * @param string $direction
+     * @return string $html
+     * @throws moodle_exception
+     */
+    public function list_sortby($options, $sort, $direction) {
+        global $PAGE, $OUTPUT;
+
+        $html = '';
+        $nonjsoptions = array();
+
+        if (!in_array($sort, array_keys($options))) {
+            throw new moodle_exception("Not a sort option");
+        }
+
+
+        $pageurl = clone($PAGE->url);
+        $PAGE->url->param('page', 0); // reset pagination
+
+        $html .= html_writer::start_div('dropdown-group pull-right'); //
+        $html .= html_writer::start_div('js-control btn-group pull-right');
+
+        $html .= html_writer::start_tag('button', array('data-toggle' => 'dropdown',
+                                                        'class' =>'btn btn-small dropdown-toggle'));
+
+        $html .= get_string('sortedby', 'dialogue', get_string($sort, 'dialogue'));
+        $html .= html_writer::tag('tag', null, array('class' => 'caret'));
+        $html .= html_writer::end_tag('button');
+        $html .= html_writer::start_tag('ul', array('class' => 'dropdown-menu'));
+        foreach ($options as $option => $settings) {
+            $string = get_string($option, 'dialogue');
+            $nonjsoptions[$option] = $string;
+            if ($settings['directional'] == false) {
+                $url = clone($PAGE->url);
+                $url->param('sort', $option);
+                $html .= html_writer::start_tag('li');
+                $html .= html_writer::link($url, $string);
+                $html .= html_writer::end_tag('li');
+                continue;
+            }
+            $toggledirection = ($direction == 'desc') ? 'asc' : 'desc';
+            $url = clone($PAGE->url);
+            $url->param('sort', $option);
+            $url->param('direction', $toggledirection);
+            // font awesome icon
+            $faclass = "fa fa-sort-{$settings['type']}-{$toggledirection} pull-right";
+            $faicon = html_writer::tag('i', '', array('class' => $faclass));
+            $html .= html_writer::start_tag('li');
+            $html .= html_writer::link($url, $faicon . $string);
+            $html .= html_writer::end_tag('li');
+        }
+        $html .= html_writer::end_tag('ul');
+        $html .= html_writer::end_div(); // end of js-control
+
+        // Important: non javascript control must be after javascript control else layout borked in chrome.
+        $select = new single_select($pageurl, 'sort', $nonjsoptions, $sort, null, 'orderbyform');
+        $select->method = 'post';
+        $nonjscontrol = $OUTPUT->render($select);
+        $html .= html_writer::div($nonjscontrol, 'nonjs-control');
+
+        $html .= html_writer::end_div(); // end of container
+        return $html;
+
+    }
+
     public function sort_by_dropdown($options) {
         global $PAGE, $OUTPUT;
         $html = '';
