@@ -1694,130 +1694,320 @@ function dialogue_get_conversation_listing_by_role(dialogue $dialogue, &$total =
 }
 
 /**
- *
- * @global type $PAGE
- * @global type $DB
- * @global type $USER
- * @param dialogue $dialogue
- * @param type $total
- * @return type
+ * dialogue_conversations provides all the functionality to construct a listing
+ * of conversations
  */
-function dialogue_get_conversation_listing(dialogue $dialogue, &$total = null) {
-    global $PAGE, $DB, $USER;
+class dialogue_conversations {
 
-    $currentgroup = groups_get_activity_group($dialogue->cm, true);
+    protected $fields       = array();
+    protected $basesql      = null;
+    protected $orderbysql   = '';
+    protected $joins        = array();
+    protected $wheres       = array();
+    protected $params       = array();
 
-    $url = $PAGE->url;
-    $state = $url->get_param('state');
-    $page = $url->get_param('page');
-    $page = isset($page) ? $page : 0;
-    $sort = $url->get_param('sort');
-    $show = $url->get_param('show');
+    public function __construct(dialogue $dialogue, $state = dialogue::STATE_OPEN) {
 
-    // Asking to view any check they have the capability.
-    if ($show == dialogue::SHOW_EVERYONE) {
-        require_capability('mod/dialogue:viewany', $dialogue->context);
+        $this->basesql  = "FROM {dialogue_messages} dm
+                           JOIN {dialogue_conversations} dc ON dc.id = dm.conversationid
+                           JOIN {user} u ON u.id = dm.authorid";
+
+        $this->dialogue = $dialogue;
+
+        $this->set_state($state);
+
+        $this->setup();
+
     }
 
-    // latest, unread, oldest
-    switch ($sort) {
-        case 'unread':
-            $orderby = "ORDER BY unread DESC";
-            break;
-        case 'oldest':
-            $orderby = "ORDER BY dm.timemodified ASC";
-            break;
-        case 'authoraz':
-            $authorfullaz = $DB->sql_concat('u.firstname', "' '", 'u.lastname');
-            $orderby = "ORDER BY $authorfullaz ASC";
-            break;
-        case 'authorza':
-            $authorfullza = $DB->sql_concat('u.lastname', "' '", 'u.firstname');
-            $authorfullza = $DB->sql_concat('u.firstname', "' '", 'u.lastname');
-            $orderby = "ORDER BY $authorfullza DESC"; //
-            break;
-        default:
-            $orderby = "ORDER BY dm.timemodified DESC";
-            break;
+    public function setup() {
+
+        $this->fields['id'] = 'dm.id';
+        $this->fields['subject'] = 'dc.subject';
+        $this->fields['dialogueid'] = 'dm.dialogueid';
+        $this->fields['conversationid'] = 'dm.conversationid';
+        $this->fields['conversationindex'] = 'dm.conversationindex';
+        $this->fields['authorid'] = 'dm.authorid';
+        $this->fields['body'] = 'dm.body';
+        $this->fields['bodyformat'] = 'dm.bodyformat';
+        $this->fields['attachments'] = 'dm.attachments';
+        $this->fields['state'] = 'dm.state';
+        $this->fields['timemodified'] = 'dm.timemodified';
+
+        $this->set_unread_field();
+        $this->set_last_message_join();
+        $this->set_participant_filter();
     }
 
-    // Base fields used in query
-    $fields = "dm.id, dc.subject, dm.dialogueid, dm.conversationid, dm.conversationindex,
-               dm.authorid, u.firstname, u.lastname, dm.body, dm.bodyformat, dm.attachments,
-               dm.state, dm.timemodified";
-
-    // SQL to calculate unread.
-    $unreadfieldsql = "(SELECT COUNT(dm.id)
-                          FROM {dialogue_messages} dm
-                         WHERE dm.conversationid = dc.id
-                           AND dm.state = :totalstate) -
-                       (SELECT COUNT(DISTINCT(df.conversationid, df.messageid, df.userid))
-                          FROM {dialogue_flags} df
-                         WHERE df.conversationid = dc.id
-                           AND df.flag = :flagread
-                           AND df.userid = :flaguserid) AS unread";
-    // SQL params needed for unread.
-    $unreadfieldparams = array('totalstate' => $state,
-                               'flagread' => dialogue::FLAG_READ,
-                               'flaguserid' => $USER->id);
-
-    $baseparams = array('dialogueid' => $dialogue->activityrecord->id,
-                        'latestmessagestate' => $state,
-                        'vieweruserid' => $USER->id);
-
-    $basesql = "FROM {dialogue_messages} dm
-                JOIN {dialogue_conversations} dc ON dc.id = dm.conversationid
-                JOIN {user} u ON u.id = dm.authorid
-          INNER JOIN (SELECT dm.conversationid, MAX(dm.conversationindex) AS conversationindex
-                        FROM {dialogue_messages} dm
-                       WHERE dm.dialogueid = :dialogueid
-                         AND dm.state = :latestmessagestate
-                    GROUP BY dm.conversationid) latestmessage
-                  ON dm.conversationid = latestmessage.conversationid
-                 AND dm.conversationindex = latestmessage.conversationindex";
-
-    $userfilterjoin = '';
-    $userfilterwheres = array();
-    $userfilterparams = array();
-    // Important: always default to showing current user conversations they are
-    // participating in. require viewany capability check done at start of function.
-    if ($show != dialogue::SHOW_EVERYONE) {
-        $userfilterjoin = 'INNER JOIN {dialogue_participants} dp ON dp.conversationid = dm.conversationid';
-        $userfilterwheres[] = "(dp.userid = :mineuserid)";
-        $userfilterparams['mineuserid'] = $USER->id;
+    public function set_group($groupid) {
+        $this->joins['group']       = 'JOIN {groups_members} gm ON gm.userid = dm.authorid';
+        $this->wheres['group']      = "gm.groupid = :groupid";
+        $this->params['groupid']    = $groupid;
     }
 
-    $groupfilterjoin = '';
-    if ($currentgroup) {
-        $groupfilterjoin = ' JOIN {groups_members} gm ON gm.userid = dm.authorid ';
-        $userfilterwheres[] = "(gm.groupid = :groupid)";
-        $userfilterparams['groupid'] = $currentgroup;
+    public function set_last_message_join() {
+        if (is_null($this->state)) {
+            throw new moodle_exception("State must be set first");
+        }
+
+        $this->joins['lastmessage'] = "JOIN (SELECT dm.conversationid,
+                                             MAX(dm.conversationindex) AS conversationindex
+                                       FROM {dialogue_messages} dm
+                                      WHERE dm.dialogueid = :lastmessagedialogueid
+                                        AND dm.state = :lastmessagestate
+                                   GROUP BY dm.conversationid) lastmessage
+                                 ON dm.conversationid = lastmessage.conversationid
+                                AND dm.conversationindex = lastmessage.conversationindex";
+
+        $this->params['lastmessagedialogueid']  = $this->dialogue->activityrecord->id;
+        $this->params['lastmessagestate']       = $this->state;
     }
 
-    $where = '';
-    if ($userfilterwheres) {
-        $where = 'WHERE ' . implode(' AND ', $userfilterwheres);
+
+    public function set_unread_field() {
+        global $USER;
+
+        if (!in_array($this->state, array(dialogue::STATE_OPEN, dialogue::STATE_CLOSED))) {
+            throw new moodle_exception("Cannot get unread count on this state");
+        }
+
+        $this->fields['unread'] = "(SELECT COUNT(dm.id)
+                                      FROM {dialogue_messages} dm
+                                     WHERE dm.conversationid = dc.id
+                                       AND dm.state = :unreadstate) -
+                                   (SELECT COUNT(DISTINCT(df.conversationid, df.messageid, df.userid))
+                                      FROM {dialogue_flags} df
+                                     WHERE df.conversationid = dc.id
+                                       AND df.flag = :unreadflagread
+                                       AND df.userid = :unreaduserid) AS unread";
+
+        $this->params['unreadstate'] = $this->state;
+        $this->params['unreadflagread'] = dialogue::FLAG_READ;
+        $this->params['unreaduserid'] = $USER->id;
     }
 
-    $selectsql = "SELECT $fields, $unreadfieldsql $basesql $userfilterjoin $groupfilterjoin $where $orderby";
-    $params = $baseparams + $userfilterparams + $unreadfieldparams;
+    public function set_role_filter($roleid) {
 
-    //$selectsql = "SELECT $fields $basesql $userfilterjoin $groupfilterjoin $where $orderby";
-    //$params = $baseparams + $userfilterparams;
+        $roles = get_all_roles($this->dialogue->context);
 
-    $countsql = "SELECT COUNT(1) $basesql $userfilterjoin $groupfilterjoin $where";
+        if (!isset($roles[$roleid])) {
+            throw new moodle_exception('Role does not exist fruity!');
+        }
 
-    $total = $DB->count_records_sql($countsql, $params);
+        $contextlist = get_related_contexts_string($this->dialogue->context);
 
-    $records = array();
-    if ($total) { // don't bother running select if total zero
-        $limit = dialogue::PAGINATION_PAGE_SIZE;
-        $offset = $page * $limit;
-        $records = $DB->get_records_sql($selectsql, $params, $offset, $limit);
+        $this->wheres['role'] = "u.id IN
+                                     (SELECT ra.userid
+                                        FROM {role_assignments} ra
+                                       WHERE ra.roleid = :roleid
+                                         AND ra.contextid $contextlist)";
+
+        $this->params['roleid'] = $roleid;
     }
 
-    return $records;
+    /**
+     * Sets required SQL to filter conversations based on a users participation
+     * in them. They have either opened or replied to conversation.
+     *
+     * @global stdClass $USER
+     */
+    public function set_participant_filter() {
+        global $USER;
+
+        $this->joins['participant'] ="JOIN (SELECT dp.conversationid
+                                              FROM {dialogue_participants} dp
+                                             WHERE dp.userid = :participantid) participant
+                                                ON participant.conversationid = dc.id";
+
+        $this->params['participantid'] = $USER->id;
+    }
+
+    /**
+     * Clear out SQL an PARAMs that would filter conversations based on a users
+     * participantion in them.
+     *
+     */
+    public function remove_participant_filter() {
+        unset($this->joins['participant']);
+        unset($this->params['participantid']);
+    }
+
+    public function set_state($state) {
+        if (!$this->valid_state($state)) {
+            throw new moodle_exception('State not valid!');
+        }
+        return $this->state = $state;
+    }
+
+    /**
+     * For users like Teachers that can viewany conversation this will remove the
+     * participant filter sql, therefore displaying conversations in a dialogue
+     * that they are not currently involved in.
+     *
+     * @throws moodle_exception
+     */
+    public function set_view_any() {
+        if (!has_capability('mod/dialogue:viewany', $this->dialogue->context)) {
+            throw new moodle_exception('You do not have the rights to viewany!');
+        }
+        $this->remove_participant_filter();
+    }
+
+    /**
+     * Checks for valid state
+     *
+     * @param type $state
+     * @return boolen true | false
+     */
+    public function valid_state($state) {
+        $validstates = array(dialogue::STATE_OPEN,
+                             dialogue::STATE_CLOSED);
+        return in_array($state, $validstates);
+    }
+
+    /**
+     * Builds and executes SQL that gives a count of the total matches in the
+     * query.
+     *
+     * @global stdClass $DB
+     * @return int $matches
+     */
+    public function matches() {
+        global $DB;
+
+        $basesql = $this->basesql;
+
+        $joinsql = '';
+        if ($this->joins) {
+            $joinsql = implode("\n", $this->joins);
+        }
+
+        $wheresql = '';
+        if ($this->wheres) {
+            $wheresql = "\nWHERE " . implode(' AND ', $this->wheres);
+        }
+
+        $params = $this->params;
+
+        $countsql = "SELECT COUNT(1) $basesql $joinsql $wheresql";
+
+        return $DB->count_records_sql($countsql, $params);
+    }
+
+    /**
+     * Return a structure of possible options that can be used to order the built
+     * query on.
+     *
+     * @return array $options
+     */
+    public static function get_sort_options() {
+
+        $options = array('unread' => array(
+                             'directional' => false,
+                                          ),
+                         'latest' => array(
+                             'directional' => false,
+                                          ),
+                         'oldest' => array(
+                             'directional' => false,
+                                          ),
+                         'author' => array(
+                             'directional' => true,
+                             'type' => PARAM_ALPHA,
+                                          ),
+                         'firstname' => array(
+                             'directional' => true,
+                             'type' => PARAM_ALPHA,
+                                          ),
+                         'lastname' => array(
+                             'directional' => true,
+                             'type' => PARAM_ALPHA,
+                                          ),
+                        );
+
+        return $options;
+    }
+
+    /**
+     * Sets up the ORDER BY SQL on the passed in field option and and direction.
+     * This is used in fetch_page method.
+     *
+     * @global stdClass $DB
+     * @param string $name
+     * @param string $direction
+     * @return string $orderbysql
+     * @throws moodle_exception
+     */
+    public function set_order($name, $direction = 'asc') {
+        global $DB;
+
+        $directionsql = ($direction == 'asc') ? 'ASC' : 'DESC';
+        switch ($name) {
+            case 'unread':
+                $orderby = "ORDER BY unread DESC";
+                break;
+            case 'latest':
+                $orderby = "ORDER BY dm.timemodified DESC";
+                break;
+            case 'oldest':
+                $orderby = "ORDER BY dm.timemodified ASC";
+                break;
+            case 'author':
+                $authorfull = $DB->sql_concat('u.firstname', "' '", 'u.lastname');
+                $orderby = "ORDER BY $authorfull $directionsql";
+                break;
+            case 'lastname':
+                $orderby = "ORDER BY u.lastname $directionsql";
+                break;
+            case 'firstname':
+                $orderby = "ORDER BY u.firstname $directionsql";
+                break;
+            default:
+                throw new moodle_exception("Cannot sort on $name");
+        }
+        return $this->orderbysql = $orderby;
+    }
+
+    /**
+     * Builds and executes require SQL to return a page of records.
+     *
+     * @global stdClass $DB
+     * @param interger $page
+     * @return array records
+     */
+    public function fetch_page($page = 0) {
+        global $DB;
+
+        $records = array();
+
+        $total = $this->matches();
+        if ($total) { // don't bother running select if zero matches
+            $limit = dialogue::PAGINATION_PAGE_SIZE;
+            $offset = $page * $limit;
+            $fields = implode(', ', $this->fields);
+
+            $joinsql = '';
+            if ($this->joins) {
+                $joinsql = implode("\n", $this->joins);
+            }
+
+            $wheresql = '';
+            if ($this->wheres) {
+                $wheresql = "\nWHERE " . implode(' AND ', $this->wheres);
+            }
+
+            $orderby = $this->orderbysql;
+
+            $selectsql = "SELECT $fields $this->basesql $joinsql $wheresql $orderby" ;
+
+            $records = $DB->get_records_sql($selectsql, $this->params, $offset, $limit);
+        }
+
+        return $records;
+    }
+
 }
+
 
 function dialogue_get_draft_listing(dialogue $dialogue, &$total = null) {
     global $PAGE, $DB, $USER;
@@ -1905,7 +2095,7 @@ function dialogue_get_bulk_open_rule_listing(dialogue $dialogue, &$total = null)
 }
 
 
-/// EXTRA FUNCTIONS ///
+/// EXTRA FUNCTIONS /// $PAGE->requires->css()
 
 /**
  * Loads bootstrap javascript if theme not child of bootstrapbase
