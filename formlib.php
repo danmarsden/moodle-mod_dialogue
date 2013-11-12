@@ -283,6 +283,9 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
 
         $mform->addElement('text', 'subject', get_string('subject', 'dialogue'), array('class'=>'input-xxlarge'));//array('size'=>'80%')array('placeholder'=>'Include a subject...')
         $mform->setType('subject', PARAM_TEXT);
+
+        $mform->setExpanded('messagesection', true);
+
         parent::definition();
     }
 
