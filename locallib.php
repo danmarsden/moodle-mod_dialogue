@@ -2113,6 +2113,25 @@ function dialogue_load_bootstrap_js() {
     }
 }
 
+/**
+ * Generates a summary line for a conversation using subject and body, used in
+ * conversation listing view.
+ *
+ * @param string $subject
+ * @param string $body
+ * @param int $length
+ * @param string $separator
+ * @return string html
+ */
+function dialogue_generate_summary_line($subject, $body, $length = 70, $separator = ' - ') {
+    if (textlib::strlen($subject) > $length) {
+        return html_writer::tag('strong', dialogue_shorten_html($subject, $length));
+    }
+    $diff = $length - (strlen($subject) + strlen($separator));
+    return html_writer::tag('strong', $subject) . $separator .
+           html_writer::tag('span', dialogue_shorten_html($body, $diff));
+}
+
 function dialogue_listing_summary($subject, $body) {
     $subjectlength = textlib::strlen($subject);
     if ($subjectlength > 40 or empty($body)) {
