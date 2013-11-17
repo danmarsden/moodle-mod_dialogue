@@ -41,6 +41,9 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         // fetch context from parent dialogue
         $context = $conversation->dialogue->context;
 
+        $today    = strtotime("today");
+        $yearago  = strtotime("-1 year");
+
         $html = '';
 
         $html .= html_writer::start_div('conversation-heading');
@@ -80,17 +83,18 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
         $html .= html_writer::start_div('conversation-body');
 
-        $date = (object) dialogue_getdate($conversation->timemodified);
-        $date->fullname = fullname($conversation->author);
-        if ($date->today) {
-            $openedbyheader = get_string('openedbytoday', 'dialogue', $date);
-        } else if ($date->currentyear) {
-            $openedbyheader = get_string('openedbyshortyear', 'dialogue', $date);
+        $datestrings = (object) dialogue_get_datestrings($conversation->timemodified);
+        $datestrings->fullname = fullname($conversation->author); //sneaky
+        if ($conversation->timemodified >= $today) {
+            $openedbyheader = get_string('openedbytoday', 'dialogue', $datestrings);
+        } else if ($conversation->timemodified >= $yearago) {
+            $openedbyheader = get_string('openedbyshortyear', 'dialogue', $datestrings);
         } else {
-            $openedbyheader = get_string('openedbyfullyear', 'dialogue', $date);
+            $openedbyheader = get_string('openedbyfullyear', 'dialogue', $datestrings);
         }
 
-        $html .= html_writer::tag('h5', $openedbyheader, array('class' => 'conversation-heading'));
+        $html .= html_writer::tag('h5', $openedbyheader, array('class' => 'conversation-heading',
+                                                               'title' => userdate($conversation->timemodified)));
         $html .= html_writer::empty_tag('hr');
         $html .= $conversation->bodyhtml;
         $html .= $this->render_attachments($conversation->attachments);
@@ -145,6 +149,121 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         return $html;
     }
 
+    public function conversations(dialogue_conversations $conversations, $page) {
+        global $PAGE, $OUTPUT;
+
+        $output = '';
+
+        $dialogue = $conversations->dialogue;
+        $cm       = $conversations->dialogue->cm;
+        $state    = $conversations->state;
+
+        $today    = strtotime("today");
+        $yearago  = strtotime("-1 year");
+
+        $listheading = get_string('displayconversationsheading', 'dialogue', textlib::strtolower($state));
+        $activegroup = groups_get_activity_group($cm, true);
+        if ($activegroup) {
+            $groupname = groups_get_group_name($activegroup);
+            $listheading .= ' ' . get_string('ingroup', 'dialogue', $groupname);
+        }
+
+        $matches = $conversations->matches();
+        if (!$matches) {
+            $output .= html_writer::start_div();
+            $output .= html_writer::tag('h6', $listheading);
+            $output .= html_writer::end_div();
+            $output .= $OUTPUT->notification(get_string('noconversationsfound', 'dialogue'), 'notifyproblem');
+            return $output;
+        }
+
+        $pageurl = $PAGE->url;
+        $pagination = new paging_bar($matches, $page, dialogue::PAGINATION_PAGE_SIZE, $pageurl);
+        $records = $conversations->fetch_page($page);
+
+        $output .= html_writer::start_div('listing-meta');
+        $output .= html_writer::tag('h6', $listheading);
+        $a         = new stdClass();
+        $a->start  = ($page) ? $page * dialogue::PAGINATION_PAGE_SIZE : 1;
+        $a->end    = $page * dialogue::PAGINATION_PAGE_SIZE + count($records);
+        $a->total  = $matches;
+        $output .= html_writer::tag('h6', get_string('listpaginationheader', 'dialogue', $a), array('class'=>'pull-right'));
+        $output .= html_writer::end_div();
+
+        $output .= html_writer::start_tag('table', array('class'=>'table table-hover table-condensed'));
+        $output .= html_writer::start_tag('tbody');
+        foreach ($records as $record) {
+            $output .= html_writer::start_tag('tr', array('id'=>'conversationid-'.$record->conversationid));
+
+            if (isset($record->unread)) {
+                $unreadcount = $record->unread;
+                $badgeclass = 'hidden';
+                if ($unreadcount > 0) {
+                    $badgeclass = 'badge label-info';
+                }
+                $badge = html_writer::span($unreadcount, $badgeclass, array('title'=>get_string('numberunread', 'dialogue', $unreadcount)));
+                $output .= html_writer::tag('td', $badge);
+            }
+
+            if (isset($record->authorid)) {
+                $author = dialogue_get_user_details($dialogue, $record->authorid);
+                $avatar = $OUTPUT->user_picture($author, array('class'=> 'userpicture img-rounded', 'size' => 48));
+                $output .= html_writer::tag('td', $avatar);
+                $output .= html_writer::tag('td', fullname($author));
+            }
+
+            if (isset($record->subject) and isset($record->body)) {
+                $subject = empty($record->subject) ? get_string('nosubject', 'dialogue') : $record->subject;
+                $summaryline = dialogue_generate_summary_line($subject, $record->body);
+                $output .= html_writer::start_tag('td');
+                $output .= html_writer::start_div();
+                $output .= $summaryline;
+
+                $participants = dialogue_get_conversation_participants($dialogue, $record->conversationid);
+                $output .= html_writer::start_div();
+                foreach($participants as $participantid) {
+                    if (isset($record->authorid) and $record->authorid == $participantid) {
+                        continue;
+                    }
+                    $participant = dialogue_get_user_details($dialogue, $participantid);
+                    $picture = $OUTPUT->user_picture($participant, array('class'=>'userpicture img-rounded', 'size'=>16));
+                    $output .= html_writer::tag('span', $picture.' '.fullname($participant),
+                                                array('class' => 'participant'));
+
+                }
+                $output .= html_writer::start_div();
+
+                $output .= html_writer::end_div();
+                $output .= html_writer::end_tag('td');
+            }
+
+            if (isset($record->timemodified)) {
+                $datestrings = (object) dialogue_get_datestrings($record->timemodified);
+                if ($record->timemodified >= $today) {
+                    $datetime = $datestrings->timepast;
+                } else if ($record->timemodified >= $yearago) {
+                    $datetime = get_string('dateshortyear', 'dialogue', $datestrings);
+                } else {
+                    $datetime = get_string('datefullyear', 'dialogue', $datestrings);
+                }
+                $output .= html_writer::tag('td', $datetime, array('title' => userdate($record->timemodified)));
+            }
+
+            $viewurlparams = array('id' => $cm->id, 'conversationid' => $record->conversationid, 'action' => 'view');
+            $viewlink = html_writer::link(new moodle_url('conversation.php', $viewurlparams),
+                                          get_string('view'), array('class'=>'nonjs-control-show'));
+
+            $output .= html_writer::tag('td', $viewlink);
+
+            $output .= html_writer::end_tag('tr');
+        }
+        $output .= html_writer::end_tag('tbody');
+        $output .= html_writer::end_tag('table');
+
+        $output .= $OUTPUT->render($pagination);
+
+        return $output;
+    }
     /**
      * Render a reply related to conversation.
      *
@@ -153,6 +272,9 @@ class mod_dialogue_renderer extends plugin_renderer_base {
      */
     public function render_dialogue_reply(dialogue_reply $reply) {
         global $OUTPUT;
+
+        $today    = strtotime("today");
+        $yearago  = strtotime("-1 year");
 
         $html = '';
 
@@ -165,17 +287,18 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
         $html .= html_writer::start_div('conversation-body');
 
-        $date = (object) dialogue_getdate($reply->timemodified);
-        $date->fullname = fullname($reply->author);
-        if ($date->today) {
-            $repliedbyheader = get_string('repliedbytoday', 'dialogue', $date);
-        } else if ($date->currentyear) {
-            $repliedbyheader = get_string('repliedbyshortyear', 'dialogue', $date);
+        $datestrings = (object) dialogue_get_datestrings($reply->timemodified);
+        $datestrings->fullname = fullname($reply->author); //sneaky
+        if ($reply->timemodified >= $today) {
+            $repliedbyheader = get_string('repliedbytoday', 'dialogue', $datestrings);
+        } else if ($reply->timemodified >= $yearago) {
+            $repliedbyheader = get_string('repliedbyshortyear', 'dialogue', $datestrings);
         } else {
-            $repliedbyheader = get_string('repliedbyfullyear', 'dialogue', $date);
+            $repliedbyheader = get_string('repliedbyfullyear', 'dialogue', $datestrings);
         }
 
-        $html .= html_writer::tag('h5', $repliedbyheader, array('class' => 'conversation-heading'));
+        $html .= html_writer::tag('h5', $repliedbyheader, array('class' => 'conversation-heading',
+                                                                'title' => userdate($reply->timemodified)));
         $html .= html_writer::empty_tag('hr');
         $html .= $reply->bodyhtml;
         $html .= $this->render_attachments($reply->attachments);
@@ -495,12 +618,16 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                 $html .= html_writer::end_tag('li');
                 continue;
             }
-            $toggledirection = ($direction == 'desc') ? 'asc' : 'desc';
+            if ($option == $sort) {
+                $sortdirection = ($direction == 'desc') ? 'asc' : 'desc';
+            } else {
+                $sortdirection = textlib::strtolower($settings['default']);
+            }
             $url = clone($PAGE->url);
             $url->param('sort', $option);
-            $url->param('direction', $toggledirection);
+            $url->param('direction', $sortdirection);
             // font awesome icon
-            $faclass = "fa fa-sort-{$settings['type']}-{$toggledirection} pull-right";
+            $faclass = "fa fa-sort-{$settings['type']}-{$sortdirection} pull-right";
             $faicon = html_writer::tag('i', '', array('class' => $faclass));
             $html .= html_writer::start_tag('li');
             $html .= html_writer::link($url, $faicon . $string);
