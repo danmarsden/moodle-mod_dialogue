@@ -2314,6 +2314,46 @@ function dialogue_get_humanfriendly_dates($epoch) {
 }
 
 /**
+ * Helper function to build certain human friendly datetime strings.
+ *
+ * @param int $epoch
+ * @return array
+ */
+function dialogue_get_humanfriendly_dates($epoch) {
+    $customdatetime = array();
+
+    $timediff = time() - $epoch;
+    $datetime = usergetdate($epoch);
+
+    $periods = array(
+        31536000 => 'year',
+        2592000 => 'month',
+        604800 => 'week',
+        86400 => 'day',
+        3600 => 'hour',
+        60 => 'minute',
+        1 => 'second'
+    );
+
+    foreach ($periods as $unit => $text) {
+        if ($timediff < $unit) {
+            continue;
+        }
+        $numberofunits = floor($timediff / $unit);
+        $customdatetime['timepast'] = $numberofunits . ' ' . (($numberofunits > 1) ? get_string($text . 's') : get_string($text));
+        break; // leave on first, this will be largest unit
+    }
+
+    $customdatetime['datefull'] = $datetime['mday'] . ' ' . $datetime['month'] . ' ' . $datetime['year'];
+    $customdatetime['dateshort'] = $datetime['mday'] . ' ' . $datetime['month'];
+    $customdatetime['time'] = date("g:i a", $epoch);
+    $customdatetime['today'] = ($epoch >= strtotime("today")) ? true : false;
+    $customdatetime['currentyear'] = ($epoch >= strtotime("-1 year")) ? true : false;
+
+    return $customdatetime;
+}
+
+/**
  * Helper function to build certain datetime strings needed
  *
  * @param type $epoch
