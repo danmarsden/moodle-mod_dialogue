@@ -1,0 +1,10 @@
+{
+    "name": "moodle-mod_dialogue-userpreference",
+    "builds": {
+        "moodle-mod_dialogue-userpreference": {
+            "jsfiles": [
+                "userpreference.js"
+            ]
+        }
+    }
+}

@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_dialogue_renderer extends plugin_renderer_base {
-    
+
     /**
      * Render conversation, just the conversation
      *
@@ -75,15 +75,15 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
         $html .= html_writer::start_div('conversation');
         $messageid = 'm' . $conversation->messageid;
-        
+
         $html .= html_writer::tag('a', '', array('id' => $messageid));
         $avatar = $OUTPUT->user_picture($conversation->author, array('size' => true, 'class' => 'userpicture img-rounded'));
-        
+
         $html .= html_writer::div($avatar, 'conversation-object pull-left');
 
         $html .= html_writer::start_div('conversation-body');
 
-        $datestrings = (object) dialogue_get_datestrings($conversation->timemodified);
+        $datestrings = (object) dialogue_get_humanfriendly_dates($conversation->timemodified);
         $datestrings->fullname = fullname($conversation->author); //sneaky
         if ($conversation->timemodified >= $today) {
             $openedbyheader = get_string('openedbytoday', 'dialogue', $datestrings);
@@ -204,12 +204,19 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                 $badge = html_writer::span($unreadcount, $badgeclass, array('title'=>get_string('numberunread', 'dialogue', $unreadcount)));
                 $output .= html_writer::tag('td', $badge);
             }
-
+/*
             if (isset($record->authorid)) {
                 $author = dialogue_get_user_details($dialogue, $record->authorid);
                 $avatar = $OUTPUT->user_picture($author, array('class'=> 'userpicture img-rounded', 'size' => 48));
                 $output .= html_writer::tag('td', $avatar);
                 $output .= html_writer::tag('td', fullname($author));
+            }
+*/
+            if (isset($record->displayuserid)) {
+                $displayuser = dialogue_get_user_details($dialogue, $record->displayuserid);
+                $avatar = $OUTPUT->user_picture($displayuser, array('class'=> 'userpicture img-rounded', 'size' => 48));
+                $output .= html_writer::tag('td', $avatar);
+                $output .= html_writer::tag('td', fullname($displayuser));
             }
 
             if (isset($record->subject) and isset($record->body)) {
@@ -238,7 +245,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
             }
 
             if (isset($record->timemodified)) {
-                $datestrings = (object) dialogue_get_datestrings($record->timemodified);
+                $datestrings = (object) dialogue_get_humanfriendly_dates($record->timemodified);
                 if ($record->timemodified >= $today) {
                     $datetime = $datestrings->timepast;
                 } else if ($record->timemodified >= $yearago) {
@@ -287,7 +294,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
         $html .= html_writer::start_div('conversation-body');
 
-        $datestrings = (object) dialogue_get_datestrings($reply->timemodified);
+        $datestrings = (object) dialogue_get_humanfriendly_dates($reply->timemodified);
         $datestrings->fullname = fullname($reply->author); //sneaky
         if ($reply->timemodified >= $today) {
             $repliedbyheader = get_string('repliedbytoday', 'dialogue', $datestrings);
@@ -382,67 +389,6 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         return $html;
     }
 
-    public function conversation_list_sortby() {
-        global $PAGE;
-
-        $strings = array();
-        $strings['latest'] = get_string('latest', 'dialogue');
-        $strings['unread'] = get_string('unread', 'dialogue');
-        $strings['oldest'] = get_string('oldest', 'dialogue');
-        $strings['authoraz'] = get_string('authoraz', 'dialogue');
-        $strings['authorza'] = get_string('authorza', 'dialogue');
-
-        $url  = $PAGE->url;
-        // reset page
-        $url->param('page', 0);
-        $sort = $url->get_param('sort');
-
-        $html = '';
-        $html .= html_writer::start_div('js-control btn-group pull-right'); // btn-group required for js
-        $html .= html_writer::start_tag('button', array('data-toggle' => 'dropdown',
-                                                        'class' =>'btn btn-small dropdown-toggle'));
-
-        $html .= get_string('sortedby', 'dialogue', $strings[$sort]);
-        $html .= html_writer::tag('tag', null, array('class' => 'caret'));
-        $html .= html_writer::end_tag('button');
-        $html .= html_writer::start_tag('ul', array('class' => 'dropdown-menu'));
-
-        $html .= html_writer::start_tag('li');
-        $unreadurl = clone($url);
-        $unreadurl->param('sort', 'unread');
-        $html .= html_writer::link($unreadurl, ucfirst(get_string('unread', 'dialogue')));
-        $html .= html_writer::end_tag('li');
-
-        $html .= html_writer::start_tag('li');
-        $latesturl = clone($url);
-        $latesturl->param('sort', 'latest');
-        $html .= html_writer::link($latesturl, ucfirst(get_string('latest', 'dialogue')));
-        $html .= html_writer::end_tag('li');
-
-        $html .= html_writer::start_tag('li');
-        $oldesturl = clone($url);
-        $oldesturl->param('sort', 'oldest');
-        $html .= html_writer::link($oldesturl, ucfirst(get_string('oldest', 'dialogue')));
-        $html .= html_writer::end_tag('li');
-
-        $html .= html_writer::start_tag('li');
-        $authorazurl = clone($url);
-        $authorazurl->param('sort', 'authoraz');
-        $html .= html_writer::link($authorazurl, ucfirst(get_string('authoraz', 'dialogue')));
-        $html .= html_writer::end_tag('li');
-
-        $html .= html_writer::start_tag('li');
-        $authorzaurl = clone($url);
-        $authorzaurl->param('sort', 'authorza');
-        $html .= html_writer::link($authorzaurl, ucfirst(get_string('authorza', 'dialogue')));
-        $html .= html_writer::end_tag('li');
-
-        $html .= html_writer::end_tag('ul');
-        $html .= html_writer::end_div();
-
-        return $html;
-    }
-
     public function show_button_group() {
         global $PAGE;
 
@@ -526,50 +472,35 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         return $html;
     }
 
-    public function listing_tab_navigation() {}
-
-    public function role_selector() {
-        global $PAGE, $OUTPUT;
+    public function display_by_student_checkbox() {
+        global $PAGE;
 
         $html = '';
 
-        $context = $PAGE->context;
-        
-        $pageurl = clone($PAGE->url);
+        user_preference_allow_ajax_update('dialogue_displaybystudent', PARAM_BOOL);
 
-        $roleid = $pageurl->get_param('roleid');
+        $PAGE->requires->yui_module('moodle-mod_dialogue-userpreference',
+                                    'M.mod_dialogue.userpreference.init', array());
 
-        $rolenames = role_fix_names(get_assignable_roles($context), $context, ROLENAME_ALIAS, true);
-        $html .= html_writer::start_div('dropdown-group');
 
-        $html .= html_writer::span(get_string('role'));
+        $displaybystudent = get_user_preferences('dialogue_displaybystudent', false);
 
-        $html .= html_writer::start_div('js-control btn-group'); // btn-group required for js
-        $attributes = array('data-toggle' => 'dropdown',
-                            'class' =>'btn btn-small dropdown-toggle');
-        $html .= html_writer::start_tag('button', $attributes);
-        $html .= $rolenames[$roleid] . ' ' . html_writer::tag('span', null, array('class' => 'caret'));
-        $html .= html_writer::end_tag('button');
-        $html .= html_writer::start_tag('ul', array('class' => 'dropdown-menu'));
-        foreach ($rolenames as $roleid => $rolename) {
-            $pageurl->param('roleid', $roleid);
-            $html .= html_writer::start_tag('li');
-            $html .= html_writer::link($pageurl, $rolename);
-            $html .= html_writer::end_tag('li');
+        $attributes = array('id'=>'dialogue_displaybystudent', 'type'=>'checkbox', 'value'=> '1');
+        if ($displaybystudent) {
+            $attributes['checked'] = 'checked';
         }
-        $html .= html_writer::end_tag('ul');
-        $html .= html_writer::end_div(); // end of js-control
 
-        // Important: non javascript control must be after javascript control else layout borked in chrome.
-        $select = new single_select($pageurl, 'roleid', $rolenames, $roleid, null, 'rolesform');
-        //$select->method = 'post';
-        $nonjscontrol = $OUTPUT->render($select);
-        $html .= html_writer::div($nonjscontrol, 'nonjs-control');
+        $html .= html_writer::start_div('display-by-student js-control');
+        //$html .= html_writer::tag('label', get_string('displaybystudent', 'dialogue'));, array('class' => 'label')
+        $html .= html_writer::tag('span', get_string('displaybystudent', 'dialogue'));
+        $html .= html_writer::empty_tag('input', $attributes);
+        $html .= html_writer::end_div();
 
-        $html .= html_writer::end_div(); // end of container
         return $html;
-        
+
     }
+
+
 
     /**
      * Builds and returns HTML needed to render the sort by drop down for conversation
@@ -650,8 +581,8 @@ class mod_dialogue_renderer extends plugin_renderer_base {
     public function sort_by_dropdown($options) {
         global $PAGE, $OUTPUT;
         $html = '';
-        
-        
+
+
         $strings = array();
         foreach ($options as $option) {
             $strings[$option] = get_string($option, 'dialogue');
@@ -668,7 +599,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
         $html .= html_writer::start_div('dropdown-group pull-right'); //
         $html .= html_writer::start_div('js-control btn-group pull-right');
-        
+
         $html .= html_writer::start_tag('button', array('data-toggle' => 'dropdown',
                                                         'class' =>'btn btn-small dropdown-toggle'));
 
@@ -717,13 +648,6 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $html .= html_writer::link($viewurl, get_string('viewconversations', 'dialogue'));
         $html .= html_writer::end_tag('li');
 
-        if ($config->viewbyrole and has_capability('mod/dialogue:viewany', $context)) {
-            $active = ($currentpage == 'viewbyrole') ? array('class'=>'active') : array();
-            $html .= html_writer::start_tag('li', $active);
-            $viewurl = new moodle_url('viewbyrole.php', array('id'=>$cm->id));
-            $html .= html_writer::link($viewurl, get_string('viewbyrole', 'dialogue'));
-            $html .= html_writer::end_tag('li');
-        }
         // Drafts
         $active = ($currentpage == 'drafts') ? array('class'=>'active') : array();
         $html .= html_writer::start_tag('li', $active);

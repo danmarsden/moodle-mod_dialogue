@@ -44,8 +44,8 @@ $settings->add(new admin_setting_configselect('dialogue/maxattachments', new lan
                new lang_string('configmaxattachments', 'dialogue'), 5, $choices));
 
 // Experimental view by role
-$settings->add(new admin_setting_configcheckbox('dialogue/viewbyrole', new lang_string('viewbyrole', 'dialogue'),
-               new lang_string('configviewbyrole', 'dialogue'), 0));
+$settings->add(new admin_setting_configcheckbox('dialogue/allowdisplaybystudent', new lang_string('allowdisplaybystudent', 'dialogue'),
+               new lang_string('configallowdisplaybystudent', 'dialogue'), 0));
 
 if ($hassiteconfig) { // needs this condition or there is error on login page
     if (get_config('dialogue', 'upgraderequired')) {

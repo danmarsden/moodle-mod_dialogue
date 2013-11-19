@@ -24,7 +24,8 @@ $string['cachedef_params'] = 'Params - user interface';
 $string['configtrackunread'] = 'Track unread dialogue messages on course homepage';
 $string['configmaxattachments'] = 'Default maximum number of attachments allowed per post.';
 $string['configmaxbytes'] = 'Default maximum size for all dialogue attachments on the site (subject to course limits and other local settings)';
-$string['configviewbyrole'] = 'Experimental: adds another view option, conversations are listed by a selected role';
+
+$string['configallowdisplaybystudent'] = 'Experimental: allow conversations to be listed by student rather than author';
 $string['maxattachments'] = 'Maximum number of attachments';
 $string['maxattachments_help'] = 'This setting specifies the maximum number of files that can be attached to a dialogue post.';
 $string['maxattachmentsize'] = 'Maximum attachment size';
@@ -45,6 +46,7 @@ $string['onlydraftscanbetrashed'] = 'Only drafts can be trashed';
 $string['draftconversationtrashed'] = 'Draft conversation trashed';
 $string['draftreplytrashed'] = 'Draft reply trashed';
 
+$string['displayconversationsheading'] = 'Displaying {$a} conversations';
 
 $string['open'] = 'Open';
 $string['closed'] = 'Closed';
@@ -84,11 +86,11 @@ $string['repliedby'] = '{$a->fullname} <small>replied</small> {$a->timeago}';
 
 //$string['datetoday'] = '{$a->time}';
 $string['dateshortyear'] = '{$a->dateshort} <small>({$a->time})</small>';
-$string['datefullyear'] = '{$a->date} <small>({$a->time})</small>';
+$string['datefullyear'] = '{$a->datefull} <small>({$a->time})</small>';
 
 $string['openedbytoday'] = '<small>Opened by</small> {$a->fullname} <small>at</small> {$a->time} <small>({$a->unitstring}) ago</small>';
 $string['openedbyshortyear'] = '<small>Opened by</small> {$a->fullname} <small>on</small> {$a->dateshort} <small>({$a->time})</small>';
-$string['openedbyfullyear'] = '<small>Opened by</small> {$a->fullname} <small>on</small> {$a->date} <small>({$a->time})</small>';
+$string['openedbyfullyear'] = '<small>Opened by</small> {$a->fullname} <small>on</small> {$a->datefull} <small>({$a->time})</small>';
 
 $string['repliedbytoday'] = '{$a->fullname} <small>replied at</small> {$a->time} <small>({$a->unitstring}) ago</small>';
 $string['repliedbyshortyear'] = '{$a->fullname} <small>replied on</small> {$a->dateshort} <small>({$a->time})</small>';
@@ -158,7 +160,8 @@ $string['nopermissiontodelete'] = 'You do not have permission to delete!';
 $string['cannotdeleteopenconversation'] = 'You cannot delete a open conversation';
 
 $string['viewconversations'] = 'View conversations';
-$string['viewbyrole'] = 'View by role';
+$string['allowdisplaybystudent'] = 'Allow display by student ';
+$string['displaybystudent'] = 'Display by student ';
 $string['ago'] = 'ago';
 
 $string['participants'] = 'participants';
@@ -169,7 +172,7 @@ $string['sortedby'] = 'Sorted by: {$a} ';
 $string['unread'] = 'Unread';
 $string['latest'] = 'Latest';
 $string['oldest'] = 'Oldest';
-$string['author'] = 'Author';
+$string['fullname'] = 'Full name';
 $string['firstname'] = 'First name';
 $string['lastname'] = 'Last name';
 

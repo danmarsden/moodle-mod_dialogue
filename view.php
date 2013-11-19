@@ -73,6 +73,10 @@ $conversationlist = new dialogue_conversations($dialogue, $state);
 if ($show == dialogue::SHOW_EVERYONE) {
     $conversationlist->set_view_any();
 }
+$activegroup = groups_get_activity_group($cm, true);
+if ($activegroup) {
+    $conversationlist->set_group($activegroup);
+}
 $conversationlist->set_order($sort, $direction);
 $total = $conversationlist->matches();
 $rs = $conversationlist->fetch_page($page);
@@ -98,105 +102,12 @@ echo html_writer::empty_tag('br');
 echo $renderer->tab_navigation($dialogue);
 echo $renderer->state_button_group();
 echo $renderer->show_button_group();
-$sortoptions = dialogue_conversations::get_sort_options();
-echo $renderer->list_sortby($sortoptions, $sort, $direction);
-
-$a = new stdClass();
-$a->state = ($state == dialogue::STATE_OPEN) ?
-            get_string(dialogue::STATE_OPEN, 'dialogue') :
-            get_string(dialogue::STATE_CLOSED, 'dialogue');
-$a->show  = ($show == dialogue::SHOW_MINE) ?
-            get_string('justmy', 'dialogue') :
-            get_string('everyones', 'dialogue');
-$a->groupname = '';
-$activegroup = groups_get_activity_group($cm, true);
-if ($activegroup) {
-    $a->groupname = get_string('ingroup', 'dialogue', groups_get_group_name($activegroup));
+if ($dialogue->config->allowdisplaybystudent) {
+    echo $renderer->display_by_student_checkbox();
 }
 
-$html = '';
-if (!$rs) {
-    $html .= html_writer::start_div();
-    $html .= html_writer::tag('h6', get_string('conversationlistdisplayheader', 'dialogue', $a));
-    $html .= html_writer::end_div();
-    $html .= $OUTPUT->notification(get_string('noconversationsfound', 'dialogue'), 'notifyproblem');
-} else {
-    $html .= html_writer::start_div('listing-meta');
-   
-    $html .= html_writer::tag('h6', get_string('conversationlistdisplayheader', 'dialogue', $a));
-    $a         = new stdClass();
-    $a->start  = ($page) ? $page * dialogue::PAGINATION_PAGE_SIZE : 1;
-    $a->end    = $page * dialogue::PAGINATION_PAGE_SIZE + count($rs);
-    $a->total  = $total;
-    $html .= html_writer::tag('h6', get_string('listpaginationheader', 'dialogue', $a), array('class'=>'pull-right'));
-    $html .= html_writer::end_div();
-    $html .= html_writer::start_tag('table', array('class'=>'table table-hover table-condensed'));
-    $html .= html_writer::start_tag('tbody');
-    
-    foreach($rs as $record) {
-        $html .= html_writer::start_tag('tr', array('id'=>'item-'.$record->id));
-        if ($record->state == dialogue::STATE_CLOSED) {
-            $label = html_writer::tag('span', get_string('closed', 'dialogue'),
-                                      array('class'=>'label label-important'));
-            $html .= html_writer::tag('td', $label);
-        }
-        
-        $unreadcount = $record->unread;
-        $badgeclass = 'hidden';
-        if ($unreadcount > 0) {
-            $badgeclass = 'badge label-info';
-        }
-        $badge = html_writer::span($unreadcount, $badgeclass, array('title'=>get_string('numberunread', 'dialogue', $unreadcount)));
-        $html .= html_writer::tag('td', $badge);
-
-        $author = dialogue_get_user_details($dialogue, $record->authorid);
-        $avatar = $OUTPUT->user_picture($author, array('class'=> 'userpicture img-rounded', 'size' => 48));
-        $html .= html_writer::tag('td', $avatar);
-        $html .= html_writer::tag('td', fullname($author));
-
-        $subject = empty($record->subject) ? get_string('nosubject', 'dialogue') : $record->subject;
-        $subject = html_writer::tag('strong', $subject);
-        $shortenedbody = dialogue_shorten_html($record->body);
-        $shortenedbody = html_writer::tag('span', $shortenedbody);
-        $participantshtml = '';
-
-        $participants = dialogue_get_conversation_participants($dialogue, $record->conversationid);
-        foreach($participants as $participantid) {
-            if ($author->id == $participantid) {
-                continue;
-            }
-            $participant = dialogue_get_user_details($dialogue, $participantid);
-            $picture = $OUTPUT->user_picture($participant, array('class'=>'userpicture img-rounded', 'size'=>16));
-            $participanthtml = html_writer::tag('span', $picture.'&nbsp;'.fullname($participant));
-            $participantshtml .=  $participanthtml;
-        }
-
-        $t = dialogue_listing_summary($record->subject, $record->body);
-        $html .= html_writer::tag('td', $t.'<br/>'.$participantshtml);
-        //$html .= html_writer::tag('td', $subject.' - '.$shortenedbody.'<br/>'.$participantshtml);
-        $date = (object) dialogue_getdate($record->timemodified);
-        if ($date->today) {
-            $timemodified = $date->time;
-        } else if ($date->currentyear) {
-            $timemodified = get_string('dateshortyear', 'dialogue', $date);
-        } else {
-            $timemodified = get_string('datefullyear', 'dialogue', $date);
-        }
-        $html .= html_writer::tag('td', $timemodified, array('title' => userdate($record->timemodified)));
-
-        $viewurlparams = array('id' => $cm->id, 'conversationid' => $record->conversationid, 'action' => 'view');
-        $viewlink = html_writer::link(new moodle_url('conversation.php', $viewurlparams),
-                                      get_string('view'), array('class'=>'nonjs-control-show'));
-
-        $html .= html_writer::tag('td', $viewlink);
-
-        $html .= html_writer::end_tag('tr');
-    }
-    $html .= html_writer::end_tag('tbody');
-    $html .= html_writer::end_tag('table');
-    $html .= $OUTPUT->render($pagination); // just going to use standard pagebar, to much work to bootstrap it.
-}
-echo $html;
+echo $renderer->list_sortby(dialogue_conversations::get_sort_options(), $sort, $direction);
+echo $renderer->conversations($conversationlist, $page);
 echo $OUTPUT->footer($course);
 $logurl = new moodle_url('view.php', array('id' =>  $cm->id));
 add_to_log($course->id, 'dialogue', 'view', $logurl->out(false), $activityrecord->name, $cm->id);

@@ -1693,11 +1693,12 @@ function dialogue_get_conversation_listing_by_role(dialogue $dialogue, &$total =
     return $records;
 }
 
+
 /**
  * dialogue_conversations provides all the functionality to construct a listing
  * of conversations
  */
-class dialogue_conversations {
+class dialogue_conversations implements renderable {
 
     protected $fields       = array();
     protected $basesql      = null;
@@ -1705,12 +1706,16 @@ class dialogue_conversations {
     protected $joins        = array();
     protected $wheres       = array();
     protected $params       = array();
+    protected $matches      = null;
+    protected $page         = null;
+    protected $pagestart    = null;
+    protected $pageend      = null;
+    public    $state        = dialogue::STATE_OPEN;
 
     public function __construct(dialogue $dialogue, $state = dialogue::STATE_OPEN) {
 
-        $this->basesql  = "FROM {dialogue_messages} dm
-                           JOIN {dialogue_conversations} dc ON dc.id = dm.conversationid
-                           JOIN {user} u ON u.id = dm.authorid";
+        $this->basesql  = "FROM {dialogue_conversations} dc
+                           JOIN {dialogue_messages} dm ON dm.conversationid = dc.id";
 
         $this->dialogue = $dialogue;
 
@@ -1727,15 +1732,25 @@ class dialogue_conversations {
         $this->fields['dialogueid'] = 'dm.dialogueid';
         $this->fields['conversationid'] = 'dm.conversationid';
         $this->fields['conversationindex'] = 'dm.conversationindex';
-        $this->fields['authorid'] = 'dm.authorid';
+        $this->fields['displayuserid'] = 'dm.authorid AS displayuserid';
         $this->fields['body'] = 'dm.body';
         $this->fields['bodyformat'] = 'dm.bodyformat';
         $this->fields['attachments'] = 'dm.attachments';
         $this->fields['state'] = 'dm.state';
         $this->fields['timemodified'] = 'dm.timemodified';
 
+        $this->joins['user'] = "JOIN {user} u ON u.id = dm.authorid";
+
         $this->set_unread_field();
+
         $this->set_last_message_join();
+
+        if ($this->dialogue->config->allowdisplaybystudent) {
+            if (get_user_preferences('dialogue_displaybystudent', false)) {
+                $this->set_display_by_student();
+            }
+        }
+
         $this->set_participant_filter();
     }
 
@@ -1786,24 +1801,26 @@ class dialogue_conversations {
         $this->params['unreaduserid'] = $USER->id;
     }
 
-    public function set_role_filter($roleid) {
+    public function set_display_by_student() {
+        global $DB;
 
-        $roles = get_all_roles($this->dialogue->context);
-
-        if (!isset($roles[$roleid])) {
-            throw new moodle_exception('Role does not exist fruity!');
-        }
+        $roleid = $DB->get_field('role', 'id', array('shortname' => 'student'), MUST_EXIST);
 
         $contextlist = get_related_contexts_string($this->dialogue->context);
 
-        $this->wheres['role'] = "u.id IN
+        $this->fields['displayuserid'] = 'dp.userid AS displayuserid';
+
+        $this->joins['user'] = "JOIN {dialogue_participants} dp ON dp.conversationid = dc.id
+                                JOIN {user} u ON u.id = dp.userid";
+        $this->wheres['role'] = "dp.userid IN
                                      (SELECT ra.userid
                                         FROM {role_assignments} ra
-                                       WHERE ra.roleid = :roleid
+                                       WHERE ra.roleid = $roleid
                                          AND ra.contextid $contextlist)";
 
-        $this->params['roleid'] = $roleid;
     }
+
+
 
     /**
      * Sets required SQL to filter conversations based on a users participation
@@ -1814,10 +1831,9 @@ class dialogue_conversations {
     public function set_participant_filter() {
         global $USER;
 
-        $this->joins['participant'] ="JOIN (SELECT dp.conversationid
-                                              FROM {dialogue_participants} dp
-                                             WHERE dp.userid = :participantid) participant
-                                                ON participant.conversationid = dc.id";
+        $this->wheres['participant'] = ":participantid IN (SELECT dp.userid
+                                                            FROM mdl_dialogue_participants dp
+                                                           WHERE dp.conversationid = dc.id)";
 
         $this->params['participantid'] = $USER->id;
     }
@@ -1828,7 +1844,7 @@ class dialogue_conversations {
      *
      */
     public function remove_participant_filter() {
-        unset($this->joins['participant']);
+        unset($this->wheres['participant']);
         unset($this->params['participantid']);
     }
 
@@ -1891,7 +1907,11 @@ class dialogue_conversations {
 
         $countsql = "SELECT COUNT(1) $basesql $joinsql $wheresql";
 
-        return $DB->count_records_sql($countsql, $params);
+        if (is_null($this->matches)) {
+            $this->matches = $DB->count_records_sql($countsql, $params);
+    }
+
+        return $this->matches;
     }
 
     /**
@@ -1911,17 +1931,20 @@ class dialogue_conversations {
                          'oldest' => array(
                              'directional' => false,
                                           ),
-                         'author' => array(
+                         'fullname' => array(
                              'directional' => true,
                              'type' => PARAM_ALPHA,
+                             'default' => 'asc',
                                           ),
                          'firstname' => array(
                              'directional' => true,
                              'type' => PARAM_ALPHA,
+                             'default' => 'asc',
                                           ),
                          'lastname' => array(
                              'directional' => true,
                              'type' => PARAM_ALPHA,
+                             'default' => 'asc',
                                           ),
                         );
 
@@ -1952,9 +1975,9 @@ class dialogue_conversations {
             case 'oldest':
                 $orderby = "ORDER BY dm.timemodified ASC";
                 break;
-            case 'author':
-                $authorfull = $DB->sql_concat('u.firstname', "' '", 'u.lastname');
-                $orderby = "ORDER BY $authorfull $directionsql";
+            case 'fullname':
+                $fullname = $DB->sql_concat('u.firstname', "' '", 'u.lastname');
+                $orderby = "ORDER BY $fullname $directionsql";
                 break;
             case 'lastname':
                 $orderby = "ORDER BY u.lastname $directionsql";
@@ -1984,7 +2007,7 @@ class dialogue_conversations {
         if ($total) { // don't bother running select if zero matches
             $limit = dialogue::PAGINATION_PAGE_SIZE;
             $offset = $page * $limit;
-            $fields = implode(', ', $this->fields);
+            $fields = implode(",\n", $this->fields);
 
             $joinsql = '';
             if ($this->joins) {
@@ -2007,7 +2030,6 @@ class dialogue_conversations {
     }
 
 }
-
 
 function dialogue_get_draft_listing(dialogue $dialogue, &$total = null) {
     global $PAGE, $DB, $USER;

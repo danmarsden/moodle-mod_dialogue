@@ -1,0 +1,14 @@
+{
+    "moodle-mod_dialogue-userpreference": {
+        "requires": [
+            "base",
+            "node",
+            "json-parse",
+            "userpreference",
+            "userpreference-filters",
+            "userpreference-highlighters",
+            "event",
+            "event-key"
+        ]
+    }
+}
