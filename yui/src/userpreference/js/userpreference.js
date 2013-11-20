@@ -13,7 +13,7 @@ M.mod_dialogue.userpreference = {
     set_user_preference : function(e, name) {
             M.util.set_user_preference(name, Y.one('#'+name).get('checked'));
             // reload the page
-            window.location.reload(true)
+            window.location.reload(true);
     }
 
-}
+};
