@@ -190,10 +190,21 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $output .= html_writer::tag('h6', get_string('listpaginationheader', 'dialogue', $a), array('class'=>'pull-right'));
         $output .= html_writer::end_div();
 
-        $output .= html_writer::start_tag('table', array('class'=>'table table-hover table-condensed'));
+        $output .= html_writer::start_tag('table', array('class'=>'conversation-list table table-hover table-condensed'));
         $output .= html_writer::start_tag('tbody');
         foreach ($records as $record) {
-            $output .= html_writer::start_tag('tr', array('id'=>'conversationid-'.$record->conversationid));
+
+            $datattributes = array('data-redirect' => 'conversation',
+                                   'data-action'   => 'view',
+                                   'data-conversationid' => $record->conversationid);
+
+            $output .= html_writer::start_tag('tr', $datattributes);
+
+            if ($record->state == dialogue::STATE_CLOSED) {
+                $label = html_writer::tag('span', get_string('closed', 'dialogue'),
+                                          array('class'=>'state-indicator state-closed'));
+                $output .= html_writer::tag('td', $label);
+            }
 
             if (isset($record->unread)) {
                 $unreadcount = $record->unread;
@@ -258,9 +269,9 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
             $viewurlparams = array('id' => $cm->id, 'conversationid' => $record->conversationid, 'action' => 'view');
             $viewlink = html_writer::link(new moodle_url('conversation.php', $viewurlparams),
-                                          get_string('view'), array('class'=>'nonjs-control-show'));
+                                          get_string('view'));
 
-            $output .= html_writer::tag('td', $viewlink);
+            $output .= html_writer::tag('td', $viewlink, array('class'=>'nonjs-control'));
 
             $output .= html_writer::end_tag('tr');
         }
