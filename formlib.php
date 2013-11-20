@@ -207,7 +207,7 @@ class mod_dialogue_reply_form extends mod_dialogue_message_form {
  */
 class mod_dialogue_conversation_form extends mod_dialogue_message_form {
     protected function definition() {
-        global $PAGE;
+        global $PAGE, $OUTPUT;
 
         $mform    = $this->_form;
         $cm       = $PAGE->cm;
@@ -270,6 +270,8 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
             // make sure have groups, possible group mode but no groups yada yada
             if ($groups) {
                 $mform->addElement('header', 'bulkopenrulessection', get_string('bulkopenrule', 'dialogue'));
+                $notify = $OUTPUT->notification(get_string('bulkopenrulenotifymessage', 'dialogue'), 'notifymessage');
+                $mform->addElement('html', $notify);
                 $mform->addElement('select','groupinformation', get_string('group'), $groups);
                 $mform->addElement('checkbox', 'includefuturemembers', get_string('includefuturemembers', 'dialogue'));
                 $mform->disabledIf('includefuturemembers', 'groupinformation', 'eq', '');
@@ -373,7 +375,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
         if (!empty($data->groupinformation)) {
             $matches = array();
             $subject = $data->groupinformation;
-            $pattern = '/(course|group)-(\d)/';
+            $pattern = '/(course|group)-(\d.+)/';
             preg_match($pattern, $subject, $matches);
             $bulkopenrule = array();
             $bulkopenrule['type'] = ($matches[1]) ? $matches[1] : '';
