@@ -76,12 +76,12 @@ if (!$rs) {
     $html .= $OUTPUT->notification(get_string('nobulkrulesfound', 'dialogue'), 'notifyproblem');
 } else {
     $html .= html_writer::start_div('listing-meta');
-    $html .= html_writer::tag('h6', new lang_string('displaying', 'dialogue'));
+    $html .= html_writer::tag('h6', get_string('displaying', 'dialogue'));
     $a = new stdClass();
     $a->start = ($page) ? $page * dialogue::PAGINATION_PAGE_SIZE : 1;
     $a->end = $page * dialogue::PAGINATION_PAGE_SIZE + count($rs);
     $a->total = $total;
-    $html .= html_writer::tag('h6', new lang_string('listpaginationheader', 'dialogue', $a), array('class' => 'pull-right'));
+    $html .= html_writer::tag('h6', get_string('listpaginationheader', 'dialogue', $a), array('class' => 'pull-right'));
     $html .= html_writer::end_div();
 
 
