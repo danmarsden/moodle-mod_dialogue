@@ -88,7 +88,7 @@ $string['repliedby'] = '{$a->fullname} <small>replied</small> {$a->timeago}';
 $string['dateshortyear'] = '{$a->dateshort} <small>({$a->time})</small>';
 $string['datefullyear'] = '{$a->datefull} <small>({$a->time})</small>';
 
-$string['openedbytoday'] = '<small>Opened by</small> {$a->fullname} <small>at</small> {$a->time} <small>({$a->unitstring}) ago</small>';
+$string['openedbytoday'] = '<small>Opened by</small> {$a->fullname} <small>at</small> {$a->time} <small>({$a->timepast}) ago</small>';
 $string['openedbyshortyear'] = '<small>Opened by</small> {$a->fullname} <small>on</small> {$a->dateshort} <small>({$a->time})</small>';
 $string['openedbyfullyear'] = '<small>Opened by</small> {$a->fullname} <small>on</small> {$a->datefull} <small>({$a->time})</small>';
 
@@ -126,7 +126,7 @@ $string['draftlistdisplayheader'] = 'Displaying my drafts';
 
 $string['listpaginationheader'] = '{$a->start}-{$a->end} of {$a->total}';
 
-
+$string['bulkopenrulenotifymessage'] = "<strong>Note:</strong><br/>When using a bulk opener rule, conversations are not opened straight away. Conversations will be opened when the system's cron function is run, typically every 30 minutes.";
 $string['groupmodenotifymessage'] = 'This activity is running in groupmode, this will affect who you can start a conversation with and what conversations are displayed.';
 
 $string['draftconversation'] = 'Draft conversation';
