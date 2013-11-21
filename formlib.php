@@ -213,7 +213,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
         $cm       = $PAGE->cm;
         $context  = $PAGE->context;
 
-        $mform->disable_form_change_checker();
+        //$mform->disable_form_change_checker();
 
         $mform->addElement('header', 'openwithsection', get_string('openwith', 'dialogue'));
 
