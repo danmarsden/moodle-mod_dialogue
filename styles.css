@@ -3642,3 +3642,9 @@ a.btn-create:visited {
      -moz-border-radius: 4px;
           border-radius: 4px;
 }
+
+body.jsenabled .conversation-list tr:hover,
+body.jsenabled .draft-list tr:hover,
+body.jsenabled .bulkopenrule-list tr:hover {
+  cursor: pointer;
+}

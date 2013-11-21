@@ -68,6 +68,9 @@ if (dialogue_cm_needs_upgrade($cm->id)) {
 
 dialogue_load_bootstrap_js();// load javascript if not bootstrap theme
 
+$PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
+                            'M.mod_dialogue.clickredirector.init', array($cm->id));
+
 $dialogue = new dialogue($cm, $course, $activityrecord);
 $conversationlist = new dialogue_conversations($dialogue, $state);
 if ($show == dialogue::SHOW_EVERYONE) {

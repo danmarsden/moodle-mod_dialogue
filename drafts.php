@@ -50,6 +50,9 @@ $PAGE->set_url($pageurl);
 $PAGE->set_title(format_string($activityrecord->name));
 $PAGE->set_heading(format_string($course->fullname));
 
+$PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
+                            'M.mod_dialogue.clickredirector.init', array($cm->id));
+
 $dialogue = new dialogue($cm, $course, $activityrecord);
 $total = 0;
 $rs = dialogue_get_draft_listing($dialogue, $total);
@@ -77,22 +80,42 @@ if (!$rs) {
     $html .= html_writer::tag('h6', new lang_string('listpaginationheader', 'dialogue', $a), array('class' => 'pull-right'));
     $html .= html_writer::end_div();
 
-    $html .= html_writer::start_tag('table', array('class'=>'table table-hover table-condensed'));
+    $html .= html_writer::start_tag('table', array('class'=>'conversation-list table table-hover table-condensed'));
     $html .= html_writer::start_tag('tbody');
     foreach($rs as $record) {
         if (dialogue_is_a_conversation($record)) {
             $label = html_writer::tag('span', get_string('draftconversation', 'dialogue'),
                               array('class' => 'state-indicator state-draft'));
-            $params = array('id'=>$cm->id, 'conversationid'=>$record->conversationid, 'action'=>'edit');
+
+            $datattributes = array('data-redirect' => 'conversation',
+                                   'data-action'   => 'edit',
+                                   'data-conversationid' => $record->conversationid);
+
+            $params = array('id' => $cm->id,
+                            'conversationid' => $record->conversationid,
+                            'action' => 'edit');
+
             $editlink = html_writer::link(new moodle_url('conversation.php', $params),
                                       get_string('edit'), array());
         } else {
             $label = html_writer::tag('span', get_string('draftreply', 'dialogue'),
                               array('class' => 'state-indicator state-draft'));
-            $params = array('id'=>$cm->id,'conversationid'=>$record->conversationid,'messageid'=>$record->id, 'action'=>'edit');
+
+            $datattributes = array('data-redirect' => 'reply',
+                                   'data-action'   => 'edit',
+                                   'data-conversationid' => $record->conversationid,
+                                   'data-messageid' => $record->id);
+
+            $params = array('id' => $cm->id,
+                            'conversationid' => $record->conversationid,
+                            'messageid' => $record->id,
+                            'action' => 'edit');
+            
             $editlink = html_writer::link(new moodle_url('reply.php', $params), get_string('edit'), array());
         }
-        $html .= html_writer::start_tag('tr', array('id'=>'item-'.$record->id));
+        
+
+        $html .=  html_writer::start_tag('tr', $datattributes);
         $html .= html_writer::tag('td', $label);
         $subject = empty($record->subject) ? get_string('nosubject', 'dialogue') : $record->subject;
         $subject = html_writer::tag('strong', $subject);
@@ -110,7 +133,7 @@ if (!$rs) {
         }
         $html .= html_writer::tag('td', $timemodified, array('title' => userdate($record->timemodified)));
        
-        $html .= html_writer::tag('td', $editlink);
+        $html .= html_writer::tag('td', $editlink, array('class'=>'nonjs-control'));
         $html .= html_writer::end_tag('tr');
     }
     $html .= html_writer::end_tag('tbody');

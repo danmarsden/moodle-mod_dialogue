@@ -51,6 +51,8 @@ $PAGE->set_url($pageurl);
 $PAGE->set_title(format_string($activityrecord->name));
 $PAGE->set_heading(format_string($course->fullname));
 
+$PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
+                            'M.mod_dialogue.clickredirector.init', array($cm->id));
 
 $dialogue = new dialogue($cm, $course, $activityrecord);
 $total = 0;
@@ -66,8 +68,6 @@ if (!empty($dialogue->activityrecord->intro)) {
 }
 
 echo $renderer->tab_navigation($dialogue);
-
-//echo $modrenderer->sort_by_dropdown(array('latest', 'oldest'));
 
 $groupcache = groups_cache_groupdata($course->id);
 
@@ -85,10 +85,15 @@ if (!$rs) {
     $html .= html_writer::end_div();
 
 
-    $html .= html_writer::start_tag('table', array('class'=>'table table-hover table-condensed'));
+    $html .= html_writer::start_tag('table', array('class'=>'conversation-list table table-hover table-condensed'));
     $html .= html_writer::start_tag('tbody');
     foreach($rs as $record) {
-        $html .= html_writer::start_tag('tr', array('id'=>'item-'.$record->id));
+
+        $datattributes = array('data-redirect' => 'conversation',
+                               'data-action'   => 'view',
+                               'data-conversationid' => $record->conversationid);
+
+        $html .=  html_writer::start_tag('tr', $datattributes);
         if ($record->lastrun) {
             $lastrun = get_string('lastranon', 'dialogue') . userdate($record->lastrun);
         } else {
@@ -122,13 +127,11 @@ if (!$rs) {
         $subject = empty($record->subject) ? get_string('nosubject', 'dialogue') : $record->subject;
         $subject = html_writer::tag('strong', $subject);
         $html .= html_writer::tag('td', $subject);
-        //$shortenedbody = dialogue_shorten_html($record->body, 60);
-        //$shortenedbody = html_writer::tag('span', $shortenedbody);
-        //$html .= html_writer::tag('td', $subject.' - '.$shortenedbody);
+
         $params = array('id' => $cm->id, 'conversationid' => $record->conversationid);
         $link = html_writer::link(new moodle_url('conversation.php', $params),
                                    get_string('view'), array());
-        $html .= html_writer::tag('td', $link);
+        $html .= html_writer::tag('td', $link, array('class'=>'nonjs-control'));
         $html .= html_writer::end_tag('tr');
     }
     $html .= html_writer::end_tag('tbody');
@@ -136,7 +139,6 @@ if (!$rs) {
     $html .= html_writer::end_tag('table');
     $html .= $OUTPUT->render($pagination); // just going to use standard pagebar, to much work to bootstrap it.
 }
-
 
 echo $html;
 echo $OUTPUT->footer($course);
