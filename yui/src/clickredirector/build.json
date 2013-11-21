@@ -1,0 +1,10 @@
+{
+    "name": "moodle-mod_dialogue-clickredirector",
+    "builds": {
+        "moodle-mod_dialogue-clickredirector": {
+            "jsfiles": [
+                "clickredirector.js"
+            ]
+        }
+    }
+}

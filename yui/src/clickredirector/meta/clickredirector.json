@@ -1,0 +1,14 @@
+{
+    "moodle-mod_dialogue-clickredirector": {
+        "requires": [
+            "base",
+            "node",
+            "json-parse",
+            "clickredirector",
+            "clickredirector-filters",
+            "clickredirector-highlighters",
+            "event",
+            "event-key"
+        ]
+    }
+}
