@@ -34,9 +34,13 @@ body.jsenabled .nonjs-control, body.jsenabled .nonjs-control input {
  * above workaround leaves you with a button floating around
  */
 
-fieldset.hidden {
-    display: inherit;
-    visibility: inherit;
+.path-mod-dialogue .mform fieldset {
+  border: none;
+}
+
+.path-mod-dialogue fieldset.hidden {
+  display: inherit;
+  visibility: inherit;
 }
 
 // CSS Reset
@@ -76,7 +80,6 @@ fieldset.hidden {
 @import "bootstrap/utilities.less"; // Has to be last to override when necessary
 
 // Font Awesome
-//@import "font-awesome/font-awesome.less";
 
 @import "font-awesome/variables";
 @import "font-awesome/mixins";
