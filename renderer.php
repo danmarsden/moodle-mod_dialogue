@@ -488,6 +488,10 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
         $html = '';
 
+        if (! has_capability('mod/dialogue:displaybystudent', $PAGE->context)) {
+            return $html;
+        }
+
         $redirecturl = new moodle_url('/mod/dialogue/view.php', array('id' => $PAGE->cm->id));
 
         user_preference_allow_ajax_update('dialogue_displaybystudent', PARAM_BOOL);
