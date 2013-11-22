@@ -55,6 +55,7 @@ $string['dialogue:bulkopenrulecreate'] = 'Create a bulk opener rule';
 $string['dialogue:bulkopenruleeditany'] = 'Allows user to edit any rule, useful for admin\'s etc';
 $string['dialogue:close'] = 'Close a conversation';
 $string['dialogue:closeany'] = 'Close any';
+$string['dialogue:displaybystudent'] = 'Display by student';
 $string['dialogue:deleteany'] = 'Delete any';
 $string['dialogue:open'] = 'Open a conversation';
 $string['dialogue:receive'] = 'Receive, who can be the recipient when opening a conversation';
