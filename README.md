@@ -23,7 +23,7 @@ Contributions
 -------------
 Originally written by Ray Kingdon
 
-Rewritten by Troy Williams for The University of Waikato - 2013
+Rewritten by Troy Williams - 2013
 
 Contributions by many others
 
