@@ -147,7 +147,7 @@ function dialogue_upgrade_is_complete() {
  * @param int $matches
  * @return array
  */
-function dialogue_upgrade_get_list($page = 0, $limit = dialogue::PAGINATION_PAGE_SIZE, &$matches = null) {
+function dialogue_upgrade_get_list($sortby, $page = 0, $limit = dialogue::PAGINATION_PAGE_SIZE, &$matches = null) {
     global $DB;
 
     $countsql   = "SELECT COUNT(1) ";
@@ -162,7 +162,7 @@ function dialogue_upgrade_get_list($page = 0, $limit = dialogue::PAGINATION_PAGE
                    JOIN {modules} m ON m.id = cm.module
                   WHERE m.name = 'dialogue'";
 
-    $orderbysql = "ORDER BY d.timemodified DESC";
+    $orderbysql = "ORDER BY $sortby";
 
     $matches = $DB->count_records_sql($countsql . $basesql);
 
@@ -505,4 +505,19 @@ function dialogue_upgrade_duplicate_course_module(stdClass $cm, $newinstanceid) 
     set_coursemodule_visible($newcm->id, $newcm->visible);
 
     return $newcm;
+}
+
+require_once($CFG->libdir.'/formslib.php');
+class dialogue_upgrade_selected_form extends moodleform {
+    /**
+     * Define this form - is called from parent constructor.
+     */
+    public function definition() {
+        $mform = $this->_form;
+        // Visible elements.
+        $mform->addElement('hidden', 'selecteddialogues', '', array('class'=>'selecteddialogues'));
+        $mform->setType('selecteddialogues', PARAM_SEQUENCE);
+
+        $mform->addElement('submit', 'upgradeselected', get_string('upgradeselected', 'dialogue'));
+    }
 }

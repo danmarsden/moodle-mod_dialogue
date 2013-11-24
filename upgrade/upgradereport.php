@@ -18,10 +18,11 @@ require(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot.'/mod/dialogue/upgrade/upgradelib.php');
 require_once($CFG->dirroot.'/mod/dialogue/locallib.php');
+require_once($CFG->libdir.'/tablelib.php');
 
-$page       = optional_param('page', 0, PARAM_INT);
-$upgrade    = optional_param('upgrade', 0, PARAM_INT);
-$confirm    = optional_param('confirm', 0, PARAM_INT);
+$page               = optional_param('page', 0, PARAM_INT);
+$upgradedialogues   = optional_param('upgradedialogues', '', PARAM_SEQUENCE);
+$confirm            = optional_param('confirm', 0, PARAM_INT);
 
 if (dialogue_upgrade_is_complete()) {
     redirect(new moodle_url('/'), get_string('upgradeiscompleted', 'dialogue'), 1);
@@ -36,97 +37,123 @@ require_capability('moodle/site:config', $context);
 
 $PAGE->set_context($context);
 $PAGE->set_pagetype('standard');
-$PAGE->set_title(new lang_string('modulenameplural', 'dialogue') . ' > ' .
-                 new lang_string('upgradereport', 'dialogue'));
-$PAGE->set_heading(new lang_string('upgradereport', 'dialogue'));
+$PAGE->set_title(get_string('modulenameplural', 'dialogue') . ' > ' .
+                 get_string('upgradereport', 'dialogue'));
+$PAGE->set_heading(get_string('upgradereport', 'dialogue'));
 
-$pageparams = array('page' => $page, 'upgrade' => $upgrade);
+$pageparams = array('page' => $page);
 $pageurl = new moodle_url('/mod/dialogue/upgrade/upgradereport.php', $pageparams);
 $PAGE->set_url($pageurl);
 
+$returnurl = new moodle_url('/mod/dialogue/upgrade/upgradereport.php'); // used multiple places
 
+if (!empty($upgradedialogues) and $confirm and confirm_sesskey()) {
+    // Set time limit to run until done
+    set_time_limit(0);
+    // Increase memory limit
+    raise_memory_limit(MEMORY_EXTRA);
 
-if (!empty($upgrade)) {
-    $returnurl = new moodle_url('/mod/dialogue/upgrade/upgradereport.php'); // used multiple places
-    // get cm
-    //$cm = dialogue_upgrade_get_course_module_by_dialogue($upgrade);
-    $cm = get_coursemodule_from_id('dialogue', $upgrade);
-    if (!$cm) {
-        print_error('invalidcoursemodule');
-        exit;
-    }
-    // confirm
-    if (!$confirm or !confirm_sesskey()) {
-        $confirmurl = clone($pageurl);
-        $confirmurl->params(array('confirm' => 1, 'sesskey' => sesskey()));
-        echo $OUTPUT->header();
-        echo $OUTPUT->box_start('noticebox');
-        $upgradenotice = get_string('upgradecheck', 'dialogue', $cm->name);
-        $continue = new single_button($confirmurl, new lang_string('yes'));
-        $cancel = new single_button($returnurl, new lang_string('no'), 'get');
-        echo $OUTPUT->confirm($upgradenotice, $continue, $cancel);
-        echo $OUTPUT->box_end();
-        echo $OUTPUT->footer();
-        exit;
-    }
-    // upgrade
-    $result = dialogue_upgrade_course_module($cm);
-    if (!$result) {
-        print_error('Fail!');
+    $cmids = explode(',', $upgradedialogues);
+    $count = count($cmids);
+    foreach($cmids as $cmid) {
+        $cm = get_coursemodule_from_id('dialogue', $cmid);
+        if (!$cm) {
+            print_error('invalidcoursemodule');
+            exit;
+        }
+        echo html_writer::tag('h3', get_string('upgradingsummary', 'dialogue', $cm->name));
+        $result = dialogue_upgrade_course_module($cm);
+        if (!$result) {
+            echo html_writer::tag('strong', get_string('upgradingresultfailed', 'dialogue'));
+            exit;
+
+        }
+        echo html_writer::tag('strong', get_string('upgradingresultsuccess', 'dialogue'));
+
     }
     // cleanup
     dialogue_upgrade_cleanup();
+    // back to report page
+    redirect($returnurl, get_string('upgradedcount', 'dialogue', $count), 2);
 
-    redirect($returnurl);
+} else {
+
+    $form = new dialogue_upgrade_selected_form();
+    if ($form->is_submitted()) {
+        $data = $form->get_data();
+        if ((!$confirm or !confirm_sesskey()) and !empty($data->selecteddialogues)) {
+            $confirmurl = clone($pageurl);
+            $confirmurl->params(array('confirm' => 1, 'sesskey' => sesskey(), 'upgradedialogues' => $data->selecteddialogues));
+            echo $OUTPUT->header();
+            echo $OUTPUT->box_start('noticebox');
+            $upgradenotice = get_string('upgradeselectedcount', 'dialogue', count(explode(',', $data->selecteddialogues)));
+            $notice = html_writer::tag('h2', $upgradenotice);
+            $continue = new single_button($confirmurl, get_string('yes'));
+            $cancel = new single_button($returnurl, get_string('no'), 'get');
+            echo $OUTPUT->confirm($notice, $continue, $cancel);
+            echo $OUTPUT->box_end();
+            echo $OUTPUT->footer();
+            exit;
+        }
+    }
+    // javascript selector
+    $PAGE->requires->js('/mod/dialogue/upgrade/upgrade.js');
+    $PAGE->requires->js_init_call('M.mod_dialogue.upgrade.init_upgrade_table', array());
+    $PAGE->requires->string_for_js('upgradenodialoguesselected', 'dialogue');
+    // table definitions
+    $tablecolumns = array('select',
+                        'id',
+                        'coursename',
+                        'dialoguename',
+                        'timemodified');
+
+    $selectall = '<div class="selectall">' .
+                 '<input type="checkbox" name="selectall"/>' .
+                 '</div>';
+
+    $tableheaders = array($selectall,
+                        '#',
+                        get_string('course'),
+                        get_string('name'),
+                        get_string('modified')
+                        );
+
+    $table = new flexible_table('dialogue-upgrade-report');
+    $table->define_columns($tablecolumns);
+    $table->define_headers($tableheaders);
+    $baseurl = clone($pageurl);
+    $table->define_baseurl($baseurl->out());
+    $table->set_attribute('cellspacing', '0');
+    $table->set_attribute('class', 'generaltable generalbox');
+    $table->sortable(true, 'timemodified');
+    $table->no_sorting('select');
+    $table->no_sorting('dialoguename');
+    $table->text_sorting('coursename');
+
+    echo $OUTPUT->header();
+    $table->setup();
+
+    // get the order for display
+    $sortby = $table->get_sql_sort();
+
+    // get list, setup pagination
+    $perpage = dialogue::PAGINATION_PAGE_SIZE;
+    $matches = 0;
+    $rs = dialogue_upgrade_get_list($sortby, $page, $perpage, $matches);
+    $pagination = new paging_bar($matches, $page, $perpage, $pageurl);
+    foreach ($rs as $record) {
+        $row = array();
+        $row[] = '<input type="checkbox" name="cmid" value="' . $record->id . '"/>';
+        $row[] = $record->id;
+        $row[] = $record->coursename;
+        $row[] = format_text($record->dialoguename);
+        $row[] = userdate($record->timemodified);
+        $table->add_data($row);
+    }
+    echo $OUTPUT->heading(get_string('upgradenoneedupgrade', 'dialogue', intval($matches)));
+    $table->print_html();
+    echo html_writer::empty_tag('hr');
+    $form->display();
+    echo $OUTPUT->render($pagination);
+    echo $OUTPUT->footer();
 }
-
-// table definitions
-$tablecolumns = array('id',
-                      'course',
-                      'name',
-                      'timemodified',
-                      'upgrade');
-
-$tableheaders = array('#',
-                      new lang_string('course'),
-                      new lang_string('name'),
-                      new lang_string('modified'),
-                      ''
-                      );
-
-$baseurl = clone($pageurl);
-
-$table = new flexible_table('dialogue-upgrade-report');
-$table->define_columns($tablecolumns);
-$table->define_headers($tableheaders);
-$table->define_baseurl($baseurl->out());
-$table->set_attribute('cellspacing', '0');
-$table->set_attribute('class', 'generaltable generalbox');
-
-// begin output of page
-echo $OUTPUT->header();
-$table->setup();
-
-// get list, setup pagination
-$matches = 0;
-$rs = dialogue_upgrade_get_list($page = 0, dialogue::PAGINATION_PAGE_SIZE, $matches);
-$pagination = new paging_bar($matches, $page, dialogue::PAGINATION_PAGE_SIZE, $pageurl);
-
-$upgradeurl = clone($pageurl);
-$upgradestring = new lang_string('upgrade', 'dialogue');
-
-foreach ($rs as $record) {
-    $data = array();
-    $data[] = $record->id;
-    $data[] = $record->coursename;
-    $data[] = format_text($record->dialoguename);
-    $data[] = userdate($record->timemodified);
-    $upgradeurl->param('upgrade', $record->id);
-    $data[] = html_writer::link($upgradeurl, $upgradestring);
-    $table->add_data($data);
-}
-// output the list
-echo $OUTPUT->heading(get_string('upgradenoneedupgrade', 'dialogue', intval($matches)));
-$table->print_html();
-echo $OUTPUT->render($pagination);
-echo $OUTPUT->footer();
