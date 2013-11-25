@@ -207,12 +207,12 @@ class mod_dialogue_renderer extends plugin_renderer_base {
             }
 
             if (isset($record->unread)) {
+                $badge = '';
                 $unreadcount = $record->unread;
-                $badgeclass = 'hidden';
                 if ($unreadcount > 0) {
                     $badgeclass = 'badge label-info';
+                    $badge = html_writer::span($unreadcount, $badgeclass, array('title'=>get_string('numberunread', 'dialogue', $unreadcount)));
                 }
-                $badge = html_writer::span($unreadcount, $badgeclass, array('title'=>get_string('numberunread', 'dialogue', $unreadcount)));
                 $output .= html_writer::tag('td', $badge);
             }
 /*

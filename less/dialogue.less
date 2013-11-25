@@ -34,15 +34,6 @@ body.jsenabled .nonjs-control, body.jsenabled .nonjs-control input {
  * above workaround leaves you with a button floating around
  */
 
-.path-mod-dialogue .mform fieldset {
-  border: none;
-}
-
-.path-mod-dialogue fieldset.hidden {
-  display: inherit;
-  visibility: inherit;
-}
-
 // CSS Reset
 @import "bootstrap/reset.less";
 
@@ -79,8 +70,8 @@ body.jsenabled .nonjs-control, body.jsenabled .nonjs-control input {
 // Utility classes
 @import "bootstrap/utilities.less"; // Has to be last to override when necessary
 
-// Font Awesome
 
+// Font Awesome
 @import "font-awesome/variables";
 @import "font-awesome/mixins";
 @import "font-awesome/path";
@@ -94,13 +85,8 @@ body.jsenabled .nonjs-control, body.jsenabled .nonjs-control input {
 
 // Custom
 @import "autocomplete.less";
-
-// Hide from screenreaders and browsers
-// Credit: HTML5 Boilerplate
-.hidden {
-  display: none;
-  visibility: hidden;
-}
+@import "conversation.less";
+@import "stateindicator.less";
 
 /* listing meta */
 .listing-meta h6 {
@@ -158,11 +144,6 @@ a.btn-create:visited {
   color: white;
 }
 
-
-// Custom
-@import "conversation.less";
-@import "stateindicator.less";
-
 // Horizontal rules
 .path-mod-dialogue hr {
   margin: 20px 0;
@@ -194,4 +175,13 @@ body.jsenabled .conversation-list tr:hover,
 body.jsenabled .draft-list tr:hover,
 body.jsenabled .bulkopenrule-list tr:hover{
   cursor: pointer;
+}
+
+.path-mod-dialogue .mform fieldset {
+  border: none;
+}
+
+.path-mod-dialogue fieldset.hidden {
+  display: inherit;
+  visibility: inherit;
 }
