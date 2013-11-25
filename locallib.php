@@ -1520,7 +1520,7 @@ function dialogue_cm_unread_total(dialogue $dialogue) {
     $sql = "SELECT dc.id, (SELECT COUNT(dm.id)
                              FROM {dialogue_messages} dm
                             WHERE dm.conversationid = dc.id) -
-                          (SELECT COUNT(DISTINCT(df.conversationid, df.messageid, df.userid))
+                          (SELECT COUNT(df.id)
                              FROM {dialogue_flags} df
                             WHERE df.conversationid = dc.id
                               AND df.flag = :dfreadflag
@@ -1790,7 +1790,7 @@ class dialogue_conversations implements renderable {
                                       FROM {dialogue_messages} dm
                                      WHERE dm.conversationid = dc.id
                                        AND dm.state = :unreadstate) -
-                                   (SELECT COUNT(DISTINCT(df.conversationid, df.messageid, df.userid))
+                                   (SELECT COUNT(df.id)
                                       FROM {dialogue_flags} df
                                      WHERE df.conversationid = dc.id
                                        AND df.flag = :unreadflagread
