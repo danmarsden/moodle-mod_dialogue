@@ -2146,21 +2146,16 @@ function dialogue_load_bootstrap_js() {
  * @return string html
  */
 function dialogue_generate_summary_line($subject, $body, $length = 70, $separator = ' - ') {
-    if (textlib::strlen($subject) > $length) {
-        return html_writer::tag('strong', dialogue_shorten_html($subject, $length));
-    }
+    $subject = html_to_text($subject, 0, false);
+    $body    = html_to_text($body, 0, false);
+
     $diff = $length - (strlen($subject) + strlen($separator));
-    return html_writer::tag('strong', $subject) . $separator .
-           html_writer::tag('span', dialogue_shorten_html($body, $diff));
-}
-
-function dialogue_listing_summary($subject, $body) {
-    $subjectlength = textlib::strlen($subject);
-    if ($subjectlength > 40 or empty($body)) {
-        return html_writer::tag('strong', dialogue_shorten_html($subject, 70));
+    if (textlib::strlen($subject) > $length or ! $diff) {
+        return html_writer::tag('strong', shorten_text($subject, $length));
     }
-    return html_writer::tag('strong', $subject) . ' - '. html_writer::tag('span', dialogue_shorten_html($body, 30));
 
+    return html_writer::tag('strong', $subject) . $separator .
+           html_writer::tag('span', shorten_text($body, $diff));
 }
 
 /**
