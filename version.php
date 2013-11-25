@@ -28,5 +28,5 @@ $module->requires  = 2013050100;        // See http://docs.moodle.org/dev/Moodle
 $module->cron      = 60;
 $module->component = 'mod_dialogue';    // Full name of the plugin (used for diagnostics)
 $module->release   = '2.5';             // Human-friendly version name
-$module->maturity  = MATURITY_STABLE;       // This version's maturity level
+$module->maturity  = MATURITY_BETA;     // This version's maturity level
 $module->dependencies = array();
