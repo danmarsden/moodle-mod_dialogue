@@ -1805,8 +1805,13 @@ class dialogue_conversations implements renderable {
         global $DB;
 
         $roleid = $DB->get_field('role', 'id', array('shortname' => 'student'), MUST_EXIST);
-
-        $contextlist = get_related_contexts_string($this->dialogue->context);
+        $context = $this->dialogue->context;
+        $parents = $context->get_parent_context_ids(true);
+        if ($parents) {
+            $contextlist =  ' IN ('.$context->id.',' . implode(',', $parents).')';
+        } else {
+            $contextlist = ' = '. $context->id;
+        }
 
         $this->fields['displayuserid'] = 'dp.userid AS displayuserid';
 
