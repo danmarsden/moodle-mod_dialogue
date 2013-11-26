@@ -154,62 +154,67 @@ function dialogue_cron() {
     }
 
     mtrace('1. Dealing with bulk open rules...');
-    
+     
     $sql = "SELECT dbor.*
               FROM mdl_dialogue_bulk_opener_rules dbor
               JOIN mdl_dialogue_messages dm ON dm.conversationid = dbor.conversationid
-             WHERE dbor.lastrun = 0
-                OR (dbor.includefuturemembers = 1 AND dbor.cutoffdate > dbor.lastrun)
-               AND dm.state = :bulkautomated";
+             WHERE dm.state = :bulkautomated
+               AND dbor.lastrun = 0
+                OR (dbor.includefuturemembers = 1 AND dbor.cutoffdate > dbor.lastrun)";
 
     $params = array('bulkautomated' => dialogue::STATE_BULK_AUTOMATED);
     $rs = $DB->get_recordset_sql($sql, $params);
     if ($rs->valid()) {
         foreach ($rs as $record) {
-            // setup dialogue
-            $dialogue = dialogue::instance($record->dialogueid);
-            if (!$dialogue->is_visible()){
-                mtrace(' Skipping hidden dialogue: '.$dialogue->activityrecord->name);
-                continue;
+            // try and die elegantly
+            try {
+                // setup dialogue
+                $dialogue = dialogue::instance($record->dialogueid);
+                if (!$dialogue->is_visible()){
+                    mtrace(' Skipping hidden dialogue: '.$dialogue->activityrecord->name);
+                    continue;
+                }
+                // setup conversation
+                $conversation = new dialogue_conversation($dialogue, (int) $record->conversationid);
+
+                $withcapability = 'mod/dialogue:receive';
+                $groupid = 0; // it either a course or a group, default to course
+                $requiredfields = user_picture::fields('u');
+                if ($record->type == 'group') {
+                    $groupid = $record->sourceid;
+                }
+
+                $conversationsopened = 0;
+
+                // get users that can receive
+                $enrolledusers = get_enrolled_users($dialogue->context, $withcapability, $groupid, $requiredfields);
+
+                $sentusers = $DB->get_records('dialogue_flags',
+                                            array('conversationid' => $conversation->conversationid,
+                                                    'flag' => dialogue::FLAG_SENT),
+                                            '',
+                                            'userid');
+
+                $users = array_diff_key($enrolledusers, $sentusers);
+                foreach ($users as $user) {
+                    // get a copy of the conversation
+                    $copy = $conversation->copy();
+                    $copy->add_participant($user->id);
+                    $copy->save();
+                    $copy->send();
+                    // mark the sent in automated conversation, so can track who sent to
+                    $conversation->set_flag(dialogue::FLAG_SENT, $user);
+                    unset($copy);
+                    mtrace('  opened '. $conversation->subject . ' with ' . fullname($user));
+                    // up open count
+                    $conversationsopened++;
+
+                }
+                $DB->set_field('dialogue_bulk_opener_rules', 'lastrun', time(), array('conversationid'=>$record->conversationid));
+                mtrace(' Opened '. $conversationsopened . ' for conversation ' . $conversation->subject);
+            } catch (moodle_exception $e) {
+                mtrace($e->module . ' : ' . $e->errorcode);
             }
-            // setup conversation
-            $conversation = new dialogue_conversation($dialogue, (int) $record->conversationid);
-
-            $withcapability = 'mod/dialogue:receive';
-            $groupid = 0; // it either a course or a group, default to course
-            $requiredfields = user_picture::fields('u');
-            if ($record->type == 'group') {
-                $groupid = $record->sourceid;
-            }
-
-            $conversationsopened = 0;
-            
-            // get users that can receive
-            $enrolledusers = get_enrolled_users($dialogue->context, $withcapability, $groupid, $requiredfields);
-
-            $sentusers = $DB->get_records('dialogue_flags',
-                                          array('conversationid' => $conversation->conversationid,
-                                                'flag' => dialogue::FLAG_SENT),
-                                          '',
-                                          'userid');
-
-            $users = array_diff_key($enrolledusers, $sentusers);
-            foreach ($users as $user) {
-                // get a copy of the conversation
-                $copy = $conversation->copy();
-                $copy->add_participant($user->id);
-                $copy->save();
-                $copy->send();
-                // mark the sent in automated conversation, so can track who sent to
-                $conversation->set_flag(dialogue::FLAG_SENT, $user);
-                unset($copy);
-                mtrace('  opened '. $conversation->subject . ' with ' . fullname($user));
-                // up open count
-                $conversationsopened++;
-                
-            }
-            $DB->set_field('dialogue_bulk_opener_rules', 'lastrun', time(), array('conversationid'=>$record->conversationid));
-            mtrace(' Opened '. $conversationsopened . ' for conversation ' . $conversation->subject);
         }
     } else {
         mtrace(' None to process');
