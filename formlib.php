@@ -24,8 +24,8 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  */
 
-
-require_once($CFG->libdir.'/formslib.php');
+// load repository lib, will load filelib and formslib
+require_once($CFG->dirroot . '/repository/lib.php');
 
 class mod_dialogue_message_form extends moodleform {
 
