@@ -375,7 +375,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
         if (!empty($data->groupinformation)) {
             $matches = array();
             $subject = $data->groupinformation;
-            $pattern = '/(course|group)-(\d.+)/';
+            $pattern = '/(course|group)-(\d.*)/';
             preg_match($pattern, $subject, $matches);
             $bulkopenrule = array();
             $bulkopenrule['type'] = ($matches[1]) ? $matches[1] : '';
