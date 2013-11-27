@@ -86,6 +86,8 @@ M.mod_dialogue.autocomplete = {
         this.listnode.append(participantitem);
         // attachremove listener after append
         Y.all('li div img.remove').on('click', Y.bind(this.remove_participant_onclick, this));
+        // force safari to repaint, done by adding class. only safari, safari you suck!
+        this.containernode.toggleClass('force-safari-repaint');
     },
 
     remove_participant_onclick : function(e) {
