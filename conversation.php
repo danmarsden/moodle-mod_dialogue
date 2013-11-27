@@ -123,11 +123,16 @@ if ($action == 'close') {
     exit;
 }
 
+// ready for viewing, let's just make sure not a draft, possible url manipulation by user
+if ($conversation->state == dialogue::STATE_DRAFT) {
+    redirect($returnurl);
+}
+
 // view conversation by default
 $renderer = $PAGE->get_renderer('mod_dialogue');
 
 if (!has_capability('mod/dialogue:viewany', $context) and !$conversation->is_participant()) {
-   throw new moodle_exception('nopermission');
+    throw new moodle_exception('nopermission');
 }
 
 echo $OUTPUT->header($activityrecord->name);
