@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 function dialogue_supports($feature) {
     switch($feature) {
-        case FEATURE_GROUPS:                  return true;
+        case FEATURE_GROUPS:                  return false;
         case FEATURE_GROUPINGS:               return false;
         case FEATURE_GROUPMEMBERSONLY:        return false;
         case FEATURE_MOD_INTRO:               return true;
@@ -143,7 +143,7 @@ function dialogue_delete_instance($id) {
  * @return   bool   true when complete
  */
 function dialogue_cron() {
-    global $CFG, $DB, $PAGE;
+    global $CFG, $DB, $USER, $PAGE;
     require_once($CFG->dirroot.'/mod/dialogue/locallib.php');
     
     mtrace('Dialogue cron...');
@@ -197,6 +197,10 @@ function dialogue_cron() {
 
                 $users = array_diff_key($enrolledusers, $sentusers);
                 foreach ($users as $user) {
+                    // don't start with author
+                    if ($user->id == $conversation->author->id) {
+                        continue;
+                    }
                     // get a copy of the conversation
                     $copy = $conversation->copy();
                     $copy->add_participant($user->id);

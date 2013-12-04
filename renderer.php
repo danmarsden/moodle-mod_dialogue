@@ -150,7 +150,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
     }
 
     public function conversations(dialogue_conversations $conversations, $page) {
-        global $PAGE, $OUTPUT;
+        global $PAGE, $OUTPUT, $USER;
 
         $output = '';
 
@@ -162,12 +162,6 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $yearago  = strtotime("-1 year");
 
         $listheading = get_string('displayconversationsheading', 'dialogue', textlib::strtolower($state));
-        $activegroup = groups_get_activity_group($cm, true);
-        if ($activegroup) {
-            $groupname = groups_get_group_name($activegroup);
-            $listheading .= ' ' . get_string('ingroup', 'dialogue', $groupname);
-        }
-
         $matches = $conversations->matches();
         if (!$matches) {
             $output .= html_writer::start_div();
@@ -179,7 +173,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
         $pageurl = $PAGE->url;
         $pagination = new paging_bar($matches, $page, dialogue::PAGINATION_PAGE_SIZE, $pageurl);
-        $records = $conversations->fetch_page($page);
+        $records = $conversations->page($page);
 
         $output .= html_writer::start_div('listing-meta');
         $output .= html_writer::tag('h6', $listheading);
@@ -200,11 +194,12 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
             $output .= html_writer::start_tag('tr', $datattributes);
 
+            $statelabel = '';
             if ($record->state == dialogue::STATE_CLOSED) {
-                $label = html_writer::tag('span', get_string('closed', 'dialogue'),
-                                          array('class'=>'state-indicator state-closed'));
-                $output .= html_writer::tag('td', $label);
+                $statelabel = html_writer::tag('span', get_string('closed', 'dialogue'),
+                                               array('class'=>'state-indicator state-closed'));
             }
+            $output .= html_writer::tag('td', $statelabel);
 
             if (isset($record->unread)) {
                 $badge = '';
@@ -215,16 +210,9 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                 }
                 $output .= html_writer::tag('td', $badge);
             }
-/*
+
             if (isset($record->authorid)) {
-                $author = dialogue_get_user_details($dialogue, $record->authorid);
-                $avatar = $OUTPUT->user_picture($author, array('class'=> 'userpicture img-rounded', 'size' => 48));
-                $output .= html_writer::tag('td', $avatar);
-                $output .= html_writer::tag('td', fullname($author));
-            }
-*/
-            if (isset($record->displayuserid)) {
-                $displayuser = dialogue_get_user_details($dialogue, $record->displayuserid);
+                $displayuser = dialogue_get_user_details($dialogue, $record->authorid);
                 $avatar = $OUTPUT->user_picture($displayuser, array('class'=> 'userpicture img-rounded', 'size' => 48));
                 $output .= html_writer::tag('td', $avatar);
                 $output .= html_writer::tag('td', fullname($displayuser));
@@ -240,9 +228,9 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                 $participants = dialogue_get_conversation_participants($dialogue, $record->conversationid);
                 $output .= html_writer::start_div();
                 foreach($participants as $participantid) {
-                    if (isset($record->authorid) and $record->authorid == $participantid) {
-                        continue;
-                    }
+                    //if ($participantid == $USER->id) {
+                    //    continue;
+                    //}
                     $participant = dialogue_get_user_details($dialogue, $participantid);
                     $picture = $OUTPUT->user_picture($participant, array('class'=>'userpicture img-rounded', 'size'=>16));
                     $output .= html_writer::tag('span', $picture.' '.fullname($participant),
@@ -483,42 +471,6 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         return $html;
     }
 
-    public function display_by_student_checkbox() {
-        global $PAGE;
-
-        $html = '';
-
-        if (! has_capability('mod/dialogue:displaybystudent', $PAGE->context)) {
-            return $html;
-        }
-
-        $redirecturl = new moodle_url('/mod/dialogue/view.php', array('id' => $PAGE->cm->id));
-
-        user_preference_allow_ajax_update('dialogue_displaybystudent', PARAM_BOOL);
-
-        $PAGE->requires->yui_module('moodle-mod_dialogue-userpreference',
-                                    'M.mod_dialogue.userpreference.init',
-                                    array('dialogue_displaybystudent', $redirecturl->out(false)));
-
-        $displaybystudent = get_user_preferences('dialogue_displaybystudent', false);
-
-        $attributes = array('id'=>'dialogue_displaybystudent', 'type'=>'checkbox', 'value'=> '1');
-        if ($displaybystudent) {
-            $attributes['checked'] = 'checked';
-        }
-
-        $html .= html_writer::start_div('display-by-student js-control');
-        //$html .= html_writer::tag('label', get_string('displaybystudent', 'dialogue'));, array('class' => 'label')
-        $html .= html_writer::tag('span', get_string('displaybystudent', 'dialogue'));
-        $html .= html_writer::empty_tag('input', $attributes);
-        $html .= html_writer::end_div();
-
-        return $html;
-
-    }
-
-
-
     /**
      * Builds and returns HTML needed to render the sort by drop down for conversation
      * lists.
@@ -650,7 +602,6 @@ class mod_dialogue_renderer extends plugin_renderer_base {
     public function tab_navigation(dialogue $dialogue) {
         global $PAGE;
 
-        $config  = $dialogue->config;
         $context = $dialogue->context;
         $cm      = $dialogue->cm;
 
@@ -658,28 +609,27 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $currentpage = basename($PAGE->url->out_omit_querystring(), '.php');
 
         $html .= html_writer::start_tag('ul', array('class'=>'nav nav-tabs'));
-        // Main view
+        // link main conversation listing
         $active = ($currentpage == 'view') ? array('class'=>'active') : array();
         $html .= html_writer::start_tag('li', $active);
         $viewurl = new moodle_url('view.php', array('id'=>$cm->id));
         $html .= html_writer::link($viewurl, get_string('viewconversations', 'dialogue'));
         $html .= html_writer::end_tag('li');
-
-        // Drafts
+        // link to users draft listing
         $active = ($currentpage == 'drafts') ? array('class'=>'active') : array();
         $html .= html_writer::start_tag('li', $active);
         $draftsurl = new moodle_url('drafts.php', array('id'=>$cm->id));
         $html .= html_writer::link($draftsurl, get_string('drafts', 'dialogue'));
         $html .= html_writer::end_tag('li');
-        //
-        if (has_capability('mod/dialogue:bulkopenruleeditany', $context)) { //@TODO better named cap
+        // link to bulk open rules listing
+        if (has_any_capability(array('mod/dialogue:bulkopenrulecreate', 'mod/dialogue:bulkopenruleeditany'), $context)) { // @todo better named capabilities
             $active = ($currentpage == 'bulkopenrules') ? array('class'=>'active') : array();
             $html .= html_writer::start_tag('li', $active);
             $bulkopenrulesurl = new moodle_url('bulkopenrules.php', array('id'=>$cm->id));
             $html .= html_writer::link($bulkopenrulesurl, get_string('bulkopenrules', 'dialogue'));
             $html .= html_writer::end_tag('li');
         }
-
+        // open discussion button
         if (has_capability('mod/dialogue:open', $context)) {
             $createurl = new moodle_url('conversation.php', array('id'=>$cm->id, 'action'=>'create'));
             $html .= html_writer::link($createurl, get_string('create'), array('class'=>'btn-create pull-right'));//array('class'=>'btn btn-primary pull-right')

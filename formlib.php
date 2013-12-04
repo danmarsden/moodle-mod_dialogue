@@ -244,7 +244,6 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
         $attributes = array();
         $attributes['size'] = 5;
 
-        
         $mform->addElement('selectgroups', 'p_select', get_string('people', 'dialogue'),
                            array(),
                            $attributes);
@@ -253,19 +252,16 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
 
         // bulk open rule section
         if (has_capability('mod/dialogue:bulkopenrulecreate', $context)){
-            $groupmode = groups_get_activity_groupmode($cm);
             $groups = array(); // use for form
-            if ($groupmode == NOGROUPS) {
-                $groups[''] = get_string('select').'...';
-                $groups['course-'.$PAGE->course->id] = get_string('allparticipants');
+            $groups[''] = get_string('select').'...';
+            $groups['course-'.$PAGE->course->id] = get_string('allparticipants');
+            if (has_capability('moodle/site:accessallgroups', $context)) {
+                $allowedgroups = groups_get_all_groups($PAGE->course->id, 0);
             } else {
-                $groupdata = groups_get_activity_allowed_groups($cm);
-                if ($groupdata) {
-                    $groups[''] = get_string('select').'...';
-                    foreach ($groupdata as $grouptemp) {
-                        $groups['group-'.$grouptemp->id] = $grouptemp->name;
-                    }
-                }
+                $allowedgroups = groups_get_all_groups($PAGE->course->id, $USER->id);
+            }
+            foreach ($allowedgroups as $allowedgroup) {
+                $groups['group-'.$allowedgroup->id] = $allowedgroup->name;
             }
             // make sure have groups, possible group mode but no groups yada yada
             if ($groups) {

@@ -56,6 +56,10 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->addHelpButton('maxattachments', 'maxattachments', 'dialogue');
         $mform->setDefault('maxattachments', $pluginconfig->maxattachments);
 
+        $mform->addElement('checkbox', 'usecoursegroups', get_string('usecoursegroups', 'dialogue'));
+        $mform->addHelpButton('usecoursegroups', 'usecoursegroups', 'dialogue');
+        $mform->setDefault('usecoursegroups', 0);
+
         $mform->addElement('header', 'legacy', get_string('legacy', 'dialogue'));
         $radiogroup = array();
         $radiogroup[] = $mform->createElement('radio',
@@ -84,4 +88,15 @@ class mod_dialogue_mod_form extends moodleform_mod {
 
         $this->add_action_buttons();
     }
+
+     function get_data() {
+        $data = parent::get_data();
+        if (!$data) {
+            return false;
+        }
+        if (!isset($data->usecoursegroups)) {
+            $data->usecoursegroups = 0;
+        }
+        return $data;
+     }
 }

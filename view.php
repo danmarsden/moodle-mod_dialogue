@@ -72,18 +72,11 @@ $PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
                             'M.mod_dialogue.clickredirector.init', array($cm->id));
 
 $dialogue = new dialogue($cm, $course, $activityrecord);
-$conversationlist = new dialogue_conversations($dialogue, $state);
+$conversationlist = new dialogue_conversations($dialogue, $state, groups_get_activity_group($cm, true));
 if ($show == dialogue::SHOW_EVERYONE) {
     $conversationlist->set_view_any();
 }
-$activegroup = groups_get_activity_group($cm, true);
-if ($activegroup) {
-    $conversationlist->set_group($activegroup);
-}
 $conversationlist->set_order($sort, $direction);
-$total = $conversationlist->matches();
-$rs = $conversationlist->fetch_page($page);
-$pagination = new paging_bar($total, $page, dialogue::PAGINATION_PAGE_SIZE, $pageurl);
 
 $renderer = $PAGE->get_renderer('mod_dialogue');
 
@@ -92,23 +85,10 @@ if (!empty($dialogue->activityrecord->intro)) {
     echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
 }
 
-$groupmode = groups_get_activity_groupmode($cm);
-if ($groupmode == SEPARATEGROUPS or $groupmode == VISIBLEGROUPS) {
-    echo $OUTPUT->notification(get_string('groupmodenotifymessage', 'dialogue'), 'notifymessage');
-}
-$groupsurl = clone($pageurl);
-$groupsurl->remove_params('page'); // clear page
-echo groups_print_activity_menu($cm, $groupsurl, true);
-echo html_writer::empty_tag('br');
-
 // render tab navigation, toggle button groups and order by dropdown
 echo $renderer->tab_navigation($dialogue);
 echo $renderer->state_button_group();
 echo $renderer->show_button_group();
-if ($dialogue->config->allowdisplaybystudent) {
-    echo $renderer->display_by_student_checkbox();
-}
-
 echo $renderer->list_sortby(dialogue_conversations::get_sort_options(), $sort, $direction);
 echo $renderer->conversations($conversationlist, $page);
 echo $OUTPUT->footer($course);

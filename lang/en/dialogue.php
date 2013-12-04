@@ -16,7 +16,8 @@
 
 $string['actions'] = 'Actions';
 $string['ago'] = 'ago';
-$string['allowdisplaybystudent'] = 'Allow display by student ';
+
+
 $string['attachment'] = 'Attachment';
 $string['attachments'] = 'Attachments';
 $string['bulkopener'] = 'Bulk opener';
@@ -31,10 +32,10 @@ $string['cannotclosedraftconversation'] = 'You cannot close a conversation that 
 $string['cannotdeleteopenconversation'] = 'You cannot delete a open conversation';
 $string['closed'] = 'Closed';
 $string['closeconversation'] = 'Close conversation';
-$string['configallowdisplaybystudent'] = 'Experimental: allow conversations to be listed by student rather than author';
 $string['configmaxattachments'] = 'Default maximum number of attachments allowed per post.';
 $string['configmaxbytes'] = 'Default maximum size for all dialogue attachments on the site (subject to course limits and other local settings)';
 $string['configtrackunread'] = 'Track unread dialogue messages on course homepage';
+$string['configviewstudentconversations'] = 'Experimental: student list with conversations they are involved in';
 $string['conversationcloseconfirm'] = 'Are you sure you want to close conversation {$a} ?';
 $string['conversationclosed'] = 'Conversation {$a} has been closed';
 $string['conversationdeleteconfirm'] = 'Are you sure you want to delete conversation {$a} ?';
@@ -55,13 +56,13 @@ $string['dialogue:bulkopenrulecreate'] = 'Create a bulk opener rule';
 $string['dialogue:bulkopenruleeditany'] = 'Allows user to edit any rule, useful for admin\'s etc';
 $string['dialogue:close'] = 'Close a conversation';
 $string['dialogue:closeany'] = 'Close any';
-$string['dialogue:displaybystudent'] = 'Display by student';
+//$string['dialogue:displaybystudent'] = 'Display by student';
 $string['dialogue:deleteany'] = 'Delete any';
 $string['dialogue:open'] = 'Open a conversation';
 $string['dialogue:receive'] = 'Receive, who can be the recipient when opening a conversation';
 $string['dialogue:reply'] = 'Reply';
 $string['dialogue:replyany'] = 'Reply any';
-$string['dialogue:viewany'] = 'View any conversation in a dialogue course module instance';
+$string['dialogue:viewany'] = 'View any';
 $string['dialoguename'] = 'Dialogue name';
 $string['dialogueintro'] = 'Dialogue Introduction';
 $string['dialogueupgradehelper'] = 'Dialogue upgrade helper';
@@ -166,5 +167,10 @@ $string['unread'] = 'Unread';
 $string['unreadmessages'] = 'Unread messages';
 $string['unreadmessagesnumber'] = '{$a} unread messages';
 $string['unreadmessagesone'] = '1 unread message';
+$string['usecoursegroups'] = 'Use course groups';
+$string['usecoursegroups_help'] = 'If the course has defined groups a further restriction will be added to who a dialogue can 
+be opened with. Dialogues can only be opened between group members unless the person opening the dialogue has the "Access all groups"
+capability set.';
 $string['usesearch'] = 'Use search to find people to start a dialogue with';
 $string['viewconversations'] = 'View conversations';
+$string['viewstudentconversations'] = 'View student conversations';

@@ -14,6 +14,7 @@
         <FIELD NAME="multipleconversations" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
         <FIELD NAME="maxattachments" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
         <FIELD NAME="maxbytes" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        <FIELD NAME="usecoursegroups" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
         <FIELD NAME="notifications" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" DEFAULT="1"/>
         <FIELD NAME="notificationcontent" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>

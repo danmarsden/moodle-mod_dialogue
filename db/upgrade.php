@@ -83,5 +83,18 @@ function xmldb_dialogue_upgrade($oldversion=0) {
         echo $OUTPUT->notification('Set the upgrade required flag', 'notifysuccess');
         upgrade_mod_savepoint(true, 2013050104, 'dialogue');
     }
+
+    // Use course groups field
+    if ($oldversion < 2013101501) {
+        // Define field to be added to dialogue.
+        $table = new xmldb_table('dialogue');
+        $field = new xmldb_field('usecoursegroups', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'maxbytes');
+        // Conditionally launch add field.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_mod_savepoint(true, 2013101501, 'dialogue');
+    }
+
     return true;
 }

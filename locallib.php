@@ -1307,49 +1307,80 @@ class dialogue_reply extends dialogue_message {
 
 /**
  *
- * @global type $DB
- * @global type $PAGE
+ * @global stdClass $DB
+ * @global stdClass $USER
+ * @global stdClass $PAGE
  * @param dialogue $dialogue
- * @param type $query
- * @param type $activegroup
- * @return list
+ * @param string $query
+ * @return array()
  */
-function dialogue_search_potentials(dialogue $dialogue, $query = '', $activegroup = true) {
-    global $DB, $PAGE;
+function dialogue_search_potentials(dialogue $dialogue, $query = '') {
+    global $DB, $USER, $PAGE;
 
     $results    = array();
     $pagesize   = 10;
-    $group      = null;
-    $searchsql  = '';
+
+    $params = array();
+    $wheres = array();
+    $wheresql  = '';
+
 
     $userfields = user_picture::fields('u');
 
-    $cm         = $dialogue->cm;
-    $context    = $dialogue->context;
+    $cm                 = $dialogue->cm;
+    $context            = $dialogue->context;
+    $course             = $dialogue->course;
+    $usecoursegroups    = $dialogue->activityrecord->usecoursegroups;
 
-    if ($activegroup) {
-        $group = groups_get_activity_group($cm, true);
-    }
-
-    list($esql, $params) = get_enrolled_sql($context, 'mod/dialogue:receive', $group, true);
+    list($esql, $eparams) = get_enrolled_sql($context, 'mod/dialogue:receive', null, true);
+    $params = array_merge($params, $eparams);
 
     $basesql = "FROM {user} u
-                JOIN ($esql) je ON je.id = u.id
-               WHERE u.deleted = 0";
+                JOIN ($esql) je ON je.id = u.id";
+
+    if ($usecoursegroups) {
+        if (!has_capability('moodle/site:accessallgroups', $context)) { 
+            $groupings = groups_get_user_groups($course->id, $USER->id);
+            $allgroups = $groupings[0];
+            if ($allgroups) {
+                list($ingmsql, $ingmparams) = $DB->get_in_or_equal($allgroups, SQL_PARAMS_NAMED, 'gm');
+                $groupsql = "u.id IN (SELECT userid FROM {groups_members} gm WHERE gm.groupid $ingmsql)";
+                $params = array_merge($params, $ingmparams);
+                $viewallgroupsusers = get_users_by_capability($context, 'moodle/site:accessallgroups', 'u.id');
+                if (!empty($viewallgroupsusers)) {
+                    list($agsql, $agparams) = $DB->get_in_or_equal(array_keys($viewallgroupsusers), SQL_PARAMS_NAMED, 'ag');
+                    $params = array_merge($params, $agparams);
+                    $wheres[] =  "($groupsql OR u.id $agsql)";
+                } else {
+                    $wheres[] =  "($groupsql)";
+                }
+
+            }
+        }
+    }
+
+    // current user doesn't need to be in list
+    $wheres[] = "u.id != $USER->id";
 
     $fullname = $DB->sql_concat('u.firstname', "' '", 'u.lastname');
 
     if (!empty($query)) {
-        $searchsql = " AND ". $DB->sql_like($fullname, ':search1', false, false);
+        $wheres[] = $DB->sql_like($fullname, ':search1', false, false);
         $params['search1'] = "%$query%";
     }
 
-    $countsql = "SELECT COUNT(1) " . $basesql . $searchsql;
+    if ($wheres) {
+        $wheresql = " WHERE " . implode(" AND ", $wheres);
+    }
+
+    $countsql = "SELECT COUNT(1) " . $basesql . $wheresql;
+
     $matches = $DB->count_records_sql($countsql, $params);
 
     $orderby = " ORDER BY $fullname ASC";
 
-    $selectsql = "SELECT $userfields " . $basesql. $searchsql . $orderby;
+    $selectsql = "SELECT $userfields " . $basesql. $wheresql . $orderby;
+
     $rs = $DB->get_recordset_sql($selectsql, $params, 0, $pagesize);
     foreach ($rs as $user) {
         $user->fullname = fullname($user);
@@ -1552,156 +1583,15 @@ function dialogue_cm_unread_total(dialogue $dialogue) {
     return array_sum($keyvalues);
 }
 
-/**
- *
- * @global type $PAGE
- * @global type $DB
- * @global type $USER
- * @param dialogue $dialogue
- * @param type $total
- * @return type
- */
-function dialogue_get_conversation_listing_by_role(dialogue $dialogue, &$total = null) {
-    global $PAGE, $DB, $USER;
-
-    $context = $dialogue->context;
-    $courseroles = get_roles_used_in_context($context);
-    $defaultroleid = 0;
-    foreach($courseroles as $courserole) {
-        if (role_get_name($courserole, null, ROLENAME_SHORT) == 'student') {
-            $defaultroleid = $courserole->id;
-        }
-    }
-    if (!isset($defaultroleid)) {
-        $defaultrole = reset($courseroles);
-        $defaultroleid = $defaultrole->id;
-    }
-
-    // defaults
-    $roleid     = $defaultroleid;
-    
-    $state      = dialogue::STATE_OPEN;
-    $page       = 0;
-    $showall    = 0;
-
-    if ($PAGE->url) {
-        $roleid = $PAGE->url->get_param('roleid');
-        if (!isset($courseroles[$roleid])) {
-            $roleid = $defaultroleid;
-        }
-        $state = $PAGE->url->get_param('state');
-        $page = $PAGE->url->get_param('page');
-        $showall = $PAGE->url->get_param('showall');
-    }
-   
-    $joins = array();
-    $wheres = array();
-
-    $select = "SELECT dc.id AS dcid,
-                  dc.subject AS dcsubject,
-                  dm.body AS dmbody,
-                  dm.bodyformat AS dmbodyformat,
-                  dm.state AS dmstate,
-                  dm.timemodified AS dmtimemodified, u.id AS authorid";
-                  //.user_picture::fields('u');
-
-    $select = "SELECT dp.id AS dp_id, dc.id AS conversationid,
-                  dc.subject AS subject,
-                  dm.id AS id,
-                  dm.body AS body,
-                  dm.bodyformat AS bodyformat,
-                  dm.state AS state,
-                  dm.timemodified AS timemodified,
-                  u.id AS authorid";
-
-    $joins[] = "FROM {dialogue_participants} dp";
-    $joins[] = "JOIN {dialogue_conversations} dc ON dc.id = dp.conversationid";
-    $joins[] = "JOIN {dialogue_messages} dm ON dm.conversationid = dp.conversationid";
-    $joins[] = "JOIN {user} u ON u.id = dp.userid";
-    
-    list($esql, $params) = get_enrolled_sql($context, null, 0, true);
-    $params['courseid'] = $dialogue->course->id;
-
-    $joins[] = "JOIN ($esql) e ON e.id = dp.userid";
-
-    if (!has_capability('mod/dialogue:viewany', $context)) {
-
-        $joins[] = "JOIN (SELECT dp.conversationid
-                            FROM {dialogue_participants} dp
-                           WHERE dp.userid = :isparticipant) isparticipant
-                      ON isparticipant.conversationid = dc.id";
-
-        $params['isparticipant'] = $USER->id;
-    }
-
-    $joins[] = "JOIN (SELECT dm.conversationid, MAX(dm.conversationindex) AS conversationindex
-                        FROM {dialogue_messages} dm
-                       WHERE dm.state = :latestmessagestate
-                    GROUP BY dm.conversationid) latestmessage
-                  ON dm.conversationid = latestmessage.conversationid
-                 AND dm.conversationindex = latestmessage.conversationindex";
-
-    $params['latestmessagestate'] = $state;
-  
-    $wheres[] = "dp.userid IN (SELECT userid FROM {role_assignments} WHERE roleid = :roleid)";
-    $params['roleid'] = $roleid;
-
-    $from = implode("\n", $joins);
-    
-    $wheres[] ="dp.dialogueid = :dialogueid";
-    $params['dialogueid'] = $dialogue->activityrecord->id;
-    if ($wheres) {
-        $where = "WHERE " . implode(" AND ", $wheres);
-    } else {
-        $where = "";
-    }
-
-    $sort = $PAGE->url->get_param('sort');
-    switch ($sort) {
-        case 'lastnameaz':
-            $orderby = "ORDER BY u.lastname ASC";
-            break;
-        case 'lastnameza':
-            $orderby = "ORDER BY u.lastname DESC";
-            break;
-        case 'firstnameaz':
-            $orderby = "ORDER BY u.firstname ASC";
-            break;
-        case 'firstnameza':
-            $orderby = "ORDER BY u.firstname DESC";
-            break;
-        default:
-            $orderby = "ORDER BY dm.timemodified DESC";
-            break;
-    }
-
-
-    $countsql = "SELECT COUNT(u.id) $from $where";
-    $total = $DB->count_records_sql($countsql, $params);
-
-
-    
-    $selectsql = "$select $from $where $orderby";
-
-    $records = array();
-    if ($total) { // don't bother running select if total zero
-        $limit = dialogue::PAGINATION_PAGE_SIZE;
-        $offset = $page * $limit;
-        $records = $DB->get_records_sql($selectsql, $params, $offset, $limit);
-    }
-
-    return $records;
-}
-
 
 /**
  * dialogue_conversations provides all the functionality to construct a listing
  * of conversations
  */
 class dialogue_conversations implements renderable {
-
     protected $fields       = array();
     protected $basesql      = null;
+    protected $groupid        = null;
     protected $orderbysql   = '';
     protected $joins        = array();
     protected $wheres       = array();
@@ -1710,57 +1600,59 @@ class dialogue_conversations implements renderable {
     protected $page         = null;
     protected $pagestart    = null;
     protected $pageend      = null;
+    protected $viewany      = false;
     public    $state        = dialogue::STATE_OPEN;
 
-    public function __construct(dialogue $dialogue, $state = dialogue::STATE_OPEN) {
+    public function __construct(dialogue $dialogue, $state = dialogue::STATE_OPEN, $groupid = false) {
 
         $this->basesql  = "FROM {dialogue_conversations} dc
-                           JOIN {dialogue_messages} dm ON dm.conversationid = dc.id";
+                           JOIN {dialogue_messages} dm ON dm.conversationid = dc.id
+                           JOIN {user} u ON u.id = dm.authorid";
 
         $this->dialogue = $dialogue;
 
-        $this->set_state($state);
+        $this->groupid = $groupid;
 
-        $this->setup();
+        $this->set_state($state);
 
     }
 
     public function setup() {
+        global $USER;
 
         $this->fields['id'] = 'dm.id';
         $this->fields['subject'] = 'dc.subject';
         $this->fields['dialogueid'] = 'dm.dialogueid';
         $this->fields['conversationid'] = 'dm.conversationid';
         $this->fields['conversationindex'] = 'dm.conversationindex';
-        $this->fields['displayuserid'] = 'dm.authorid AS displayuserid';
+        $this->fields['authorid'] = 'dm.authorid AS authorid';
         $this->fields['body'] = 'dm.body';
         $this->fields['bodyformat'] = 'dm.bodyformat';
         $this->fields['attachments'] = 'dm.attachments';
         $this->fields['state'] = 'dm.state';
         $this->fields['timemodified'] = 'dm.timemodified';
 
-        $this->joins['user'] = "JOIN {user} u ON u.id = dm.authorid";
-
         $this->set_unread_field();
 
         $this->set_last_message_join();
 
-        if ($this->dialogue->config->allowdisplaybystudent) {
-            if (get_user_preferences('dialogue_displaybystudent', false)) {
-                $this->set_display_by_student();
-            }
+        if (!$this->viewany) {
+
+            $this->fields['participant'] = 'dp.userid';
+
+            $this->joins['participant'] = "JOIN {dialogue_participants} dp ON dp.conversationid = dc.id";
+
+            $this->wheres['participant'] = "dp.userid IN (SELECT dp.userid
+                                                            FROM {dialogue_participants} dp
+                                                        WHERE dp.conversationid = dc.id 
+                                                            AND dp.userid = :participantid)";
+
+            $this->params['participantid'] = $USER->id;
+
         }
-
-        $this->set_participant_filter();
     }
 
-    public function set_group($groupid) {
-        $this->joins['group']       = 'JOIN {groups_members} gm ON gm.userid = dm.authorid';
-        $this->wheres['group']      = "gm.groupid = :groupid";
-        $this->params['groupid']    = $groupid;
-    }
-
-    public function set_last_message_join() {
+    protected function set_last_message_join() {
         if (is_null($this->state)) {
             throw new moodle_exception("State must be set first");
         }
@@ -1778,8 +1670,7 @@ class dialogue_conversations implements renderable {
         $this->params['lastmessagestate']       = $this->state;
     }
 
-
-    public function set_unread_field() {
+    protected function set_unread_field() {
         global $USER;
 
         if (!in_array($this->state, array(dialogue::STATE_OPEN, dialogue::STATE_CLOSED))) {
@@ -1801,58 +1692,6 @@ class dialogue_conversations implements renderable {
         $this->params['unreaduserid'] = $USER->id;
     }
 
-    public function set_display_by_student() {
-        global $DB;
-
-        $roleid = $DB->get_field('role', 'id', array('shortname' => 'student'), MUST_EXIST);
-        $context = $this->dialogue->context;
-        $parents = $context->get_parent_context_ids(true);
-        if ($parents) {
-            $contextlist =  ' IN ('.$context->id.',' . implode(',', $parents).')';
-        } else {
-            $contextlist = ' = '. $context->id;
-        }
-
-        $this->fields['displayuserid'] = 'dp.userid AS displayuserid';
-
-        $this->joins['user'] = "JOIN {dialogue_participants} dp ON dp.conversationid = dc.id
-                                JOIN {user} u ON u.id = dp.userid";
-        $this->wheres['role'] = "dp.userid IN
-                                     (SELECT ra.userid
-                                        FROM {role_assignments} ra
-                                       WHERE ra.roleid = $roleid
-                                         AND ra.contextid $contextlist)";
-
-    }
-
-
-
-    /**
-     * Sets required SQL to filter conversations based on a users participation
-     * in them. They have either opened or replied to conversation.
-     *
-     * @global stdClass $USER
-     */
-    public function set_participant_filter() {
-        global $USER;
-
-        $this->wheres['participant'] = ":participantid IN (SELECT dp.userid
-                                                            FROM mdl_dialogue_participants dp
-                                                           WHERE dp.conversationid = dc.id)";
-
-        $this->params['participantid'] = $USER->id;
-    }
-
-    /**
-     * Clear out SQL an PARAMs that would filter conversations based on a users
-     * participantion in them.
-     *
-     */
-    public function remove_participant_filter() {
-        unset($this->wheres['participant']);
-        unset($this->params['participantid']);
-    }
-
     public function set_state($state) {
         if (!$this->valid_state($state)) {
             throw new moodle_exception('State not valid!');
@@ -1871,7 +1710,7 @@ class dialogue_conversations implements renderable {
         if (!has_capability('mod/dialogue:viewany', $this->dialogue->context)) {
             throw new moodle_exception('You do not have the rights to viewany!');
         }
-        $this->remove_participant_filter();
+        $this->viewany = true;
     }
 
     /**
@@ -1896,6 +1735,8 @@ class dialogue_conversations implements renderable {
     public function matches() {
         global $DB;
 
+        $this->setup();
+
         $basesql = $this->basesql;
 
         $joinsql = '';
@@ -1914,7 +1755,7 @@ class dialogue_conversations implements renderable {
 
         if (is_null($this->matches)) {
             $this->matches = $DB->count_records_sql($countsql, $params);
-    }
+        }
 
         return $this->matches;
     }
@@ -2003,33 +1844,32 @@ class dialogue_conversations implements renderable {
      * @param interger $page
      * @return array records
      */
-    public function fetch_page($page = 0) {
+    public function page($page = 0) {
         global $DB;
 
         $records = array();
 
-        $total = $this->matches();
-        if ($total) { // don't bother running select if zero matches
-            $limit = dialogue::PAGINATION_PAGE_SIZE;
-            $offset = $page * $limit;
-            $fields = implode(",\n", $this->fields);
+        $this->setup();
 
-            $joinsql = '';
-            if ($this->joins) {
-                $joinsql = implode("\n", $this->joins);
-            }
+        $limit = dialogue::PAGINATION_PAGE_SIZE;
+        $offset = $page * $limit;
+        $fields = implode(",\n", $this->fields);
 
-            $wheresql = '';
-            if ($this->wheres) {
-                $wheresql = "\nWHERE " . implode(' AND ', $this->wheres);
-            }
-
-            $orderby = $this->orderbysql;
-
-            $selectsql = "SELECT $fields $this->basesql $joinsql $wheresql $orderby" ;
-
-            $records = $DB->get_records_sql($selectsql, $this->params, $offset, $limit);
+        $joinsql = '';
+        if ($this->joins) {
+            $joinsql = implode("\n", $this->joins);
         }
+
+        $wheresql = '';
+        if ($this->wheres) {
+            $wheresql = "\nWHERE " . implode(' AND ', $this->wheres);
+        }
+
+        $orderby = $this->orderbysql;
+
+        $selectsql = "SELECT $fields $this->basesql $joinsql $wheresql $orderby" ;
+
+        $records = $DB->get_records_sql($selectsql, $this->params, $offset, $limit);
 
         return $records;
     }

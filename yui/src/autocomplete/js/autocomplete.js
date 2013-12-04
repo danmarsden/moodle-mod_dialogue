@@ -36,6 +36,7 @@ M.mod_dialogue.autocomplete = {
         this.inputnode.ac.set('resultTextLocator', this.RESULTTEXTLOCATOR);
         this.inputnode.ac.set('resultListLocator', this.RESULTLISTLOCATOR);
         this.inputnode.ac.set('resultFormatter', this.result_formatter);
+        this.inputnode.ac.set('minQueryLength', 0);
         this.inputnode.ac.set('maxResults', 10);
         this.containernode.prepend(this.listnode);
         // add footer, this will be used for displaying record information, found counts etc

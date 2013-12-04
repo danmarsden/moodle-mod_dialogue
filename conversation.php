@@ -128,13 +128,20 @@ if ($conversation->state == dialogue::STATE_DRAFT) {
     redirect($returnurl);
 }
 
-// view conversation by default
-$renderer = $PAGE->get_renderer('mod_dialogue');
-
-if (!has_capability('mod/dialogue:viewany', $context) and !$conversation->is_participant()) {
-    throw new moodle_exception('nopermission');
+if ($conversation->state == dialogue::STATE_BULK_AUTOMATED) {
+    if (!has_capability('mod/dialogue:bulkopenruleeditany', $context) and $conversation->author->id != $USER->id) {
+        print_object($conversation->author->id);
+        throw new moodle_exception('nopermission');
+    }
 }
 
+if ($conversation->state == dialogue::STATE_OPEN or $conversation->state == dialogue::STATE_CLOSED) {
+    if (!has_capability('mod/dialogue:viewany', $context) and !$conversation->is_participant()) {
+        throw new moodle_exception('nopermission');
+    }
+}
+// view conversation by default
+$renderer = $PAGE->get_renderer('mod_dialogue');
 echo $OUTPUT->header($activityrecord->name);
 echo $renderer->render($conversation);
 $conversation->mark_read();

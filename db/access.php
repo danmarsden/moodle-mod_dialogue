@@ -62,7 +62,7 @@ $capabilities = array(
         'archetypes' => array(
             'student' => CAP_PREVENT,
             'teacher' => CAP_PREVENT,
-            'editingteacher' => CAP_ALLOW,
+            'editingteacher' => CAP_PREVENT,
             'manager' => CAP_PREVENT
         )
     ),
@@ -75,7 +75,7 @@ $capabilities = array(
             'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
+            'manager' => CAP_PREVENT
         )
     ),
 
@@ -86,18 +86,6 @@ $capabilities = array(
         'archetypes' => array(
             'student' => CAP_PREVENT,
             'teacher' => CAP_PREVENT,
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_PREVENT
-        )
-    ),
-
-    'mod/dialogue:displaybystudent' => array(
-
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'student' => CAP_PREVENT,
-            'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_PREVENT
         )
