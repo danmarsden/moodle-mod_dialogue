@@ -41,6 +41,7 @@ class backup_dialogue_activity_structure_step extends backup_activity_structure_
                                                     'introformat',
                                                     'maxattachments',
                                                     'maxbytes',
+                                                    'usecoursegroups',
                                                     'notifications',
                                                     'notificationcontent',
                                                     'multipleconversations',

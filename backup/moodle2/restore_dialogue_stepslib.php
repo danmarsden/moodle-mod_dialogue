@@ -282,7 +282,11 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
             // get mapped id
             $rec->newitemid = $this->get_mappingid('dialogue_message', $rec->itemid);
 
-            $file = (object)unserialize(base64_decode($rec->info));
+            if (extension_loaded('zlib')) {
+                $file = (object) unserialize(gzuncompress(base64_decode($rec->info)));
+            } else {
+                $file = (object) unserialize(base64_decode($rec->info));
+            }
 
             // ignore root dirs (they are created automatically)
             if ($file->filepath == '/' && $file->filename == '.') {
