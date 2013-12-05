@@ -95,14 +95,9 @@ if ($action == 'create' or $action == 'edit') {
     // display form page
     echo $OUTPUT->header();
     echo $OUTPUT->heading($activityrecord->name);
-    $groupmode = groups_get_activity_groupmode($cm);
-    if ($groupmode == SEPARATEGROUPS or $groupmode == VISIBLEGROUPS) {
-        echo $OUTPUT->notification(get_string('groupmodenotifymessage', 'dialogue'), 'notifymessage');
+    if (!empty($dialogue->activityrecord->intro)) {
+        echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
     }
-    $groupsurl = clone($pageurl);
-    $groupsurl->remove_params('page'); // clear page
-    echo groups_print_activity_menu($cm, $groupsurl, true);
-    echo html_writer::empty_tag('br');
     $form->display();
     echo $OUTPUT->footer($course);
     exit;
