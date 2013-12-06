@@ -282,8 +282,8 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
             // get mapped id
             $rec->newitemid = $this->get_mappingid('dialogue_message', $rec->itemid);
 
-            if (extension_loaded('zlib')) {
-                $file = (object) unserialize(gzuncompress(base64_decode($rec->info)));
+            if (BACKUP::RELEASE == '2.6') { // new line of code for 2.6 or breaks
+                $file = (object) backup_controller_dbops::decode_backup_temp_info($rec->info);
             } else {
                 $file = (object) unserialize(base64_decode($rec->info));
             }
