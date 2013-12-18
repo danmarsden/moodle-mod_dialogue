@@ -29,7 +29,7 @@
  */
 defined('MOODLE_INTERNAL') || die;
 
-if ($ADMIN->fulltree) {
+if ($hassiteconfig) {
     require_once($CFG->dirroot.'/mod/dialogue/lib.php');
 
     // whether to provide unread post count
