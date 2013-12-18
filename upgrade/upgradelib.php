@@ -412,7 +412,7 @@ function dialogue_upgrade_course_module(stdClass $oldcm) {
         $fs->delete_area_files($oldcontext->id, 'mod_dialogue');
 
         // delete the old context.
-        delete_context(CONTEXT_MODULE, $oldcm->id);
+        context_helper::delete_instance(CONTEXT_MODULE, $oldcm->id);
 
         // delete the old module from the course_modules table.
         $DB->delete_records('course_modules', array('id' => $oldcm->id));
