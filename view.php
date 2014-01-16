@@ -17,6 +17,8 @@
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once('lib.php');
 require_once('locallib.php');
+require_once($CFG->dirroot . '/mod/dialogue/classes/conversations.php');
+require_once($CFG->dirroot . '/mod/dialogue/classes/conversations_by_author.php');
 
 $id         = required_param('id', PARAM_INT);
 $state      = optional_param('state', null, PARAM_ALPHA);
@@ -45,7 +47,6 @@ require_login($course, false, $cm);
 
 // use cached params for toggle button groups
 $state      = dialogue_get_cached_param('state', $state, dialogue::STATE_OPEN);
-$show       = dialogue_get_cached_param('show', $show, dialogue::SHOW_MINE);
 
 // now set params on pageurl will later be set on $PAGE
 $pageparams = array('id' => $cm->id, 'state' => $state, 'show' => $show, 'page' => $page, 'sort' => $sort);
@@ -72,11 +73,9 @@ $PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
                             'M.mod_dialogue.clickredirector.init', array($cm->id));
 
 $dialogue = new dialogue($cm, $course, $activityrecord);
-$conversationlist = new dialogue_conversations($dialogue, $state, groups_get_activity_group($cm, true));
-if ($show == dialogue::SHOW_EVERYONE) {
-    $conversationlist->set_view_any();
-}
-$conversationlist->set_order($sort, $direction);
+$list = new mod_dialogue_conversations_by_author($dialogue, $page, dialogue::PAGINATION_MAX_RESULTS);
+$list->set_state($state);
+$list->set_order($sort, $direction);
 
 $renderer = $PAGE->get_renderer('mod_dialogue');
 
@@ -88,9 +87,8 @@ if (!empty($dialogue->activityrecord->intro)) {
 // render tab navigation, toggle button groups and order by dropdown
 echo $renderer->tab_navigation($dialogue);
 echo $renderer->state_button_group();
-echo $renderer->show_button_group();
-echo $renderer->list_sortby(dialogue_conversations::get_sort_options(), $sort, $direction);
-echo $renderer->conversations($conversationlist, $page);
+echo $renderer->list_sortby(mod_dialogue_conversations_by_author::get_sort_options(), $sort, $direction);
+echo $renderer->conversation_listing($list);
 echo $OUTPUT->footer($course);
 $logurl = new moodle_url('view.php', array('id' =>  $cm->id));
 add_to_log($course->id, 'dialogue', 'view', $logurl->out(false), $activityrecord->name, $cm->id);
