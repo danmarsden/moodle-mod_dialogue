@@ -149,127 +149,138 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         return $html;
     }
 
-    public function conversations(dialogue_conversations $conversations, $page) {
-        global $PAGE, $OUTPUT, $USER;
-
-        $output = '';
+    /**
+     * Render a list of conversations in a dialogue for a particular user.
+     *
+     * @global global $OUTPUT
+     * @global global $PAGE
+     * @param mod_dialogue_conversations $conversations
+     * @return string
+     */
+    public function conversation_listing(mod_dialogue_conversations $conversations) {
+        global $OUTPUT, $PAGE;
 
         $dialogue = $conversations->dialogue;
         $cm       = $conversations->dialogue->cm;
-        $state    = $conversations->state;
 
-        $today    = strtotime("today");
-        $yearago  = strtotime("-1 year");
+        $list = array();
 
-        $listheading = get_string('displayconversationsheading', 'dialogue', textlib::strtolower($state));
-        $matches = $conversations->matches();
-        if (!$matches) {
-            $output .= html_writer::start_div();
-            $output .= html_writer::tag('h6', $listheading);
-            $output .= html_writer::end_div();
-            $output .= $OUTPUT->notification(get_string('noconversationsfound', 'dialogue'), 'notifyproblem');
-            return $output;
+        $html = '';
+
+        $rowsmatched = $conversations->rows_matched();
+        if ($rowsmatched) {
+            $list = $conversations->records();
         }
 
-        $pageurl = $PAGE->url;
-        $pagination = new paging_bar($matches, $page, dialogue::PAGINATION_PAGE_SIZE, $pageurl);
-        $records = $conversations->page($page);
+        if (empty($list)) {
+            $html .= '<br/><br/>';
+            $html .= $OUTPUT->notification(get_string('noconversationsfound', 'dialogue'), 'notifyproblem');
+        } else {
+            $today    = strtotime("today");
+            $yearago  = strtotime("-1 year");
 
-        $output .= html_writer::start_div('listing-meta');
-        $output .= html_writer::tag('h6', $listheading);
-        $a         = new stdClass();
-        $a->start  = ($page) ? $page * dialogue::PAGINATION_PAGE_SIZE : 1;
-        $a->end    = $page * dialogue::PAGINATION_PAGE_SIZE + count($records);
-        $a->total  = $matches;
-        $output .= html_writer::tag('h6', get_string('listpaginationheader', 'dialogue', $a), array('class'=>'pull-right'));
-        $output .= html_writer::end_div();
+            $rowsreturned = count($list);
 
-        $output .= html_writer::start_tag('table', array('class'=>'conversation-list table table-hover table-condensed'));
-        $output .= html_writer::start_tag('tbody');
-        foreach ($records as $record) {
+            $html .= html_writer::start_div('listing-meta');
+            $html .= html_writer::tag('h6', get_string('displaying', 'dialogue'));
+            $a         = new stdClass();
+            $a->start  = ($conversations->page) ? $conversations->page * $conversations->limit : 1;
+            $a->end    = $conversations->page * $conversations->limit + $rowsreturned;
+            $a->total  = $rowsmatched;
+            $html .= html_writer::tag('h6', get_string('listpaginationheader', 'dialogue', $a), array('class'=>'pull-right'));
+            $html .= html_writer::end_div();
 
-            $datattributes = array('data-redirect' => 'conversation',
-                                   'data-action'   => 'view',
-                                   'data-conversationid' => $record->conversationid);
+            $html .= html_writer::start_tag('table', array('class'=>'conversation-list table table-hover table-condensed'));
+            $html .= html_writer::start_tag('tbody');
+            foreach ($list as $record) {
 
-            $output .= html_writer::start_tag('tr', $datattributes);
+                $datattributes = array('data-redirect' => 'conversation',
+                                       'data-action'   => 'view',
+                                       'data-conversationid' => $record->conversationid);
 
-            $statelabel = '';
-            if ($record->state == dialogue::STATE_CLOSED) {
-                $statelabel = html_writer::tag('span', get_string('closed', 'dialogue'),
-                                               array('class'=>'state-indicator state-closed'));
-            }
-            $output .= html_writer::tag('td', $statelabel);
+                $html .= html_writer::start_tag('tr', $datattributes);
 
-            if (isset($record->unread)) {
-                $badge = '';
-                $unreadcount = $record->unread;
-                if ($unreadcount > 0) {
-                    $badgeclass = 'badge label-info';
-                    $badge = html_writer::span($unreadcount, $badgeclass, array('title'=>get_string('numberunread', 'dialogue', $unreadcount)));
+                $statelabel = '';
+                if ($record->state == dialogue::STATE_CLOSED) {
+                    $statelabel = html_writer::tag('span', get_string('closed', 'dialogue'),
+                                                   array('class'=>'state-indicator state-closed'));
                 }
-                $output .= html_writer::tag('td', $badge);
-            }
+                $html .= html_writer::tag('td', $statelabel);
 
-            if (isset($record->authorid)) {
-                $displayuser = dialogue_get_user_details($dialogue, $record->authorid);
-                $avatar = $OUTPUT->user_picture($displayuser, array('class'=> 'userpicture img-rounded', 'size' => 48));
-                $output .= html_writer::tag('td', $avatar);
-                $output .= html_writer::tag('td', fullname($displayuser));
-            }
-
-            if (isset($record->subject) and isset($record->body)) {
-                $subject = empty($record->subject) ? get_string('nosubject', 'dialogue') : $record->subject;
-                $summaryline = dialogue_generate_summary_line($subject, $record->body);
-                $output .= html_writer::start_tag('td');
-                $output .= html_writer::start_div();
-                $output .= $summaryline;
-
-                $participants = dialogue_get_conversation_participants($dialogue, $record->conversationid);
-                $output .= html_writer::start_div();
-                foreach($participants as $participantid) {
-                    //if ($participantid == $USER->id) {
-                    //    continue;
-                    //}
-                    $participant = dialogue_get_user_details($dialogue, $participantid);
-                    $picture = $OUTPUT->user_picture($participant, array('class'=>'userpicture img-rounded', 'size'=>16));
-                    $output .= html_writer::tag('span', $picture.' '.fullname($participant),
-                                                array('class' => 'participant'));
-
+                if (isset($record->unread)) {
+                    $badge = '';
+                    $unreadcount = $record->unread;
+                    if ($unreadcount > 0) {
+                        $badgeclass = 'badge label-info';
+                        $badge = html_writer::span($unreadcount, $badgeclass, array('title'=>get_string('numberunread', 'dialogue', $unreadcount)));
+                    }
+                    $html .= html_writer::tag('td', $badge);
                 }
-                $output .= html_writer::start_div();
 
-                $output .= html_writer::end_div();
-                $output .= html_writer::end_tag('td');
-            }
-
-            if (isset($record->timemodified)) {
-                $datestrings = (object) dialogue_get_humanfriendly_dates($record->timemodified);
-                if ($record->timemodified >= $today) {
-                    $datetime = $datestrings->timepast;
-                } else if ($record->timemodified >= $yearago) {
-                    $datetime = get_string('dateshortyear', 'dialogue', $datestrings);
-                } else {
-                    $datetime = get_string('datefullyear', 'dialogue', $datestrings);
+                if (isset($record->userid)) {
+                    $displayuser = dialogue_get_user_details($dialogue, $record->userid);
+                    $avatar = $OUTPUT->user_picture($displayuser, array('class'=> 'userpicture img-rounded', 'size' => 48));
+                    $html .= html_writer::tag('td', $avatar);
+                    $html .= html_writer::tag('td', fullname($displayuser));
                 }
-                $output .= html_writer::tag('td', $datetime, array('title' => userdate($record->timemodified)));
+
+                if (isset($record->subject) and isset($record->body)) {
+                    $subject = empty($record->subject) ? get_string('nosubject', 'dialogue') : $record->subject;
+                    $summaryline = dialogue_generate_summary_line($subject, $record->body);
+                    $html .= html_writer::start_tag('td');
+                    $html .= html_writer::start_div();
+                    $html .= $summaryline;
+
+                    $participants = dialogue_get_conversation_participants($dialogue, $record->conversationid);
+                    $html .= html_writer::start_div();
+                    foreach($participants as $participantid) {
+                        //if ($participantid == $USER->id) {
+                        //    continue;
+                        //}
+                        $participant = dialogue_get_user_details($dialogue, $participantid);
+                        $picture = $OUTPUT->user_picture($participant, array('class'=>'userpicture img-rounded', 'size'=>16));
+                        $html .= html_writer::tag('span', $picture.' '.fullname($participant),
+                                                    array('class' => 'participant'));
+
+                    }
+                    $html .= html_writer::start_div();
+
+                    $html .= html_writer::end_div();
+                    $html .= html_writer::end_tag('td');
+                }
+
+                if (isset($record->timemodified)) {
+                    $datestrings = (object) dialogue_get_humanfriendly_dates($record->timemodified);
+                    if ($record->timemodified >= $today) {
+                        $datetime = $datestrings->timepast;
+                    } else if ($record->timemodified >= $yearago) {
+                        $datetime = get_string('dateshortyear', 'dialogue', $datestrings);
+                    } else {
+                        $datetime = get_string('datefullyear', 'dialogue', $datestrings);
+                    }
+                    $html .= html_writer::tag('td', $datetime, array('title' => userdate($record->timemodified)));
+                }
+
+                $viewurlparams = array('id' => $cm->id, 'conversationid' => $record->conversationid, 'action' => 'view');
+                $viewlink = html_writer::link(new moodle_url('conversation.php', $viewurlparams),
+                                              get_string('view'));
+
+                $html .= html_writer::tag('td', $viewlink, array('class'=>'nonjs-control'));
+
+                $html .= html_writer::end_tag('tr');
             }
 
-            $viewurlparams = array('id' => $cm->id, 'conversationid' => $record->conversationid, 'action' => 'view');
-            $viewlink = html_writer::link(new moodle_url('conversation.php', $viewurlparams),
-                                          get_string('view'));
+            $html .= html_writer::end_tag('tbody');
+            $html .= html_writer::end_tag('table');
 
-            $output .= html_writer::tag('td', $viewlink, array('class'=>'nonjs-control'));
+            $pagination = new paging_bar($rowsmatched, $conversations->page, $conversations->limit, $PAGE->url);
 
-            $output .= html_writer::end_tag('tr');
+            $html .= $OUTPUT->render($pagination);
         }
-        $output .= html_writer::end_tag('tbody');
-        $output .= html_writer::end_tag('table');
 
-        $output .= $OUTPUT->render($pagination);
-
-        return $output;
+        return $html;
     }
+
     /**
      * Render a reply related to conversation.
      *
