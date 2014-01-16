@@ -1262,6 +1262,11 @@ class dialogue_reply extends dialogue_message {
             $form->remove_from_group('delete', 'actionbuttongroup');
         }
 
+        // remove any unecessary buttons
+        if (($USER->id != $this->author->id) or is_null($this->messageid)) {
+            $form->remove_from_group('trash', 'actionbuttongroup');
+        }
+
         return $this->_form = $form;
     }
 
