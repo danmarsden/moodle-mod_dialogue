@@ -86,7 +86,31 @@ $capabilities = array(
         'archetypes' => array(
             'student' => CAP_PREVENT,
             'teacher' => CAP_PREVENT,
+            'editingteacher' => CAP_PREVENT,
+            'manager' => CAP_PREVENT
+        )
+    ),
+
+    'mod/dialogue:delete' => array(
+
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_PREVENT,
             'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_PREVENT
+        )
+    ),
+
+    'mod/dialogue:deleteany' => array(
+
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_PREVENT,
+            'editingteacher' => CAP_PREVENT,
             'manager' => CAP_PREVENT
         )
     ),
