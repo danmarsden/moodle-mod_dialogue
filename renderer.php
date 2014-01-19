@@ -38,8 +38,8 @@ class mod_dialogue_renderer extends plugin_renderer_base {
     public function render_dialogue_conversation(dialogue_conversation $conversation) {
         global $PAGE, $OUTPUT, $USER;
 
-        // fetch context from parent dialogue
-        $context = $conversation->dialogue->context;
+        $context = $conversation->dialogue->context; // fetch context from parent dialogue
+        $cm      = $conversation->dialogue->cm; // fetch course module from parent dialogue
 
         $today    = strtotime("today");
         $yearago  = strtotime("-1 year");
@@ -50,15 +50,8 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $html .= html_writer::tag('h3', $conversation->subject, array('class' => 'heading'));
 
         if ($conversation->state == dialogue::STATE_OPEN) {
-            $canclose = ((has_capability('mod/dialogue:close', $context) and $USER->id == $conversation->author->id) or
-                    has_capability('mod/dialogue:closeany', $context));
-
-            if ($canclose) {
-                $closeurl = clone($PAGE->url);
-                $closeurl->param('conversationid', $conversation->conversationid);
-                $closeurl->param('action', 'close');
-                $html .= html_writer::link($closeurl, get_string('closeconversation', 'dialogue'), array('class' => "btn btn-danger pull-right"));
-            }
+            $span = html_writer::tag('span', get_string('open', 'dialogue'), array('class' => "state-indicator state-open"));
+            $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
         }
 
         if ($conversation->state == dialogue::STATE_CLOSED) {
@@ -93,8 +86,46 @@ class mod_dialogue_renderer extends plugin_renderer_base {
             $openedbyheader = get_string('openedbyfullyear', 'dialogue', $datestrings);
         }
 
-        $html .= html_writer::tag('h5', $openedbyheader, array('class' => 'conversation-heading',
-                                                               'title' => userdate($conversation->timemodified)));
+        $html .= html_writer::start_div('conversation-header');
+        $html .= html_writer::tag('span', $openedbyheader, array('class' => 'conversation-openedby pull-left'));
+
+        $html .= html_writer::start_tag('ul', array('class' => "message-actions pull-right"));
+
+        if ($conversation->state == dialogue::STATE_OPEN) {
+            $canclose = ((has_capability('mod/dialogue:close', $context) and $USER->id == $conversation->author->id) or
+                          has_capability('mod/dialogue:closeany', $context));
+
+
+            if ($canclose) {
+                $lockicon = html_writer::tag('i', '', array('class' => "fa fa-lock"));
+                $html .= html_writer::start_tag('li');
+                $closeurl = new moodle_url('/mod/dialogue/conversation.php');
+                $closeurl->param('id', $cm->id);
+                $closeurl->param('conversationid', $conversation->conversationid);
+                $closeurl->param('action', 'close');
+                $html .= html_writer::link($closeurl,  get_string('closeconversation', 'dialogue') . $lockicon);
+                $html .= html_writer::end_tag('li');
+            }
+        }
+
+        $candelete = ((has_capability('mod/dialogue:delete', $context) and $USER->id == $conversation->author->id) or
+                       has_capability('mod/dialogue:deleteany', $context));
+
+        if ($candelete) {
+            $html .= html_writer::start_tag('li');
+            $trashicon = html_writer::tag('i', '', array('class' => "fa fa-trash-o"));
+            $deleteurl = new moodle_url('/mod/dialogue/conversation.php');
+            $deleteurl->param('id', $cm->id);
+            $deleteurl->param('conversationid', $conversation->conversationid);
+            $deleteurl->param('action', 'delete');
+            $html .= html_writer::link($deleteurl,  get_string('deleteconversation', 'dialogue') . $trashicon);
+            $html .= html_writer::end_tag('li');
+        }
+
+        $html .= html_writer::end_tag('ul');
+        $html .= html_writer::empty_tag('br');
+        $html .= html_writer::end_div();
+
         $html .= html_writer::empty_tag('hr');
         $html .= $conversation->bodyhtml;
         $html .= $this->render_attachments($conversation->attachments);
@@ -288,7 +319,11 @@ class mod_dialogue_renderer extends plugin_renderer_base {
      * @return string
      */
     public function render_dialogue_reply(dialogue_reply $reply) {
-        global $OUTPUT;
+        global $OUTPUT, $USER;
+
+        $context        = $reply->dialogue->context; // fetch context from parent dialogue
+        $cm             = $reply->dialogue->cm; // fetch course module from parent dialogue
+        $conversation   = $reply->conversation; // fetch parent conversation
 
         $today    = strtotime("today");
         $yearago  = strtotime("-1 year");
@@ -313,9 +348,10 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         } else {
             $repliedbyheader = get_string('repliedbyfullyear', 'dialogue', $datestrings);
         }
-
-        $html .= html_writer::tag('h5', $repliedbyheader, array('class' => 'conversation-heading',
-                                                                'title' => userdate($reply->timemodified)));
+        $html .= html_writer::start_div('reply-header');
+        $html .= html_writer::tag('span', $repliedbyheader, array('class' => 'reply-openedby pull-left'));
+        $html .= html_writer::empty_tag('br');
+        $html .= html_writer::end_div();
         $html .= html_writer::empty_tag('hr');
         $html .= $reply->bodyhtml;
         $html .= $this->render_attachments($reply->attachments);

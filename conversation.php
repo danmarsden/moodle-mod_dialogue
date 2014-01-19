@@ -112,8 +112,23 @@ if ($action == 'close') {
     }
     echo $OUTPUT->header($activityrecord->name);
     $pageurl->param('confirm', $conversationid);
-    echo $OUTPUT->confirm(get_string('conversationcloseconfirm', 'dialogue', $conversation->subject),
-                          $pageurl, $returnurl);
+    $notification = $OUTPUT->notification(get_string('conversationcloseconfirm', 'dialogue', $conversation->subject), 'notifymessage');
+    echo $OUTPUT->confirm($notification, $pageurl, $returnurl);
+    echo $OUTPUT->footer();
+    exit;
+}
+
+// delete conversation
+if ($action == 'delete') {
+    if (!empty($confirm) && confirm_sesskey()) {
+        $conversation->delete();
+        redirect($returnurl, get_string('conversationdeleted', 'dialogue',
+                                        $conversation->subject));
+    }
+    echo $OUTPUT->header($activityrecord->name);
+    $pageurl->param('confirm', $conversationid);
+    $notification = $OUTPUT->notification(get_string('conversationdeleteconfirm', 'dialogue', $conversation->subject), 'notifyproblem');
+    echo $OUTPUT->confirm($notification, $pageurl, $returnurl);
     echo $OUTPUT->footer();
     exit;
 }

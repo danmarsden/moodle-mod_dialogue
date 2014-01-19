@@ -1,4 +1,5 @@
 @label-color:           #fff;
+@state-open:            #5cb85c;
 @state-closed:          #d9534f;
 @state-draft:           #f0ad4e;
 @state-bulk:            #5bc0de;
@@ -23,6 +24,10 @@
 
 .state-indicator-variant(@color) {
   background-color: @color;
+}
+
+.state-open {
+  .state-indicator-variant(@state-open);
 }
 
 .state-closed {
