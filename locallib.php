@@ -2005,3 +2005,36 @@ function dialogue_contains_draft_files($draftid) {
     return (count($draftfiles) > 1) ? true : false;
 }
 
+/**
+ * This function is used to extend the global navigation by add forum nodes if there
+ * is relevant content.
+ *
+ * @param navigation_node $navref
+ * @param stdClass $course
+ * @param stdClass $module
+ * @param stdClass $cm
+ */
+function dialogue_extend_navigation($navigation, $course, $module, $cm) {
+    global $PAGE;
+
+    $context = $PAGE->context;
+
+    $navigation->add(get_string('viewconversations', 'dialogue'),
+                     new moodle_url('/mod/dialogue/view.php',
+                     array('id' => $cm->id)));
+
+    $navigation->add(get_string('viewconversationsbyrole', 'dialogue'),
+                     new moodle_url('/mod/dialogue/viewconversationsbyrole.php',
+                     array('id' => $cm->id)));
+
+    $navigation->add(get_string('drafts', 'dialogue'),
+                     new moodle_url('/mod/dialogue/drafts.php',
+                     array('id' => $cm->id)));
+
+    if (has_any_capability(array('mod/dialogue:bulkopenrulecreate', 'mod/dialogue:bulkopenruleeditany'), $context)) {
+        $navigation->add(get_string('bulkopenrules', 'dialogue'),
+                         new moodle_url('/mod/dialogue/bulkopenrules.php',
+                         array('id' => $cm->id)));
+
+    }
+}

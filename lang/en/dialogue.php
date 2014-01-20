@@ -175,4 +175,5 @@ be opened with. Dialogues can only be opened between group members unless the pe
 capability set.';
 $string['usesearch'] = 'Use search to find people to start a dialogue with';
 $string['viewconversations'] = 'View conversations';
+$string['viewconversationsbyrole'] = 'View conversations by role';
 $string['viewstudentconversations'] = 'View student conversations';
