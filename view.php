@@ -73,7 +73,7 @@ $PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
                             'M.mod_dialogue.clickredirector.init', array($cm->id));
 
 $dialogue = new dialogue($cm, $course, $activityrecord);
-$list = new mod_dialogue_conversations_by_author($dialogue, $page, dialogue::PAGINATION_MAX_RESULTS);
+$list = new mod_dialogue_conversations_by_author($dialogue, $page, dialogue::PAGINATION_PAGE_SIZE);
 $list->set_state($state);
 $list->set_order($sort, $direction);
 
