@@ -52,6 +52,8 @@ $state      = dialogue_get_cached_param('state', $state, dialogue::STATE_OPEN);
 $pageparams = array('id' => $cm->id, 'state' => $state, 'show' => $show, 'page' => $page, 'sort' => $sort);
 $pageurl    = new moodle_url('/mod/dialogue/view.php', $pageparams);
 
+$SESSION->dialoguereturnurl = $pageurl->out(false); // hack attack
+
 $PAGE->set_pagetype('mod-dialogue-view-index');
 $PAGE->set_cm($cm, $course, $activityrecord);
 $PAGE->set_context($context);

@@ -53,6 +53,8 @@ if (!$roleid) {
 $pageparams = array('id' => $cm->id, 'roleid' => $roleid, 'page' => $page, 'sort' => $sort);
 $pageurl    = new moodle_url('/mod/dialogue/viewconversationsbyrole.php', $pageparams);
 
+$SESSION->dialoguereturnurl = $pageurl->out(false); // hack attack
+
 $PAGE->set_pagetype('mod-dialogue-view-index');
 $PAGE->set_cm($cm, $course, $activityrecord);
 $PAGE->set_context($context);

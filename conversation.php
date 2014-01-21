@@ -50,7 +50,12 @@ require_login($course, false, $cm);
 
 $pageparams   = array('id' => $id, 'conversationid' => $conversationid, 'action' => $action);
 $pageurl      = new moodle_url('/mod/dialogue/conversation.php', $pageparams);
-$returnurl    = new moodle_url('/mod/dialogue/view.php', array('id' => $cm->id));
+// hack attack
+if (isset($SESSION->dialoguereturnurl)) {
+    $returnurl    = $SESSION->dialoguereturnurl;
+} else {
+    $returnurl    = new moodle_url('/mod/dialogue/view.php', array('id' => $cm->id));
+}
 $draftsurl    = new moodle_url('/mod/dialogue/drafts.php', array('id' => $cm->id));
 
 $PAGE->set_pagetype('mod-dialogue-conversation');
