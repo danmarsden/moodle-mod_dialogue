@@ -33,18 +33,17 @@ class mod_dialogue_conversations_by_role extends mod_dialogue_conversations {
     public function __construct(dialogue $dialogue, $roleid, $page = 0, $limit = dialogue::PAGINATION_MAX_RESULTS) {
         parent::__construct($dialogue, $page, $limit);
         $this->roleid   = $roleid;
-        
     }
 
     public function setup() {
         global $DB, $USER;
-        
+
         $this->params['roleid'] = $this->roleid;
-        
+
         list($relatedctxsql, $relatedctxparams) = $DB->get_in_or_equal($this->dialogue->context->get_parent_context_ids(true),
                                                                        SQL_PARAMS_NAMED,
                                                                        'relatedctx');
-        
+
         foreach ($relatedctxparams as $key => $value) {
             $this->params[$key] = $value;
         }
@@ -93,7 +92,7 @@ class mod_dialogue_conversations_by_role extends mod_dialogue_conversations {
                               'state' => 'dm.state',
                               'timemodified' => 'dm.timemodified');
 
-        
+
         $this->set_unread_field();
 
         $this->set_order('fullname');
@@ -140,7 +139,7 @@ class mod_dialogue_conversations_by_role extends mod_dialogue_conversations {
 
         return $records;
     }
-    
+
     public function rows_matched() {
         global $DB;
 
