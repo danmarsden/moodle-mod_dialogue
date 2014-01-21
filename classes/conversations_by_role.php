@@ -95,8 +95,6 @@ class mod_dialogue_conversations_by_role extends mod_dialogue_conversations {
 
         $this->set_unread_field();
 
-        $this->set_order('fullname');
-
     }
 
     protected function set_unread_field() {
