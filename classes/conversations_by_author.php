@@ -52,7 +52,7 @@ class mod_dialogue_conversations_by_author extends mod_dialogue_conversations {
         $this->basesql  = "FROM {user} u
                            JOIN {dialogue_participants} dp ON dp.userid = u.id
                            JOIN {dialogue_conversations} dc ON dc.id = dp.conversationid
-                           JOIN {dialogue_messages} dm ON dm.conversationid = dp.conversationid AND u.id = dm.authorid
+                           JOIN {dialogue_messages} dm ON dm.conversationid = dp.conversationid
                            JOIN (SELECT dm.conversationid, MAX(dm.conversationindex) AS conversationindex
                                    FROM {dialogue_messages} dm
                                   WHERE dm.dialogueid = :lastmessagedialogueid
