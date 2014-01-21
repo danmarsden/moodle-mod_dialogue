@@ -189,6 +189,7 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         
         $data->dialogueid = $this->get_new_parentid('dialogue');
         $data->conversationid = $this->get_mappingid('dialogue_conversation', $data->conversationid);
+        $data->authorid = $this->get_mappingid('user', $data->authorid);
         
         $newitemid = $DB->insert_record('dialogue_messages', $data);
         $this->set_mapping('dialogue_message', $oldid, $newitemid, true);
