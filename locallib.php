@@ -289,8 +289,11 @@ class dialogue_message implements renderable {
         if (is_null($this->_messageid)) {
             return true;
         }
-        // only author can delete
-        if ($this->_authorid != $USER->id) {
+        // permission to delete conversation
+        $candelete = ((has_capability('mod/dialogue:delete', $context) and $USER->id == $this->_authorid) or
+                       has_capability('mod/dialogue:deleteany', $context));
+
+        if (!$candelete) {
             throw new moodle_exception('nopermissiontodelete', 'dialogue');
         }
         // delete message and attachment files for message
@@ -707,18 +710,18 @@ class dialogue_conversation extends dialogue_message {
 
         $cm      = $this->dialogue->cm;
         $course  = $this->dialogue->course;
+        $context = $this->dialogue->context;
 
         // hasn't been saved yet
         if (is_null($this->_conversationid)) {
             return true;
         }
-        // only author can delete
-        if ($this->_authorid != $USER->id) {
+        // permission to delete conversation
+        $candelete = ((has_capability('mod/dialogue:delete', $context) and $USER->id == $this->_authorid) or
+                       has_capability('mod/dialogue:deleteany', $context));
+
+        if (!$candelete) {
             throw new moodle_exception('nopermissiontodelete', 'dialogue');
-        }
-        // this shouldn't happen, just an extra check
-        if ($this->state == dialogue::STATE_OPEN) {
-            throw new moodle_exception('cannotdeleteopenconversation', 'dialogue');
         }
         // delete flags
         $DB->delete_records('dialogue_flags', array('conversationid' => $this->_conversationid));
