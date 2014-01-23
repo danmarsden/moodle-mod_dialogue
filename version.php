@@ -23,7 +23,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$module->version   = 2013112903;
+$module->version   = 2013112904;
 $module->requires  = 2013111800;        // See http://docs.moodle.org/dev/Moodle_Versions
 $module->cron      = 60;
 $module->component = 'mod_dialogue';    // Full name of the plugin (used for diagnostics)
