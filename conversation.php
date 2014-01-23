@@ -140,7 +140,6 @@ if ($conversation->state == dialogue::STATE_DRAFT) {
 
 if ($conversation->state == dialogue::STATE_BULK_AUTOMATED) {
     if (!has_capability('mod/dialogue:bulkopenruleeditany', $context) and $conversation->author->id != $USER->id) {
-        print_object($conversation->author->id);
         throw new moodle_exception('nopermission');
     }
 }
