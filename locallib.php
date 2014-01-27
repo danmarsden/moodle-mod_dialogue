@@ -1552,45 +1552,48 @@ function dialogue_get_cached_param($name, $value, $default) {
 function dialogue_cm_unread_total(dialogue $dialogue) {
     global $USER, $DB;
 
+    $sql    = '';
     $params = array();
-    $joins  = array();
-    $wheres = array();
-
-    $sql = "SELECT dc.id, (SELECT COUNT(dm.id)
-                             FROM {dialogue_messages} dm
-                            WHERE dm.conversationid = dc.id) -
-                          (SELECT COUNT(df.id)
-                             FROM {dialogue_flags} df
-                            WHERE df.conversationid = dc.id
-                              AND df.flag = :dfreadflag
-                              AND df.userid = :dfuserid) AS unread
-              FROM {dialogue_conversations} dc";
-
-    $params['dfreadflag'] = dialogue::FLAG_READ;
-    $params['dfuserid']   = $USER->id;
-
-    $wheres[] = "dc.dialogueid = :dialogueid";
-    $params['dialogueid'] = $dialogue->activityrecord->id;
 
     if (!has_capability('mod/dialogue:viewany', $dialogue->context)) {
-            $joins[] = " JOIN {dialogue_participants} dp ON dp.conversationid = dc.id";
-            $wheres[] = "dp.userid = :userid";
-            $params['userid'] = $USER->id;
+        $dialogueid = $dialogue->activityrecord->id;
+        $userid     = $USER->id;
+
+        $sql = "SELECT (SELECT COUNT(1)
+                          FROM mdl_dialogue_messages dm
+                          JOIN mdl_dialogue_participants dp ON dp.conversationid = dm.conversationid
+                         WHERE dm.dialogueid = ?
+                           AND dp.userid = ?) -
+                       (SELECT COUNT(1)
+                          FROM mdl_dialogue_flags df
+                         WHERE df.dialogueid = ?
+                           AND df.userid = ?
+                           AND df.flag = ?) AS unread";
+
+        $params = array($dialogueid, $userid, $dialogueid, $userid, dialogue::FLAG_READ);
+    } else {
+        $dialogueid = $dialogue->activityrecord->id;
+        $userid     = $USER->id;
+
+        $sql = "SELECT (SELECT COUNT(1)
+                          FROM mdl_dialogue_messages dm
+                         WHERE dm.dialogueid = ?) -
+                       (SELECT COUNT(1)
+                          FROM mdl_dialogue_flags df
+                         WHERE df.dialogueid = ?
+                           AND df.userid = ?
+                           AND df.flag = ?) AS unread";
+
+        $params = array($dialogueid, $dialogueid, $userid, dialogue::FLAG_READ);
     }
 
-    if ($joins) {
-        $sql .= implode("\n ", $joins);
+    // get user's total unread count for a dialogue
+    $record = (array) $DB->get_record_sql($sql, $params);
+    if (isset($record['unread']) and $record['unread'] > 0) {
+        return (int) $record['unread'];
     }
-
-    if ($wheres) {
-        $sql .= " WHERE " . implode(" AND ", $wheres);
-    }
-
-    $keyvalues = $DB->get_records_sql_menu($sql, $params);
-
-    return array_sum($keyvalues);
+    return 0;
 }
-
 
 function dialogue_get_draft_listing(dialogue $dialogue, &$total = null) {
     global $PAGE, $DB, $USER;
