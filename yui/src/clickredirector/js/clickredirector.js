@@ -39,6 +39,13 @@ M.mod_dialogue.clickredirector = {
         }
         // build redirect url
         redirect = this.modroot + page + '.php?' + urlparams.join('&');
-        window.location.href = redirect;
+        if (e.ctrlKey) {
+            // ugly hack for FF, FU FF
+            if (window.getSelection) {
+                window.getSelection().removeAllRanges();
+            }
+            return window.open(redirect, '_blank');
+        }
+        return window.location.href = redirect;
     }
 };
