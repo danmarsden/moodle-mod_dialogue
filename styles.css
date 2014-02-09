@@ -2061,7 +2061,6 @@ a.thumbnail:focus {
   list-style: none;
 }
 
-.label,
 .badge {
   display: inline-block;
   padding: 2px 4px;
@@ -2075,12 +2074,6 @@ a.thumbnail:focus {
   background-color: #999999;
 }
 
-.label {
-  -webkit-border-radius: 3px;
-     -moz-border-radius: 3px;
-          border-radius: 3px;
-}
-
 .badge {
   padding-right: 9px;
   padding-left: 9px;
@@ -2089,13 +2082,10 @@ a.thumbnail:focus {
           border-radius: 9px;
 }
 
-.label:empty,
 .badge:empty {
   display: none;
 }
 
-a.label:hover,
-a.label:focus,
 a.badge:hover,
 a.badge:focus {
   color: #ffffff;
@@ -2153,13 +2143,11 @@ a.badge:focus {
   background-color: #1a1a1a;
 }
 
-.btn .label,
 .btn .badge {
   position: relative;
   top: -1px;
 }
 
-.btn-mini .label,
 .btn-mini .badge {
   top: 0;
 }
@@ -2588,7 +2576,6 @@ span.participant {
           box-shadow: none;
 }
 
-.btn-create .label,
 .btn-create .badge {
   position: relative;
   top: -1px;
