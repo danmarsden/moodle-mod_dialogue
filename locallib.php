@@ -104,6 +104,16 @@ class dialogue {
     }
 
     /**
+     * Return message states that can be marked with a read flag
+     * FLAG_READ
+     *
+     * @return array
+     */
+    public static function get_unread_states() {
+        return array(dialogue::STATE_OPEN, dialogue::STATE_CLOSED);
+    }
+
+    /**
      * Set up a dialogue based on dialogue identifier
      *
      * @param int $dialogueid
@@ -1555,36 +1565,46 @@ function dialogue_cm_unread_total(dialogue $dialogue) {
     $sql    = '';
     $params = array();
 
+    $dialogueid = $dialogue->activityrecord->id;
+    $userid     = $USER->id;
+
+    $params['todialogueid'] = $dialogueid;
+    $params['touserid']     = $userid;
+
+    list($insql, $inparams) = $DB->get_in_or_equal(dialogue::get_unread_states(), SQL_PARAMS_NAMED, 'un');
+
+    $params = array_merge($params, $inparams);
+
+    $params['undialogueid'] = $dialogueid;
+    $params['unuserid']     = $userid;
+    $params['unflag']       = dialogue::FLAG_READ;
+
     if (!has_capability('mod/dialogue:viewany', $dialogue->context)) {
-        $dialogueid = $dialogue->activityrecord->id;
-        $userid     = $USER->id;
 
         $sql = "SELECT (SELECT COUNT(1)
                           FROM mdl_dialogue_messages dm
                           JOIN mdl_dialogue_participants dp ON dp.conversationid = dm.conversationid
-                         WHERE dm.dialogueid = ?
-                           AND dp.userid = ?) -
+                         WHERE dm.dialogueid = :todialogueid
+                           AND dp.userid = :touserid
+                           AND dm.state $insql) -
                        (SELECT COUNT(1)
                           FROM mdl_dialogue_flags df
-                         WHERE df.dialogueid = ?
-                           AND df.userid = ?
-                           AND df.flag = ?) AS unread";
+                         WHERE df.dialogueid = :undialogueid
+                           AND df.userid = :unuserid
+                           AND df.flag = :unflag) AS unread";
 
-        $params = array($dialogueid, $userid, $dialogueid, $userid, dialogue::FLAG_READ);
     } else {
-        $dialogueid = $dialogue->activityrecord->id;
-        $userid     = $USER->id;
 
         $sql = "SELECT (SELECT COUNT(1)
                           FROM mdl_dialogue_messages dm
-                         WHERE dm.dialogueid = ?) -
+                         WHERE dm.dialogueid = :todialogueid
+                           AND dm.state $insql) -
                        (SELECT COUNT(1)
                           FROM mdl_dialogue_flags df
-                         WHERE df.dialogueid = ?
-                           AND df.userid = ?
-                           AND df.flag = ?) AS unread";
+                         WHERE df.dialogueid = :undialogueid
+                           AND df.userid = :unuserid
+                           AND df.flag = :unflag) AS unread";
 
-        $params = array($dialogueid, $dialogueid, $userid, dialogue::FLAG_READ);
     }
 
     // get user's total unread count for a dialogue
