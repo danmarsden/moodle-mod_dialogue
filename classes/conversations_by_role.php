@@ -98,11 +98,14 @@ class mod_dialogue_conversations_by_role extends mod_dialogue_conversations {
     }
 
     protected function set_unread_field() {
-        global $USER;
+        global $USER, $DB;
+
+        list($insql, $inparams) = $DB->get_in_or_equal(dialogue::get_unread_states(), SQL_PARAMS_NAMED, 'unreadstate');
 
         $this->fields['unread'] = "(SELECT COUNT(dm.id)
                                       FROM {dialogue_messages} dm
-                                     WHERE dm.conversationid = dc.id) -
+                                     WHERE dm.conversationid = dc.id
+                                       AND dm.state IN ('open', 'closed')) -
                                    (SELECT COUNT(df.id)
                                       FROM {dialogue_flags} df
                                      WHERE df.conversationid = dc.id
