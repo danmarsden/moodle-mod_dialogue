@@ -101,7 +101,7 @@ class mod_dialogue_conversations_by_author extends mod_dialogue_conversations {
     protected function set_unread_field() {
         global $USER, $DB;
 
-        list($insql, $inparams) = $DB->get_in_or_equal(array(), SQL_PARAMS_NAMED, 'unreadstate');
+        list($insql, $inparams) = $DB->get_in_or_equal(dialogue::get_unread_states(), SQL_PARAMS_NAMED, 'unreadstate');
 
         $this->fields['unread'] = "(SELECT COUNT(dm.id)
                                       FROM {dialogue_messages} dm
