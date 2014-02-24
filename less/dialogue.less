@@ -37,9 +37,6 @@ body.jsenabled .nonjs-control, body.jsenabled .nonjs-control input {
 // CSS Reset
 @import "bootstrap/reset.less";
 
-// Grid system and page structure
-@import "bootstrap/scaffolding.less";
-
 // Base CSS
 @import "bootstrap/tables.less";
 
@@ -59,8 +56,16 @@ body.jsenabled .nonjs-control, body.jsenabled .nonjs-control input {
 @import "bootstrap/media.less";
 @import "badges.less";
 
+// -------------------------
 // Utility classes
-@import "bootstrap/utilities.less"; // Has to be last to override when necessary
+// -------------------------
+// Floats
+.path-mod-dialogue .pull-right {
+  float: right !important;
+}
+.path-mod-dialogue .pull-left {
+  float: left !important;
+}
 
 // Font Awesome
 @import "font-awesome/variables";
@@ -82,41 +87,34 @@ body.jsenabled .nonjs-control, body.jsenabled .nonjs-control input {
 @import "stateindicator.less";
 
 /* listing meta */
-.listing-meta h6 {
+.path-mod-dialogue .listing-meta h6 {
    display: inline-block
 }
 
-.listing-meta:before {
+.path-mod-dialogue .listing-meta:before {
    content: "";
    display: block;
    clear: both;
 }
 
 /* dropdown group - contains both js and no-js controls */
-.dropdown-group {
+.path-mod-dialogue .dropdown-group {
    display: inline-block;
 }
-.dropdown-group > span {
+.path-mod-dialogue .dropdown-group > span {
    margin-right: 10px;
 }
-.btn-group + .dropdown-group > span {
+.path-mod-dialogue .btn-group + .dropdown-group > span {
    margin-left: 10px
 }
-
-.participation {
+.path-mod-dialogue .participation {
     margin-top: 10px;
 }
-.participation + span {
+.path-mod-dialogue .participation + span {
     display: inline-block;
     margin: 0 10px 0 0;
 }
-
-.display-by-student {
-vertical-align: middle;
-   margin-left: 10px;
-}
-
-span.participant {
+.path-mod-dialogue span.participant {
   margin: 0 10px 0 0;
 }
 
@@ -126,14 +124,14 @@ span.participant {
   .btn-primary;
   /*.buttonBackground(@btnPrimaryBackground, @btnPrimaryBackgroundHighlight);*/
 }
-// @todo Important need to keep consistant colours
-a.btn:link,
-a.btn:visited {
-  /*color: #555555;*/
+// Important need to keep consistant colours on btn
+.path-mod-dialogue a.btn:link,
+.path-mod-dialogue a.btn:visited {
+  color: #555555;
 }
 
-a.btn-create:link,
-a.btn-create:visited {
+.path-mod-dialogue a.btn-create:link,
+.path-mod-dialogue a.btn-create:visited {
   color: white;
 }
 
@@ -177,4 +175,25 @@ body.jsenabled .bulkopenrule-list tr:hover{
 .path-mod-dialogue fieldset.hidden {
   display: inherit;
   visibility: inherit;
+}
+
+.drop-down-arrow {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: bottom;
+  border-top:   4px solid black;
+  border-right: 4px solid transparent;
+  border-left:  4px solid transparent;
+  content: "";
+  cursor: pointer;
+}
+
+.path-mod-dialogue .input-xxlarge {
+  width: 530px;
+}
+
+// Rounded corners
+.img-rounded {
+  .border-radius(6px);
 }

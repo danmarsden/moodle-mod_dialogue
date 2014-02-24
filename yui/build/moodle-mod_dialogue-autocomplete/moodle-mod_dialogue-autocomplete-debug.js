@@ -59,6 +59,7 @@ M.mod_dialogue.autocomplete = {
 
         // bind handle_select function on the autocomplete object
         this.inputnode.ac.after('select', Y.bind(this.handle_select, this));
+        this.containernode.one('.drop-down-arrow').on('click', Y.bind(this.drop_the_list, this));
         this.inputnode.on('key', Y.bind(this.handle_backspace, this), 'backspace');
         this.inputnode.ac.on('results', Y.bind(this.enforce_participant_limit, this));
         this.inputnode.ac.on('results', Y.bind(this.refresh_footer, this));
@@ -82,6 +83,7 @@ M.mod_dialogue.autocomplete = {
         this.add_participant(person);
         this.inputnode.set('value', '');
     },
+            
     add_participant : function(participant) {
         var participantitem = this.make_participant_item(participant);
         this.listnode.append(participantitem);
@@ -104,8 +106,14 @@ M.mod_dialogue.autocomplete = {
             lastparticipant.remove();
         }
     },
-    handle_backspace : function(e) {
+
+    handle_backspace : function() {
         this.remove_last_participant();
+        this.inputnode.focus();
+    },
+
+    drop_the_list : function() {
+        this.inputnode.ac.sendRequest('');
         this.inputnode.focus();
     },
 
