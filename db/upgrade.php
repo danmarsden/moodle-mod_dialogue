@@ -96,5 +96,16 @@ function xmldb_dialogue_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2013101501, 'dialogue');
     }
 
+    // Add index on dialogue messages table for conversationid to improve performance.
+    if ($oldversion < 2014030700) {
+        $table = new xmldb_table('dialogue_messages');
+        $index = new xmldb_index('conversationid', XMLDB_INDEX_NOTUNIQUE, array('conversationid'));
+        // Conditionally launch add index.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        upgrade_mod_savepoint(true, 2014030700, 'dialogue');
+    }
+
     return true;
 }
