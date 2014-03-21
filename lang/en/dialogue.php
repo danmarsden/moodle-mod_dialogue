@@ -78,6 +78,7 @@ $string['draftlistdisplayheader'] = 'Displaying my drafts';
 $string['draftreply'] = 'Draft reply';
 $string['draftreplytrashed'] = 'Draft reply trashed';
 $string['drafts'] = 'Drafts';
+$string['errorcutoffdateinpast'] =  'Cut off date cannot be set in the past';
 $string['erroremptymessage'] = 'Message cannot be empty';
 $string['erroremptysubject'] = 'Subject cannot be empty.';
 $string['errornoparticipant'] = 'You must open a dialogue with somebody...';

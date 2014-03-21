@@ -360,6 +360,9 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
         if (empty($data['subject'])) {
             $errors['subject'] = get_string('erroremptysubject', 'dialogue');
         }
+        if ($data['cutoffdate'] < time()) {
+            $errors['cutoffdate'] = get_string('errorcutoffdateinpast', 'dialogue');
+        }
 
         return $errors;
     }
