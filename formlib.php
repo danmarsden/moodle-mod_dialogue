@@ -225,7 +225,8 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
         $html .= html_writer::end_tag('div');
         $html .= html_writer::start_tag('div', array('class'=>'felement ftext'));
         $html .= html_writer::start_tag('div', array('id'=>'participant_autocomplete_field', 'class' => 'js-control yui3-aclist-field'));
-        $html .= html_writer::tag('input', '', array('id'=>'participant_autocomplete_input', 'placeholder' => get_string('searchpotentials', 'dialogue')));
+        $html .= html_writer::tag('input', '', array('id'=>'participant_autocomplete_input', 'class' => 'input-xxlarge', 'placeholder' => get_string('searchpotentials', 'dialogue')));
+        $html .= html_writer::tag('span', '', array('class'=>'drop-down-arrow'));
         $html .= html_writer::end_tag('div');
         $html .= html_writer::end_tag('div');
         $html .= html_writer::end_tag('div');
