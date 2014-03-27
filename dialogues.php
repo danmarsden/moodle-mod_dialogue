@@ -380,6 +380,9 @@
 /****************** edit a reply ****************************************/
 
         $entry = $DB->get_record('dialogue_entries', array('id' => $params->entryid));
+        if ($entry->userid != $USER->id) {
+            throw new moodle_exception('You cannot edit a reply that does not belong to you!');
+        }
         $replyid = 'reply'. $entry->conversationid;
        
         if (isset($formdata->{$replyid})) {
@@ -387,7 +390,7 @@
             $replytext = clean_param($formdata->{$replyid}['text'], PARAM_CLEAN);
 
             $replyformat = clean_param($formdata->{$replyid}['format'], PARAM_INT);
-            $replyitemid = clean_param($formdata->{$replyid}['itemid'], PARAM_INT);print_object($replyitemid);
+            $replyitemid = clean_param($formdata->{$replyid}['itemid'], PARAM_INT);
 
             // save editor embedded files
             $message = file_save_draft_area_files($replyitemid,
