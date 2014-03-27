@@ -60,28 +60,6 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->addHelpButton('usecoursegroups', 'usecoursegroups', 'dialogue');
         $mform->setDefault('usecoursegroups', 0);
 
-        $mform->addElement('header', 'legacy', get_string('legacy', 'dialogue'));
-        $radiogroup = array();
-        $radiogroup[] = $mform->createElement('radio',
-                                              'legacytype',
-                                              '',
-                                              get_string('teachertostudent', 'dialogue'),
-                                              dialogue::LEGACY_TYPE_TEACHER2STUDENT);
-
-        $radiogroup[] = $mform->createElement('radio',
-                                              'legacytype',
-                                              '',
-                                              get_string('studenttostudent', 'dialogue'),
-                                              dialogue::LEGACY_TYPE_STUDENT2STUDENT);
-
-        $radiogroup[] = $mform->createElement('radio',
-                                              'legacytype',
-                                              '',
-                                              get_string('everyone', 'dialogue'),
-                                              dialogue::LEGACY_TYPE_EVERYONE);
-        $mform->setDefault('legacytype', -1);
-        $mform->addGroup($radiogroup, 'radiogroup', null, null, false);
-
         $this->standard_grading_coursemodule_elements();
 
         $this->standard_coursemodule_elements();
