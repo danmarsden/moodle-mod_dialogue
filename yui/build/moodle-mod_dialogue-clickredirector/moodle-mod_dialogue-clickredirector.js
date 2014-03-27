@@ -35,12 +35,17 @@ M.mod_dialogue.clickredirector = {
             params.messageid = messageid;
         }
         // build array of url params
-        var urlparams = new Array();
+        var urlparams = [];
         for (var param in params) {
             urlparams.push(param + '=' + params[param]);
         }
         // build redirect url
         redirect = this.modroot + page + '.php?' + urlparams.join('&');
+        console.debug(e);
+        if(e.metaKey) {
+            alert('meta');
+        }
+
         if (e.ctrlKey) {
             // ugly hack for FF, FU FF
             if (window.getSelection) {
