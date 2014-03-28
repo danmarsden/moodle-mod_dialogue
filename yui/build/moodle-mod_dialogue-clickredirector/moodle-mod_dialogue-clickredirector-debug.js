@@ -41,12 +41,7 @@ M.mod_dialogue.clickredirector = {
         }
         // build redirect url
         redirect = this.modroot + page + '.php?' + urlparams.join('&');
-        console.debug(e);
-        if(e.metaKey) {
-            alert('meta');
-        }
-
-        if (e.ctrlKey) {
+        if (e.ctrlKey || e.metaKey) {
             // ugly hack for FF, FU FF
             if (window.getSelection) {
                 window.getSelection().removeAllRanges();
