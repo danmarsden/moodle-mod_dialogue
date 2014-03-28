@@ -36,6 +36,7 @@ $string['configmaxattachments'] = 'Default maximum number of attachments allowed
 $string['configmaxbytes'] = 'Default maximum size for all dialogue attachments on the site (subject to course limits and other local settings)';
 $string['configtrackunread'] = 'Track unread dialogue messages on course homepage';
 $string['configviewstudentconversations'] = 'Experimental: student list with conversations they are involved in';
+$string['configviewconversationsbyrole'] = 'Experimental: View conversations by role, order conversation listing by author\'s role';
 $string['conversationcloseconfirm'] = 'Are you sure you want to close conversation {$a} ?';
 $string['conversationclosed'] = 'Conversation {$a} has been closed';
 $string['conversationdeleteconfirm'] = 'Are you sure you want to delete conversation {$a}, this cannot be undone?';
@@ -65,6 +66,7 @@ $string['dialogue:receive'] = 'Receive, who can be the recipient when opening a 
 $string['dialogue:reply'] = 'Reply';
 $string['dialogue:replyany'] = 'Reply any';
 $string['dialogue:viewany'] = 'View any';
+$string['dialogue:viewbyrole'] = 'View conversation listing by role, experimental';
 $string['dialoguename'] = 'Dialogue name';
 $string['dialogueintro'] = 'Dialogue Introduction';
 $string['dialogueupgradehelper'] = 'Dialogue upgrade helper';
@@ -176,4 +178,4 @@ be opened with. Dialogues can only be opened between group members unless the pe
 capability set.';
 $string['usesearch'] = 'Use search to find people to start a dialogue with';
 $string['viewconversations'] = 'View conversations';
-$string['viewstudentconversations'] = 'View student conversations';
+$string['viewconversationsbyrole'] = 'View conversations by role';

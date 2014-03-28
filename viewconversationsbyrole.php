@@ -18,12 +18,12 @@ require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once('lib.php');
 require_once('locallib.php');
 require_once($CFG->dirroot . '/mod/dialogue/classes/conversations.php');
-require_once($CFG->dirroot . '/mod/dialogue/classes/conversations_by_author.php');
+require_once($CFG->dirroot . '/mod/dialogue/classes/conversations_by_role.php');
 
 $id         = required_param('id', PARAM_INT);
-$state      = optional_param('state', dialogue::STATE_OPEN, PARAM_ALPHA);
+$roleid     = optional_param('roleid', 0, PARAM_INT);
 $page       = optional_param('page', 0, PARAM_INT);
-$sort       = optional_param('sort', 'latest', PARAM_ALPHANUM);
+$sort       = optional_param('sort', 'fullname', PARAM_ALPHANUM);
 $direction  = optional_param('direction', 'asc', PARAM_ALPHA);
 
 if ($id) {
@@ -44,10 +44,14 @@ $context = context_module::instance($cm->id);
 
 require_login($course, false, $cm);
 
+$rolenames = role_fix_names(get_profile_roles($context), $context, ROLENAME_ALIAS, true);
+if (!$roleid) {
+    $roleid  = $DB->get_field('role', 'id', array('shortname' => 'student'), MUST_EXIST);
+}
+
 // now set params on pageurl will later be set on $PAGE
-$pageurl = new moodle_url('/mod/dialogue/view.php');
+$pageurl = new moodle_url('/mod/dialogue/viewconversationsbyrole.php');
 $pageurl->param('id', $cm->id);
-$pageurl->param('state', $state);
 if ($page) {
     $pageurl->param('page', $page);
 }
@@ -57,6 +61,8 @@ $pageurl->param('direction', $direction);
 $returnurl = clone($pageurl);
 $returnurl->remove_params('page');
 $SESSION->dialoguereturnurl = $returnurl->out(false);
+
+
 
 $PAGE->set_pagetype('mod-dialogue-view-index');
 $PAGE->set_cm($cm, $course, $activityrecord);
@@ -79,8 +85,7 @@ $PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
                             'M.mod_dialogue.clickredirector.init', array($cm->id));
 
 $dialogue = new dialogue($cm, $course, $activityrecord);
-$list = new mod_dialogue_conversations_by_author($dialogue, $page, dialogue::PAGINATION_PAGE_SIZE);
-$list->set_state($state);
+$list = new mod_dialogue_conversations_by_role($dialogue, $roleid, $page, dialogue::PAGINATION_PAGE_SIZE);
 $list->set_order($sort, $direction);
 
 $renderer = $PAGE->get_renderer('mod_dialogue');
@@ -93,9 +98,26 @@ if (!empty($dialogue->activityrecord->intro)) {
 
 // render tab navigation, toggle button groups and order by dropdown
 echo $renderer->tab_navigation($dialogue);
-echo $renderer->state_button_group();
-echo $renderer->list_sortby(mod_dialogue_conversations_by_author::get_sort_options(), $sort, $direction);
+$roleselector = '';
+$roleselector .= html_writer::start_div('dropdown-group');
+$roleselector .= html_writer::start_div('js-control btn-group'); // btn-group required for js
+$attributes = array('data-toggle' => 'dropdown', 'class' =>'btn btn-small dropdown-toggle');
+$roleselector .= html_writer::start_tag('button', $attributes);
+$roleselector .= $rolenames[$roleid] . ' ' . html_writer::tag('span', null, array('class' => 'caret'));
+$roleselector .= html_writer::end_tag('button');
+$roleselector .= html_writer::start_tag('ul', array('class' => 'dropdown-menu'));
+foreach ($rolenames as $roleid => $rolename) {
+    $pageurl->param('roleid', $roleid);
+    $roleselector .= html_writer::start_tag('li');
+    $roleselector .= html_writer::link($pageurl, $rolename);
+    $roleselector .= html_writer::end_tag('li');
+}
+$roleselector .= html_writer::end_tag('ul');
+$roleselector .= html_writer::end_div(); // end of js-control
+$roleselector .= html_writer::end_div();
+echo $roleselector;
+echo $renderer->list_sortby(mod_dialogue_conversations_by_role::get_sort_options(), $sort, $direction);
 echo $renderer->conversation_listing($list);
 echo $OUTPUT->footer($course);
-$logurl = new moodle_url('view.php', array('id' =>  $cm->id));
-add_to_log($course->id, 'dialogue', 'view', $logurl->out(false), $activityrecord->name, $cm->id);
+$logurl = new moodle_url('viewconversationsbyrole.php', array('id' =>  $cm->id));
+add_to_log($course->id, 'dialogue', 'view by role', $logurl->out(false), $activityrecord->name, $cm->id);

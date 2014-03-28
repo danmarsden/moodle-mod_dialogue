@@ -649,6 +649,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
     public function tab_navigation(dialogue $dialogue) {
         global $PAGE;
 
+        $config  = $dialogue->config;
         $context = $dialogue->context;
         $cm      = $dialogue->cm;
 
@@ -662,6 +663,14 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $viewurl = new moodle_url('view.php', array('id'=>$cm->id));
         $html .= html_writer::link($viewurl, get_string('viewconversations', 'dialogue'));
         $html .= html_writer::end_tag('li');
+        // experimental: link conversation by role listing
+        if (!empty($config->viewconversationsbyrole) and has_capability('mod/dialogue:viewbyrole', $context)) {
+            $active = ($currentpage == 'viewconversationsbyrole') ? array('class'=>'active') : array();
+            $html .= html_writer::start_tag('li', $active);
+            $viewurl = new moodle_url('viewconversationsbyrole.php', array('id'=>$cm->id));
+            $html .= html_writer::link($viewurl, get_string('viewconversationsbyrole', 'dialogue'));
+            $html .= html_writer::end_tag('li');
+        }
         // link to users draft listing
         $active = ($currentpage == 'drafts') ? array('class'=>'active') : array();
         $html .= html_writer::start_tag('li', $active);

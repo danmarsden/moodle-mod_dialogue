@@ -52,6 +52,9 @@ require_capability('mod/dialogue:reply', $context);
 $pageparams   = array('id' => $id, 'conversationid' => $conversationid, 'action' => $action);
 $pageurl      = new moodle_url('/mod/dialogue/reply.php', $pageparams);
 $returnurl    = new moodle_url('/mod/dialogue/view.php', array('id' => $id));
+if (isset($SESSION->dialoguereturnurl)) {
+    $returnurl = $SESSION->dialoguereturnurl;
+}
 $draftsurl    = new moodle_url('/mod/dialogue/drafts.php', array('id' => $id));
 
 $PAGE->set_pagetype('mod-dialogue-reply');

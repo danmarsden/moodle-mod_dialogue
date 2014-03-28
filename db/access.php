@@ -176,4 +176,18 @@ $capabilities = array(
             'manager' => CAP_PREVENT
         )
     ),
+
+    'mod/dialogue:viewbyrole' => array(
+        'riskbitmask' => RISK_PERSONAL,
+
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_PREVENT,
+            'editingteacher' => CAP_PREVENT,
+            'manager' => CAP_PREVENT
+        )
+    ),
+
 );
