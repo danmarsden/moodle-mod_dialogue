@@ -178,7 +178,6 @@ $capabilities = array(
     ),
 
     'mod/dialogue:viewbyrole' => array(
-        'riskbitmask' => RISK_PERSONAL,
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
