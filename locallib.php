@@ -1579,32 +1579,34 @@ function dialogue_cm_unread_total(dialogue $dialogue) {
     $params['unuserid']     = $userid;
     $params['unflag']       = dialogue::FLAG_READ;
 
-    if (!has_capability('mod/dialogue:viewany', $dialogue->context)) {
+    // Most restrictive: view own
+    $sql = "SELECT
+                 (SELECT COUNT(1)
+                    FROM {dialogue_messages} dm
+                    JOIN {dialogue_participants} dp ON dp.conversationid = dm.conversationid
+                   WHERE dm.dialogueid = :todialogueid
+                     AND dp.userid = :touserid
+                     AND dm.state $insql) -
+                 (SELECT COUNT(1)
+                    FROM {dialogue_flags} df
+                    JOIN {dialogue_participants} dp ON dp.conversationid = df.conversationid
+                     AND dp.userid = df.userid
+                   WHERE df.dialogueid = :undialogueid
+                     AND df.userid = :unuserid
+                     AND df.flag = :unflag) AS unread";
 
-        $sql = "SELECT (SELECT COUNT(1)
-                          FROM mdl_dialogue_messages dm
-                          JOIN mdl_dialogue_participants dp ON dp.conversationid = dm.conversationid
-                         WHERE dm.dialogueid = :todialogueid
-                           AND dp.userid = :touserid
-                           AND dm.state $insql) -
-                       (SELECT COUNT(1)
-                          FROM mdl_dialogue_flags df
-                         WHERE df.dialogueid = :undialogueid
-                           AND df.userid = :unuserid
-                           AND df.flag = :unflag) AS unread";
-
-    } else {
-
-        $sql = "SELECT (SELECT COUNT(1)
-                          FROM mdl_dialogue_messages dm
-                         WHERE dm.dialogueid = :todialogueid
-                           AND dm.state $insql) -
-                       (SELECT COUNT(1)
-                          FROM mdl_dialogue_flags df
-                         WHERE df.dialogueid = :undialogueid
-                           AND df.userid = :unuserid
-                           AND df.flag = :unflag) AS unread";
-
+    // Least restrictive: view any
+    if (has_capability('mod/dialogue:viewany', $dialogue->context)) {
+        $sql = "SELECT
+                     (SELECT COUNT(1)
+                        FROM {dialogue_messages} dm
+                       WHERE dm.dialogueid = :todialogueid
+                         AND dm.state $insql) -
+                     (SELECT COUNT(1)
+                        FROM {dialogue_flags} df
+                       WHERE df.dialogueid = :undialogueid
+                         AND df.userid = :unuserid
+                         AND df.flag = :unflag) AS unread";
     }
 
     // get user's total unread count for a dialogue
