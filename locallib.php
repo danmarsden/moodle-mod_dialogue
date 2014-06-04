@@ -1703,23 +1703,7 @@ function dialogue_get_bulk_open_rule_listing(dialogue $dialogue, &$total = null)
 }
 
 
-/// EXTRA FUNCTIONS /// $PAGE->requires->css()
-
-/**
- * Loads bootstrap javascript if theme not child of bootstrapbase
- * else if load when bootstrap theme in use javascript doesn't work,
- * unsure why no time to investigate.
- *
- * @global type $PAGE
- */
-function dialogue_load_bootstrap_js() {
-    global $PAGE;
-
-    $parents = $PAGE->theme->parents;
-    if (!in_array('bootstrapbase', $parents)) {
-        $PAGE->requires->js('/mod/dialogue/bootstrap.js');
-    }
-}
+/// EXTRA FUNCTIONS ///
 
 /**
  * Generates a summary line for a conversation using subject and body, used in

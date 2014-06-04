@@ -73,8 +73,6 @@ if (dialogue_cm_needs_upgrade($cm->id)) {
     exit;
 }
 
-dialogue_load_bootstrap_js();// load javascript if not bootstrap theme
-
 $PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
                             'M.mod_dialogue.clickredirector.init', array($cm->id));
 
