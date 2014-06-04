@@ -250,7 +250,7 @@ function dialogue_cm_info_view(cm_info $cm) {
     if ($usetracking) {
         $unread = dialogue_cm_unread_total(new dialogue($cm));
         if ($unread) {
-            $out = '<span class="unread"> <a href="' . $cm->get_url() . '">';
+            $out = '<span class="unread"> <a href="' . $cm->url . '">';
             if ($unread == 1) {
                 $out .= $strunreadmessagesone;
             } else {
