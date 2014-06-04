@@ -54,6 +54,7 @@ $string['dateshortyear'] = '{$a->dateshort} <small>({$a->time})</small>';
 $string['datefullyear'] = '{$a->datefull} <small>({$a->time})</small>';
 $string['deleteconversation'] = 'Delete conversation';
 $string['deletereply'] = 'Delete reply';
+$string['dialoguecron'] = 'Dialogue cron';
 $string['dialogue:addinstance'] = 'Add a Dialogue';
 $string['dialogue:bulkopenrulecreate'] = 'Create a bulk opener rule';
 $string['dialogue:bulkopenruleeditany'] = 'Allows user to edit any rule, useful for admin\'s etc';

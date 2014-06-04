@@ -142,17 +142,10 @@ function dialogue_delete_instance($id) {
  * participants, and cleans up expired/closed conversations
  * @return   bool   true when complete
  */
-function dialogue_cron() {
-    global $CFG, $DB, $USER, $PAGE;
+function dialogue_process_bulk_openrules() {
+    global $CFG, $DB;
     require_once($CFG->dirroot.'/mod/dialogue/locallib.php');
     
-    mtrace('Dialogue cron...');
-    
-    if (isset($CFG->dialoguecrondisabled)) {
-        mtrace('Disabled in config');
-        return true;
-    }
-
     mtrace('1. Dealing with bulk open rules...');
      
     $sql = "SELECT dbor.*
