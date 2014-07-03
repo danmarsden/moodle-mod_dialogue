@@ -1,199 +1,204 @@
-body .js-control {
-    display: none;
-}
+body.path-mod-dialogue {
+  .js-control {
+      display: none;
+  }
 
-body .js-control input {
-    border: none;
-}
+  .js-control input {
+      border: none;
+  }
 
-body.jsenabled .js-control {
-    display: inline-block;
-}
+  &.jsenabled .js-control {
+      display: inline-block;
+  }
 
-body.jsenabled .nonjs-control, body.jsenabled .nonjs-control input {
-    display: none;
-}
+  &.jsenabled .nonjs-control, &.jsenabled .nonjs-control input {
+      display: none;
+  }
 
-/** Bootstrap **/
-// Core variables and mixins
-@import "bootstrap/variables.less"; // Modify this for custom colors, font-sizes, etc
-@import "bootstrap/mixins.less";
+  /* Ensure all Bootstrap is contained to the main page region and doesn't interfere with the theme outside it */
+  #region-main {
+    /** Bootstrap **/
+    // Core variables and mixins
+    @import "bootstrap/variables.less"; // Modify this for custom colors, font-sizes, etc
+    @import "bootstrap/mixins.less";
 
-/* fieldset.hidden vs .hidden
- *
- * Moodle uses fieldset.hidden for mforms, to signify a collection of
- * form elements that don't have a box drawn round them. Bootstrap
- * uses hidden for stuff that is hidden in various responsive modes.
- *
- * Relatedly, there is also fieldset.invisiblefieldset which hides the
- * border and sets the display to inline.
- *
- * Originally this just set block and visible, but it is used
- * in random question dialogue in Quiz,
- * that dialogue is hidden and shown, so when hidden the
- * above workaround leaves you with a button floating around
- */
+    /* fieldset.hidden vs .hidden
+     *
+     * Moodle uses fieldset.hidden for mforms, to signify a collection of
+     * form elements that don't have a box drawn round them. Bootstrap
+     * uses hidden for stuff that is hidden in various responsive modes.
+     *
+     * Relatedly, there is also fieldset.invisiblefieldset which hides the
+     * border and sets the display to inline.
+     *
+     * Originally this just set block and visible, but it is used
+     * in random question dialogue in Quiz,
+     * that dialogue is hidden and shown, so when hidden the
+     * above workaround leaves you with a button floating around
+     */
 
-// CSS Reset
-@import "bootstrap/reset.less";
+    // CSS Reset
+    @import "bootstrap/reset.less";
 
-// Base CSS
-@import "bootstrap/tables.less";
+    // Base CSS
+    @import "bootstrap/tables.less";
 
-// Components: common
-@import "bootstrap/dropdowns.less";
+    // Components: common
+    @import "bootstrap/dropdowns.less";
 
-// Components: Buttons & Alerts
-@import "bootstrap/buttons.less";
-@import "bootstrap/button-groups.less";
-@import "bootstrap/alerts.less"; // Note: alerts share common CSS with buttons and thus have styles in buttons.less
+    // Components: Buttons & Alerts
+    @import "bootstrap/buttons.less";
+    @import "bootstrap/button-groups.less";
+    @import "bootstrap/alerts.less"; // Note: alerts share common CSS with buttons and thus have styles in buttons.less
 
-// Components: Nav
-@import "bootstrap/navs.less";
+    // Components: Nav
+    @import "bootstrap/navs.less";
 
-// Components: Misc
-@import "bootstrap/thumbnails.less";
-@import "bootstrap/media.less";
-@import "badges.less";
+    // Components: Misc
+    @import "bootstrap/thumbnails.less";
+    @import "bootstrap/media.less";
+    @import "badges.less";
 
-// -------------------------
-// Utility classes
-// -------------------------
-// Floats
-.path-mod-dialogue .pull-right {
-  float: right !important;
-}
-.path-mod-dialogue .pull-left {
-  float: left !important;
-}
+    // -------------------------
+    // Utility classes
+    // -------------------------
+    // Floats
+    .pull-right {
+      float: right !important;
+    }
+    .pull-left {
+      float: left !important;
+    }
 
-// Font Awesome
-@import "font-awesome/variables";
-@import "font-awesome/mixins";
-@import "font-awesome/path";
-@import "font-awesome/core";
-.@{fa-css-prefix}-sort-alpha-asc:before { content: @fa-var-sort-alpha-asc; }
-.@{fa-css-prefix}-sort-alpha-desc:before { content: @fa-var-sort-alpha-desc; }
-.@{fa-css-prefix}-sort-amount-asc:before { content: @fa-var-sort-amount-asc; }
-.@{fa-css-prefix}-sort-amount-desc:before { content: @fa-var-sort-amount-desc; }
-.@{fa-css-prefix}-sort-numeric-asc:before { content: @fa-var-sort-numeric-asc; }
-.@{fa-css-prefix}-sort-numeric-desc:before { content: @fa-var-sort-numeric-desc; }
-.@{fa-css-prefix}-lock:before { content: @fa-var-lock; }
-.@{fa-css-prefix}-trash-o:before { content: @fa-var-trash-o; }
+    // Font Awesome
+    @import "font-awesome/variables";
+    @import "font-awesome/mixins";
+    @import "font-awesome/path";
+    @import "font-awesome/core";
+    .@{fa-css-prefix}-sort-alpha-asc:before { content: @fa-var-sort-alpha-asc; }
+    .@{fa-css-prefix}-sort-alpha-desc:before { content: @fa-var-sort-alpha-desc; }
+    .@{fa-css-prefix}-sort-amount-asc:before { content: @fa-var-sort-amount-asc; }
+    .@{fa-css-prefix}-sort-amount-desc:before { content: @fa-var-sort-amount-desc; }
+    .@{fa-css-prefix}-sort-numeric-asc:before { content: @fa-var-sort-numeric-asc; }
+    .@{fa-css-prefix}-sort-numeric-desc:before { content: @fa-var-sort-numeric-desc; }
+    .@{fa-css-prefix}-lock:before { content: @fa-var-lock; }
+    .@{fa-css-prefix}-trash-o:before { content: @fa-var-trash-o; }
 
-// Custom
-@import "autocomplete.less";
-@import "conversation.less";
-@import "stateindicator.less";
+    // Custom
+    @import "autocomplete.less";
+    @import "conversation.less";
+    @import "stateindicator.less";
 
-/* listing meta */
-.path-mod-dialogue .listing-meta h6 {
-   display: inline-block
-}
+    /* listing meta */
+    .listing-meta h6 {
+       display: inline-block
+    }
 
-.path-mod-dialogue .listing-meta:before {
-   content: "";
-   display: block;
-   clear: both;
-}
+    .listing-meta:before {
+       content: "";
+       display: block;
+       clear: both;
+    }
 
-/* dropdown group - contains both js and no-js controls */
-.path-mod-dialogue .dropdown-group {
-   display: inline-block;
-}
-.path-mod-dialogue .dropdown-group > span {
-   margin-right: 10px;
-}
-.path-mod-dialogue .btn-group + .dropdown-group > span {
-   margin-left: 10px
-}
-.path-mod-dialogue .participation {
-    margin-top: 10px;
-}
-.path-mod-dialogue .participation + span {
-    display: inline-block;
-    margin: 0 10px 0 0;
-}
-.path-mod-dialogue span.participant {
-  margin: 0 10px 0 0;
-}
+    /* dropdown group - contains both js and no-js controls */
+    .dropdown-group {
+       display: inline-block;
+    }
+    .dropdown-group > span {
+       margin-right: 10px;
+    }
+    .btn-group + .dropdown-group > span {
+       margin-left: 10px
+    }
+    .participation {
+        margin-top: 10px;
+    }
+    .participation + span {
+        display: inline-block;
+        margin: 0 10px 0 0;
+    }
+    span.participant {
+      margin: 0 10px 0 0;
+    }
 
-/* Custom buttons */
-.btn-create {
-  .btn;
-  .btn-primary;
-  /*.buttonBackground(@btnPrimaryBackground, @btnPrimaryBackgroundHighlight);*/
-}
-// Important need to keep consistant colours on btn
-.path-mod-dialogue a.btn:link,
-.path-mod-dialogue a.btn:visited {
-  color: #555555;
-}
+    /* Custom buttons */
+    .btn-create {
+      .btn;
+      .btn-primary;
+      /*.buttonBackground(@btnPrimaryBackground, @btnPrimaryBackgroundHighlight);*/
+    }
+    // Important need to keep consistant colours on btn
+    a.btn:link,
+    a.btn:visited {
+      color: #555555;
+    }
 
-.path-mod-dialogue a.btn-create:link,
-.path-mod-dialogue a.btn-create:visited {
-  color: white;
-}
+    a.btn-create:link,
+    a.btn-create:visited {
+      color: white;
+    }
 
-// Horizontal rules
-.path-mod-dialogue hr {
-  margin: 20px 0;
-  border: 0;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid @white;
-}
+    // Horizontal rules
+    hr {
+      margin: 20px 0;
+      border: 0;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid @white;
+    }
 
-// Notifications - Bootstrap style
-.path-mod-dialogue .notifyproblem {
- .alert;
- .alert-error;
-}
-.path-mod-dialogue .notifysuccess {
-  .alert;
-  .alert-success;
-}
-.path-mod-dialogue .notifymessage {
-  .alert;
-  .alert-info;
-}
-.path-mod-dialogue .redirectmessage {
-  .alert;
-  .alert-block;
-  .alert-info;
-}
+    // Notifications - Bootstrap style
+    .notifyproblem {
+     .alert;
+     .alert-error;
+    }
+    .notifysuccess {
+      .alert;
+      .alert-success;
+    }
+    .notifymessage {
+      .alert;
+      .alert-info;
+    }
+    .redirectmessage {
+      .alert;
+      .alert-block;
+      .alert-info;
+    }
 
-body.jsenabled .conversation-list tr:hover,
-body.jsenabled .draft-list tr:hover,
-body.jsenabled .bulkopenrule-list tr:hover{
-  cursor: pointer;
-}
+    .mform fieldset {
+      border: none;
+    }
 
-.path-mod-dialogue .mform fieldset {
-  border: none;
-}
+    fieldset.hidden {
+      display: inherit;
+      visibility: inherit;
+    }
 
-.path-mod-dialogue fieldset.hidden {
-  display: inherit;
-  visibility: inherit;
-}
+    .drop-down-arrow {
+      display: inline-block;
+      width: 0;
+      height: 0;
+      vertical-align: bottom;
+      border-top:   4px solid black;
+      border-right: 4px solid transparent;
+      border-left:  4px solid transparent;
+      content: "";
+      cursor: pointer;
+    }
 
-.drop-down-arrow {
-  display: inline-block;
-  width: 0;
-  height: 0;
-  vertical-align: bottom;
-  border-top:   4px solid black;
-  border-right: 4px solid transparent;
-  border-left:  4px solid transparent;
-  content: "";
-  cursor: pointer;
-}
+    .input-xxlarge {
+      width: 530px;
+    }
 
-.path-mod-dialogue .input-xxlarge {
-  width: 530px;
-}
+    // Rounded corners
+    .img-rounded {
+      .border-radius(6px);
+    }
+  }
 
-// Rounded corners
-.img-rounded {
-  .border-radius(6px);
+  &.jsenabled .conversation-list tr:hover,
+  &.jsenabled .draft-list tr:hover,
+  &.jsenabled .bulkopenrule-list tr:hover{
+    cursor: pointer;
+  }
 }
