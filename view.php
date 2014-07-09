@@ -95,5 +95,14 @@ echo $renderer->state_button_group();
 echo $renderer->list_sortby(mod_dialogue_conversations_by_author::get_sort_options(), $sort, $direction);
 echo $renderer->conversation_listing($list);
 echo $OUTPUT->footer($course);
-$logurl = new moodle_url('view.php', array('id' =>  $cm->id));
-add_to_log($course->id, 'dialogue', 'view', $logurl->out(false), $activityrecord->name, $cm->id);
+
+// Trigger course module viewed event
+$eventparams = array(
+    'context' => $context,
+    'objectid' => $activityrecord->id
+);
+$event = \mod_dialogue\event\course_module_viewed::create($eventparams);
+$event->add_record_snapshot('course_modules', $cm);
+$event->add_record_snapshot('course', $course);
+$event->add_record_snapshot('dialogue', $activityrecord);
+$event->trigger();

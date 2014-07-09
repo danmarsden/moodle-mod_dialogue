@@ -82,6 +82,12 @@ if ($action == 'create' or $action == 'edit') {
                         $sendmessage = get_string('conversationopenedcron', 'dialogue');
                     } else {
                         $sendmessage = get_string('conversationopened', 'dialogue');
+                        // Trigger conversation created event
+                        $eventparams = array(
+                            'context' => $context,
+                            'objectid' => $conversation->conversationid
+                        );
+                        $event = \mod_dialogue\event\conversation_created::create($eventparams);
                     }
                     redirect($returnurl, $sendmessage);
                 }
@@ -110,6 +116,13 @@ if ($action == 'create' or $action == 'edit') {
 if ($action == 'close') {
     if (!empty($confirm) && confirm_sesskey()) {
         $conversation->close();
+        // Trigger conversation closed event
+        $eventparams = array(
+            'context' => $context,
+            'objectid' => $conversation->conversationid
+        );
+        $event = \mod_dialogue\event\conversation_closed::create($eventparams);
+        $event->trigger();
         redirect($returnurl, get_string('conversationclosed', 'dialogue',
                                         $conversation->subject));
     }
@@ -124,7 +137,17 @@ if ($action == 'close') {
 // delete conversation
 if ($action == 'delete') {
     if (!empty($confirm) && confirm_sesskey()) {
+        $messagerecord = $conversation->messagerecord;
+        $conversationrecord = $conversation->conversationrecord;
         $conversation->delete();
+        // Trigger conversation created event
+        $eventparams = array(
+            'context' => $context,
+            'objectid' => $conversation->conversationid
+        );
+        $event = \mod_dialogue\event\conversation_deleted::create($eventparams);
+        $event->trigger();
+        // Redirect to the listing page we came from.
         redirect($returnurl, get_string('conversationdeleted', 'dialogue',
                                         $conversation->subject));
     }
@@ -177,5 +200,10 @@ if ($hasreplycapability and $conversation->state == dialogue::STATE_OPEN) {
     $form->display();
 }
 echo $OUTPUT->footer($course);
-$logurl = new moodle_url('conversation.php', array('id' =>  $cm->id, 'conversationid' => $conversation->conversationid));
-add_to_log($course->id, 'dialogue', 'view conversation', $logurl->out(false), $conversation->subject, $cm->id);
+// Trigger conversation viewed event
+$eventparams = array(
+    'context' => $context,
+    'objectid' => $conversation->conversationid
+);
+$event = \mod_dialogue\event\conversation_viewed::create($eventparams);
+$event->trigger();
