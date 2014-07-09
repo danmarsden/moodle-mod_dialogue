@@ -572,9 +572,6 @@ class dialogue_message implements renderable {
             }
         }
 
-        $logurl = new moodle_url('conversation.php', array('id' =>  $cm->id, 'conversationid' => $conversationid));
-        add_to_log($course->id, 'dialogue', 'reply', $logurl->out(false), $subject, $cm->id);
-
         return true;
     }
 
@@ -705,13 +702,10 @@ class dialogue_conversation extends dialogue_message {
         $openstate = dialogue::STATE_OPEN;
         $closedstate = dialogue::STATE_CLOSED;
         $params = array('conversationid' => $this->conversationid, 'state' => $openstate);
-        
+
         // close all messages in conversation that have a open state, we don't worry about drafts etc
         $DB->set_field('dialogue_messages', 'state', $closedstate, $params);
 
-        $logurl = new moodle_url('conversation.php', array('id' =>  $cm->id, 'conversationid' => $this->_conversationid));
-        add_to_log($course->id, 'dialogue', 'close conversation', $logurl->out(false), $this->subject, $cm->id);
-        
         return true;
     }
 
@@ -744,8 +738,6 @@ class dialogue_conversation extends dialogue_message {
 
         parent::delete();
         
-        $logurl = new moodle_url('view.php', array('id' =>  $cm->id));
-        add_to_log($course->id, 'dialogue', 'delete conversation', $logurl->out(false), $this->subject, $cm->id);
     }
 
     /**
@@ -1151,10 +1143,6 @@ class dialogue_conversation extends dialogue_message {
 
             return true;
         }
-
-
-        $logurl = new moodle_url('conversation.php', array('id' =>  $cm->id, 'conversationid' => $this->_conversationid));
-        add_to_log($course->id, 'dialogue', 'open conversation', $logurl->out(false), $this->subject, $cm->id);
 
         parent::send();
     }
