@@ -88,6 +88,7 @@ if ($action == 'create' or $action == 'edit') {
                             'objectid' => $conversation->conversationid
                         );
                         $event = \mod_dialogue\event\conversation_created::create($eventparams);
+                        $event->trigger();
                     }
                     redirect($returnurl, $sendmessage);
                 }
