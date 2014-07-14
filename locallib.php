@@ -603,7 +603,7 @@ class dialogue_conversation extends dialogue_message {
     protected $_conversationid = null;
     protected $_subject = '';
     protected $_participants = null;
-    protected $_replies = null;
+    protected $_replies = array();
     protected $_bulkopenrule = null;
     protected $_receivedby = null;
 
@@ -733,7 +733,12 @@ class dialogue_conversation extends dialogue_message {
         $DB->delete_records('dialogue_bulk_opener_rules', array('conversationid' => $this->_conversationid));
         // delete participants
         $DB->delete_records('dialogue_participants', array('conversationid' => $this->_conversationid));
-        // delete conversations
+        // delete replies
+        foreach ($this->replies() as $reply) {
+            // delete reply
+            $reply->delete();
+        }
+        // delete conversation
         $DB->delete_records('dialogue_conversations', array('id' => $this->_conversationid));
 
         parent::delete();
@@ -947,7 +952,7 @@ class dialogue_conversation extends dialogue_message {
     public function replies($index = null) {
         global $DB;
 
-        if (is_null($this->_replies)) {
+        if (empty($this->_replies)) {
             // only all replies in an open or close state, a reply should never be automated
             // and drafts are no in the line of published conversation.
             $items = array(dialogue::STATE_OPEN, dialogue::STATE_CLOSED);
