@@ -137,8 +137,6 @@ if ($action == 'close') {
 // delete conversation
 if ($action == 'delete') {
     if (!empty($confirm) && confirm_sesskey()) {
-        $messagerecord = $conversation->messagerecord;
-        $conversationrecord = $conversation->conversationrecord;
         $conversation->delete();
         // Trigger conversation created event
         $eventparams = array(
