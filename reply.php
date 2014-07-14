@@ -82,6 +82,15 @@ if ($form->is_submitted()) {
             if ($form->is_validated()){
                 $reply->save_form_data();
                 $reply->send();
+                $eventparams = array(
+                    'context' => $context,
+                    'objectid' => $reply->messageid,
+                    'other' => array(
+                        'conversationid' => $conversation->conversationid
+                    )
+                );
+                $event = \mod_dialogue\event\reply_created::create($eventparams);
+                $event->trigger();
                 redirect($returnurl, get_string('replysent', 'dialogue'));
             }
             break; // leave switch to display form page
