@@ -95,8 +95,8 @@ cron_trace_time_and_memory();
 $pre_dbqueries = null;
 $pre_dbqueries = $DB->perf_get_queries();
 $pre_time      = microtime(1);
-// Run the cron
-dialogue_cron();
+// Process bulk open rules
+dialogue_process_bulk_openrules();
 if (isset($pre_dbqueries)) {
     mtrace("... used " . ($DB->perf_get_queries() - $pre_dbqueries) . " dbqueries");
     mtrace("... used " . (microtime(1) - $pre_time) . " seconds");
