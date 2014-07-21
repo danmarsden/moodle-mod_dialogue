@@ -149,8 +149,8 @@ function dialogue_process_bulk_openrules() {
     mtrace('1. Dealing with bulk open rules...');
      
     $sql = "SELECT dbor.*
-              FROM mdl_dialogue_bulk_opener_rules dbor
-              JOIN mdl_dialogue_messages dm ON dm.conversationid = dbor.conversationid
+              FROM {dialogue_bulk_opener_rules} dbor
+              JOIN {dialogue_messages} dm ON dm.conversationid = dbor.conversationid
              WHERE dm.state = :bulkautomated
                AND dbor.lastrun = 0
                 OR (dbor.includefuturemembers = 1 AND dbor.cutoffdate > dbor.lastrun)";

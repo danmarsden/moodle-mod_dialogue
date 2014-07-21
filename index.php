@@ -59,8 +59,8 @@ if (!$dialogues) {
     $params = array('courseid' => $course->id) + $inparams;
     
     $sql = "SELECT dc.dialogueid, COUNT(dc.dialogueid) AS count
-              FROM mdl_dialogue_conversations dc
-              JOIN mdl_dialogue_messages dm ON dm.conversationid = dc.id
+              FROM {dialogue_conversations} dc
+              JOIN {dialogue_messages} dm ON dm.conversationid = dc.id
              WHERE dc.course = :courseid
                AND dm.conversationindex = 1
                AND dm.state $insql
