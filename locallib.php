@@ -1090,8 +1090,9 @@ class dialogue_conversation extends dialogue_message {
 
         $this->set_subject($data->subject);
         $this->set_body($data->body['text'], $data->body['format'], $data->body['itemid']);
-        $this->set_attachmentsdraftid($data->attachments['itemid']);
-
+        if (isset($data->attachments)) {
+            $this->set_attachmentsdraftid($data->attachments['itemid']);
+        }
         $this->save();
 
         $this->_formdatasaved = true;
@@ -1281,8 +1282,9 @@ class dialogue_reply extends dialogue_message {
         $data = $this->_form->get_submitted_data();
 
         $this->set_body($data->body['text'], $data->body['format'], $data->body['itemid']);
-        $this->set_attachmentsdraftid($data->attachments['itemid']);
-
+        if (isset($data->attachments)) {
+            $this->set_attachmentsdraftid($data->attachments['itemid']);
+        }
         $this->save();
 
         $this->_formdatasaved = true;
