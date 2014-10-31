@@ -360,9 +360,9 @@ class dialogue_message implements renderable {
     }
 
     protected function magic_get_bodyhtml() {
-
         $contextid = $this->dialogue->context->id;
-        return file_rewrite_pluginfile_urls($this->_body, 'pluginfile.php', $contextid, 'mod_dialogue', 'message', $this->_messageid);
+        $ret = file_rewrite_pluginfile_urls($this->_body, 'pluginfile.php', $contextid, 'mod_dialogue', 'message', $this->_messageid);
+        return format_text($ret, $this->bodyformat);
     }
 
     protected function magic_get_state() {
