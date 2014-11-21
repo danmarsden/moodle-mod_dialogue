@@ -257,7 +257,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
                 if (isset($record->subject) and isset($record->body)) {
                     $subject = empty($record->subject) ? get_string('nosubject', 'dialogue') : $record->subject;
-                    $summaryline = dialogue_generate_summary_line($subject, $record->body);
+                    $summaryline = dialogue_generate_summary_line($subject, $record->body, $record->bodyformat);
                     $html .= html_writer::start_tag('td');
                     $html .= html_writer::start_div();
                     $html .= $summaryline;

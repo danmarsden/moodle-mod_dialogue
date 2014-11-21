@@ -1710,9 +1710,9 @@ function dialogue_get_bulk_open_rule_listing(dialogue $dialogue, &$total = null)
  * @param string $separator
  * @return string html
  */
-function dialogue_generate_summary_line($subject, $body, $length = 70, $separator = ' - ') {
+function dialogue_generate_summary_line($subject, $body, $bodyformat, $length = 70, $separator = ' - ') {
     $subject = html_to_text($subject, 0, false);
-    $body    = html_to_text($body, 0, false);
+    $body    = html_to_text(format_text($body, $bodyformat), 0, false);
 
     $diff = $length - (strlen($subject) + strlen($separator));
     if (textlib::strlen($subject) > $length or ! $diff) {
