@@ -23,9 +23,9 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2014071700;
-$plugin->requires  = 2014050800;        // See http://docs.moodle.org/dev/Moodle_Versions
+$plugin->version   = 2014112400;
+$plugin->requires  = 2014111000;        // See http://docs.moodle.org/dev/Moodle_Versions
 $plugin->component = 'mod_dialogue';    // Full name of the plugin (used for diagnostics)
-$plugin->release   = '2.7';             // Human-friendly version name
-$plugin->maturity  = MATURITY_BETA;       // This version's maturity level
+$plugin->release   = '2.8';             // Human-friendly version name
+$plugin->maturity  = MATURITY_ALPHA;    // This version's maturity level
 $plugin->dependencies = array();
