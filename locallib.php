@@ -1061,13 +1061,12 @@ class dialogue_conversation extends dialogue_message {
         $data = $this->_form->get_submitted_data();
 
         // shortcut set of participants for now @todo - make better
+        $this->clear_participants();
         if (!empty($data->people)) {
             $participants = (array) $data->people; // may be single value
             foreach ($participants as $userid) {
                 $this->add_participant($userid);
             }
-        } else {
-            $this->clear_participants();
         }
 
         // set bulk open rule
