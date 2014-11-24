@@ -391,9 +391,6 @@ function dialogue_upgrade_course_module(stdClass $oldcm) {
         // got this far, ok...
         $transaction->allow_commit();
 
-        // apply role override for legacy type
-        dialogue_apply_legacy_permissions($newcontext, $olddialogue->dialoguetype);
-
         /** Final clean up process **/
 
         // delete entries related to old instance

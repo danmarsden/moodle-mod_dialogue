@@ -103,7 +103,6 @@ $string['justmy'] = 'just my';
 $string['lastname'] = 'Last name';
 $string['lastranon'] = 'Last ran on ';
 $string['latest'] = 'Latest';
-$string['legacy'] = 'Legacy';
 $string['listpaginationheader'] = '{$a->start}-{$a->end} of {$a->total}';
 $string['modulename'] = 'Dialogue';
 $string['modulename_help'] = 'Dialogues allow students or teachers to start two-way dialogues with another person. They are course activities that can be useful when the teacher wants a place to give private feedback to a student on their online activity. For example, if a student is participating in a language forum and made a grammatical error that the teacher wants to point out without embarassing the student, a dialogue is the perfect place. A dialogue activity would also be an excellent way for counsellors within an institution to interact with students - all activities are logged and email is not necessarily required';

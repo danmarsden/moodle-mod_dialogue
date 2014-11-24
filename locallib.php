@@ -51,10 +51,6 @@ class dialogue {
     const SHOW_EVERYONE = 'everyone';
     const PAGINATION_PAGE_SIZE = 20;
     const PAGINATION_MAX_RESULTS = 1000;
-    const LEGACY_TYPE_TEACHER2STUDENT = 0;
-    const LEGACY_TYPE_STUDENT2STUDENT = 1;
-    const LEGACY_TYPE_EVERYONE = 2;
-
     
     protected $_course  = null;
     protected $_module  = null;
@@ -1721,51 +1717,6 @@ function dialogue_generate_summary_line($subject, $body, $bodyformat, $length = 
 
     return html_writer::tag('strong', $subject) . $separator .
            html_writer::tag('span', shorten_text($body, $diff));
-}
-
-/**
- * Overrides permissions for a dialogue based on legacy type
- * - teacher to student
- * - student to student
- * - everybody
- * 
- * @global type $DB
- * @param type $context
- * @param type $type
- * @throws moodle_exception
- */
-function dialogue_apply_legacy_permissions($context, $type) {
-    global $DB;
-
-    $studentrole = $DB->get_record('role', array('shortname' => 'student'));
-    $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
-
-    if (!$studentrole) {
-        throw new moodle_exception('missing student role');
-    }
-
-    if (!$teacherrole) {
-        throw new moodle_exception('missing editingteacher role');
-    }
-
-    switch ($type) {
-        case dialogue::LEGACY_TYPE_TEACHER2STUDENT: // should already be setup like this - @todo
-            role_change_permission($teacherrole->id, $context, 'mod/dialogue:open', CAP_INHERIT);
-            role_change_permission($teacherrole->id, $context, 'mod/dialogue:receive', CAP_INHERIT);
-            role_change_permission($studentrole->id, $context, 'mod/dialogue:open', CAP_INHERIT);
-            role_change_permission($studentrole->id, $context, 'mod/dialogue:receive', CAP_INHERIT);
-            break;
-        case dialogue::LEGACY_TYPE_STUDENT2STUDENT:
-            role_change_permission($studentrole->id, $context, 'mod/dialogue:open', CAP_ALLOW);
-            role_change_permission($studentrole->id, $context, 'mod/dialogue:receive', CAP_ALLOW);
-            break;
-        case dialogue::LEGACY_TYPE_EVERYONE:
-            role_change_permission($teacherrole->id, $context, 'mod/dialogue:open', CAP_ALLOW);
-            role_change_permission($teacherrole->id, $context, 'mod/dialogue:receive', CAP_ALLOW);
-            role_change_permission($studentrole->id, $context, 'mod/dialogue:open', CAP_ALLOW);
-            role_change_permission($studentrole->id, $context, 'mod/dialogue:receive', CAP_ALLOW);
-            break;
-    }
 }
 
 /**

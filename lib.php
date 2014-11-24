@@ -64,11 +64,6 @@ function dialogue_add_instance($data) {
 
     $result =  $DB->insert_record('dialogue', $data);
 
-    if (isset($data->legacytype)) {
-        $context = context_module::instance($data->coursemodule);
-        dialogue_apply_legacy_permissions($context, $data->legacytype);
-    }
-
     return $result;
 }
 
@@ -90,11 +85,6 @@ function dialogue_update_instance($data, $mform) {
     $data->id = $data->instance;
 
     $DB->update_record('dialogue', $data);
-
-    if (isset($data->legacytype)) {
-        $context = context_module::instance($data->coursemodule);
-        dialogue_apply_legacy_permissions($context, $data->legacytype);
-    }
 
     return true;
 }
