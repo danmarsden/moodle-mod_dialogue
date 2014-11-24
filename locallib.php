@@ -1715,7 +1715,7 @@ function dialogue_generate_summary_line($subject, $body, $bodyformat, $length = 
     $body    = html_to_text(format_text($body, $bodyformat), 0, false);
 
     $diff = $length - (strlen($subject) + strlen($separator));
-    if (textlib::strlen($subject) > $length or ! $diff) {
+    if (\core_text::strlen($subject) > $length or ! $diff) {
         return html_writer::tag('strong', shorten_text($subject, $length));
     }
 

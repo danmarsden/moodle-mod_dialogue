@@ -568,7 +568,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
             if ($option == $sort) {
                 $sortdirection = ($direction == 'desc') ? 'asc' : 'desc';
             } else {
-                $sortdirection = textlib::strtolower($settings['default']);
+                $sortdirection = \core_text::strtolower($settings['default']);
             }
             $url = clone($PAGE->url);
             $url->param('sort', $option);
