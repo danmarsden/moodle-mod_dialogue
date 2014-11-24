@@ -1849,7 +1849,7 @@ function dialogue_get_humanfriendly_dates($epoch) {
             continue;
         }
         $numberofunits = floor($timediff / $unit);
-        $customdatetime['timepast'] = $numberofunits . ' ' . (($numberofunits > 1) ? get_string($text . 's') : get_string($text));
+        $customdatetime['unitstring'] = $numberofunits . ' ' . (($numberofunits > 1) ? new lang_string($text . 's', 'dialogue') : new lang_string($text, 'dialogue'));
         break; // leave on first, this will be largest unit
     }
 

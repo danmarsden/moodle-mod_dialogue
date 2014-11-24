@@ -184,3 +184,18 @@ capability set.';
 $string['usesearch'] = 'Use search to find people to start a dialogue with';
 $string['viewconversations'] = 'View conversations';
 $string['viewconversationsbyrole'] = 'View conversations by role';
+// DateTime labels
+$string['year'] = 'year';
+$string['years'] = 'years';
+$string['month'] = 'month';
+$string['months'] = 'months';
+$string['week'] = 'week';
+$string['weeks'] = 'weeks';
+$string['day'] = 'day';
+$string['days'] = 'days';
+$string['hour'] = 'hour';
+$string['hours'] = 'hours';
+$string['minute'] = 'minute';
+$string['minutes'] = 'minutes';
+$string['second'] = 'second';
+$string['seconds'] = 'seconds';
