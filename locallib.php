@@ -47,8 +47,6 @@ class dialogue {
 
     const FLAG_SENT = 'sent';
     const FLAG_READ = 'read';
-    const SHOW_MINE = 'mine';
-    const SHOW_EVERYONE = 'everyone';
     const PAGINATION_PAGE_SIZE = 20;
     const PAGINATION_MAX_RESULTS = 1000;
     
