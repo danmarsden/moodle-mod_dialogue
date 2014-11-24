@@ -435,48 +435,6 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         return $html;
     }
 
-    public function show_button_group() {
-        global $PAGE;
-
-        $showurl = clone($PAGE->url);
-        $html = '';
-        $minelink = '';
-        $everyonelink = '';
-
-        // return '' user doesn't have view any capability
-        if (!has_capability('mod/dialogue:viewany', $PAGE->context)) {
-            return $html;
-        }
-
-        // get show option from url param
-        $show = $showurl->get_param('show');
-        // disable show mine button, enable show everyone
-        if ($show == dialogue::SHOW_MINE) {
-            $showurl->param('show', dialogue::SHOW_EVERYONE);
-
-            $minelink = html_writer::link('#', html_writer::tag('span', get_string('mine', 'dialogue')),
-                                                                  array('class'=>'btn btn-small disabled'));
-
-            $everyonelink = html_writer::link($showurl, html_writer::tag('span', get_string('everyone', 'dialogue')),
-                                                                    array('class'=>'btn btn-small'));
-        }
-        // disable show everyone button, enable show mine
-        if ($show == dialogue::SHOW_EVERYONE) {
-            $showurl->param('show', dialogue::SHOW_MINE);
-
-            $minelink = html_writer::link($showurl, html_writer::tag('span', get_string('mine', 'dialogue')),
-                                                                  array('class'=>'btn btn-small'));
-
-            $everyonelink = html_writer::link('#', html_writer::tag('span', get_string('everyone', 'dialogue')),
-                                                                    array('class'=>'btn btn-small disabled'));
-        }
-        $html .= html_writer::start_div('btn-group');
-        $html .= $minelink; // show mine link
-        $html .= $everyonelink; // show everyone's link
-        $html .= html_writer::end_div();
-
-        return $html;
-    }
 
     public function state_button_group() {
         global $PAGE;
