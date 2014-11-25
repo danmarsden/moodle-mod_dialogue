@@ -16,8 +16,6 @@
 
 $string['actions'] = 'Actions';
 $string['ago'] = 'ago';
-
-
 $string['attachment'] = 'Attachment';
 $string['attachments'] = 'Attachments';
 $string['bulkopener'] = 'Bulk opener';
@@ -70,7 +68,6 @@ $string['dialogue:viewany'] = 'View any';
 $string['dialogue:viewbyrole'] = 'View conversation listing by role, experimental';
 $string['dialoguename'] = 'Dialogue name';
 $string['dialogueintro'] = 'Dialogue Introduction';
-$string['dialogueupgradehelper'] = 'Dialogue upgrade helper';
 $string['displaybystudent'] = 'Display by student ';
 $string['displayconversationsheading'] = 'Displaying {$a} conversations';
 $string['displaying'] = 'Displaying';
@@ -159,20 +156,6 @@ $string['sortedby'] = 'Sorted by: {$a} ';
 $string['subject'] = 'Subject';
 $string['teachertostudent'] = 'Teacher to student';
 $string['trashdraft'] = 'Trash draft';
-$string['upgrade'] = 'Upgrade';
-$string['upgradecheck'] = 'Upgrade dialogue {$a}?';
-$string['upgradeiscompleted'] = 'Upgrade is completed';
-$string['upgrademessage'] = 'This Dialogue needs to be upgraded! Please contact your Moodle administrator';
-$string['upgradenoneedupgrade'] = '{$a} dialogues need to be upgraded';
-$string['upgradereport'] = 'List dialogues still to upgrade';
-$string['upgradereportdescription'] = 'This will show a report of all the dialogues on the system that still need to be upgraded to schema';
-$string['upgradeselected'] = 'Upgrade selected dialogues';
-$string['upgradeselectedcount'] = 'Upgrade {$a} selected dialogues?';
-$string['upgradingsummary'] = 'Upgrading dialogue: {$a}';
-$string['upgradingresultsuccess'] = 'Result: Upgrade successful';
-$string['upgradingresultfailed'] = 'Result: Upgrade failed';
-$string['upgradedcount'] = 'Upgraded {$a} dialogues';
-$string['upgradenodialoguesselected'] = 'No dialogues selected';
 $string['unread'] = 'Unread';
 $string['unreadmessages'] = 'Unread messages';
 $string['unreadmessagesnumber'] = '{$a} unread messages';

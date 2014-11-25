@@ -49,10 +49,4 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configcheckbox('dialogue/viewconversationsbyrole', new lang_string('viewconversationsbyrole', 'dialogue'),
                    new lang_string('configviewconversationsbyrole', 'dialogue'), 0));
 
-    if (get_config('dialogue', 'upgraderequired')) {
-        $ADMIN->add('root', new admin_externalpage('dialogueupgradehelper',
-            $name = new lang_string('dialogueupgradehelper', 'dialogue'),
-            new moodle_url('/mod/dialogue/upgrade/index.php')));
-
-    }
 }

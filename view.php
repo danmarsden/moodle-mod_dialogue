@@ -66,13 +66,6 @@ $PAGE->set_url($pageurl);
 $PAGE->set_title(format_string($activityrecord->name));
 $PAGE->set_heading(format_string($course->fullname));
 
-// check if needs to be upgraded
-if (dialogue_cm_needs_upgrade($cm->id)) {
-    $link = new moodle_url('/course/view.php', array('id' => $COURSE->id));
-    notice(get_string('upgrademessage', 'dialogue'), $link);
-    exit;
-}
-
 $PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
                             'M.mod_dialogue.clickredirector.init', array($cm->id));
 

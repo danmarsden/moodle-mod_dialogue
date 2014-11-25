@@ -1716,31 +1716,6 @@ function dialogue_generate_summary_line($subject, $body, $bodyformat, $length = 
            html_writer::tag('span', shorten_text($body, $diff));
 }
 
-/**
- * Check if a dialogue course module needs to be upgraded. Checks config flag
- * first as this will be in cache and save slight overhead of database calls.
- * 
- * @global stdClass $DB
- * @param int $cmid
- * @return boolean true | false
- */
-function dialogue_cm_needs_upgrade($cmid) {
-    global $DB;
-    // check get_config first as should be in cache
-    if (get_config('dialogue', 'upgraderequired')) {
-        $dbmanager = $DB->get_manager();
-        if ($dbmanager->table_exists('dialogue_old')) {
-            $sql = "SELECT 1
-                      FROM {course_modules} cm
-                      JOIN {modules} m ON m.id = cm.module
-                      JOIN {dialogue_old} d ON d.id = cm.instance
-                     WHERE m.name = 'dialogue'
-                       AND cm.id = :cmid";
-            return $needsupgrade = $DB->record_exists_sql($sql, array('cmid' => $cmid));
-        }
-    }
-    return false;
-}
 
 /**
  * Counts conversations in a particular dialogue. Can optionally
