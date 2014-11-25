@@ -40,3 +40,21 @@ Installation
 02) Uncompress archive and copy the files into the /mod/dialogue folder.
 
 03) Go to the /admin page and allow the module to be installed.
+
+Upgrading
+---------
+Before upgrading it is advisable that you test the upgrade first on a COPY of your production site, to make sure it works as you expect.
+
+### Backup important data ###
+There are three areas that should be backed up before any upgrade:
+
+* Moodle dataroot (For example, server/moodledata)
+* Moodle database (For example, your Postgres or MySQL database dump)
+
+### Version specific ###
+
+#### Dialogue 2.8 ####
+You can only upgrade from Dialogue 2.5 or later.
+
+#### Dialogue 2.7, 2.6, 2.5 ####
+You can only upgrade from Dialogue 2.0 or later. There are major changes to schema, and you with have to either upgrade dialogues manually from Moodle admin or the cli script cli/upgrade.php.
