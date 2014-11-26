@@ -1864,7 +1864,7 @@ function dialogue_getdate($epoch) {
             continue;
         }
         $numberofunits = floor($timediff / $unit);
-        $customdatetime['unitstring'] = $numberofunits . ' ' . (($numberofunits > 1) ? new lang_string($text . 's') : new lang_string($text));
+        $customdatetime['timepast'] = $numberofunits . ' ' . (($numberofunits > 1) ? new lang_string($text . 's') : new lang_string($text));
         break; // leave on first, this will be largest unit
     }
 
