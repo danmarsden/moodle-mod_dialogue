@@ -429,17 +429,3 @@ function dialogue_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
     send_stored_file($file, 0, 0, $forcedownload, $options);
 }
 
-/* Event handler functions @TODO */
-function dialogue_user_enrolled($eventdata) {
-    cache_helper::purge_by_event($event);
-    return true;
-}
-function dialogue_user_unenrolled($eventdata) {
-    return true;
-}
-function dialogue_groups_member_added($eventdata) {
-    return true;
-}
-function dialogue_groups_member_removed($eventdata) {
-    return true;
-}
