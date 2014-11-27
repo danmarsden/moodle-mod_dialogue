@@ -257,8 +257,7 @@ function dialogue_cm_info_view(cm_info $cm) {
  * @return stdClass|null
  */
 function dialogue_user_outline($course, $user, $mod, $dialogue) {
-    global $DB, $CFG;
-    require_once($CFG->dirroot . '/mod/dialogue/locallib.php');
+    global $DB;
 
     $sql = "SELECT COUNT(DISTINCT dm.timecreated) AS count, 
                      MAX(dm.timecreated) AS timecreated
@@ -267,7 +266,7 @@ function dialogue_user_outline($course, $user, $mod, $dialogue) {
                AND dm.authorid = :userid
                AND dm.state = :state";
 
-    $params = array('dialogueid' => $dialogue->id, 'userid' => $user->id, 'state' => dialogue::STATE_OPEN);
+    $params = array('dialogueid' => $dialogue->id, 'userid' => $user->id, 'state' => \mod_dialogue\dialogue::STATE_OPEN);
     $record = $DB->get_record_sql($sql, $params);
     if ($record) {
         $result = new stdClass();
