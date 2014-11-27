@@ -56,8 +56,7 @@ function dialogue_supports($feature) {
  */
 
 function dialogue_add_instance($data) {
-    global $CFG, $DB;
-    require_once($CFG->dirroot . '/mod/dialogue/locallib.php');
+    global $DB;
 
     $data->timecreated = time();
     $data->timemodified = $data->timecreated;
@@ -78,8 +77,7 @@ function dialogue_add_instance($data) {
  * @return bool true on success
  */
 function dialogue_update_instance($data, $mform) {
-    global $CFG, $DB;
-    require_once($CFG->dirroot . '/mod/dialogue/locallib.php');
+    global $DB;
 
     $data->timemodified = time();
     $data->id = $data->instance;
