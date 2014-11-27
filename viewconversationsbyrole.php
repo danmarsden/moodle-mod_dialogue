@@ -76,7 +76,7 @@ $PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
                             'M.mod_dialogue.clickredirector.init', array($cm->id));
 
 $dialogue = new dialogue($cm, $course, $activityrecord);
-$list = new mod_dialogue_conversations_by_role($dialogue, $roleid, $page, dialogue::PAGINATION_PAGE_SIZE);
+$list = new mod_dialogue_conversations_by_role($dialogue, $roleid, $page, \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE);
 $list->set_order($sort, $direction);
 
 $renderer = $PAGE->get_renderer('mod_dialogue');

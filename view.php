@@ -21,7 +21,7 @@ require_once($CFG->dirroot . '/mod/dialogue/classes/conversations.php');
 require_once($CFG->dirroot . '/mod/dialogue/classes/conversations_by_author.php');
 
 $id         = required_param('id', PARAM_INT);
-$state      = optional_param('state', dialogue::STATE_OPEN, PARAM_ALPHA);
+$state      = optional_param('state', \mod_dialogue\dialogue::STATE_OPEN, PARAM_ALPHA);
 $page       = optional_param('page', 0, PARAM_INT);
 $sort       = optional_param('sort', 'latest', PARAM_ALPHANUM);
 $direction  = optional_param('direction', 'asc', PARAM_ALPHA);
@@ -40,7 +40,7 @@ if ($id) {
     print_error('missingparameter');
 }
 
-$context = context_module::instance($cm->id);
+$context = \context_module::instance($cm->id);
 
 require_login($course, false, $cm);
 
@@ -69,8 +69,8 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
                             'M.mod_dialogue.clickredirector.init', array($cm->id));
 
-$dialogue = new dialogue($cm, $course, $activityrecord);
-$list = new mod_dialogue_conversations_by_author($dialogue, $page, dialogue::PAGINATION_PAGE_SIZE);
+$dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
+$list = new \mod_dialogue\conversations_by_author($dialogue, $page, \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE);
 $list->set_state($state);
 $list->set_order($sort, $direction);
 
@@ -85,7 +85,7 @@ if (!empty($dialogue->activityrecord->intro)) {
 // render tab navigation, toggle button groups and order by dropdown
 echo $renderer->tab_navigation($dialogue);
 echo $renderer->state_button_group();
-echo $renderer->list_sortby(mod_dialogue_conversations_by_author::get_sort_options(), $sort, $direction);
+echo $renderer->list_sortby(\mod_dialogue\conversations_by_author::get_sort_options(), $sort, $direction);
 echo $renderer->conversation_listing($list);
 echo $OUTPUT->footer($course);
 

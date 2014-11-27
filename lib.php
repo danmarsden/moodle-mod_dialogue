@@ -145,20 +145,20 @@ function dialogue_process_bulk_openrules() {
                AND dbor.lastrun = 0
                 OR (dbor.includefuturemembers = 1 AND dbor.cutoffdate > dbor.lastrun)";
 
-    $params = array('bulkautomated' => dialogue::STATE_BULK_AUTOMATED);
+    $params = array('bulkautomated' => \mod_dialogue\dialogue::STATE_BULK_AUTOMATED);
     $rs = $DB->get_recordset_sql($sql, $params);
     if ($rs->valid()) {
         foreach ($rs as $record) {
             // try and die elegantly
             try {
                 // setup dialogue
-                $dialogue = dialogue::instance($record->dialogueid);
+                $dialogue = \mod_dialogue\dialogue::instance($record->dialogueid);
                 if (!$dialogue->is_visible()){
                     mtrace(' Skipping hidden dialogue: '.$dialogue->activityrecord->name);
                     continue;
                 }
                 // setup conversation
-                $conversation = new dialogue_conversation($dialogue, (int) $record->conversationid);
+                $conversation = new \mod_dialogue\conversation($dialogue, (int) $record->conversationid);
 
                 $withcapability = 'mod/dialogue:receive';
                 $groupid = 0; // it either a course or a group, default to course
@@ -174,7 +174,7 @@ function dialogue_process_bulk_openrules() {
 
                 $sentusers = $DB->get_records('dialogue_flags',
                                             array('conversationid' => $conversation->conversationid,
-                                                    'flag' => dialogue::FLAG_SENT),
+                                                    'flag' => \mod_dialogue\dialogue::FLAG_SENT),
                                             '',
                                             'userid');
 
@@ -190,7 +190,7 @@ function dialogue_process_bulk_openrules() {
                     $copy->save();
                     $copy->send();
                     // mark the sent in automated conversation, so can track who sent to
-                    $conversation->set_flag(dialogue::FLAG_SENT, $user);
+                    $conversation->set_flag(\mod_dialogue\dialogue::FLAG_SENT, $user);
                     unset($copy);
                     mtrace('  opened '. $conversation->subject . ' with ' . fullname($user));
                     // up open count
@@ -231,7 +231,7 @@ function dialogue_cm_info_view(cm_info $cm) {
     }
 
     if ($usetracking) {
-        $unread = dialogue_cm_unread_total(new dialogue($cm));
+        $unread = dialogue_cm_unread_total(new \mod_dialogue\dialogue($cm));
         if ($unread) {
             $out = '<span class="unread"> <a href="' . $cm->url . '">';
             if ($unread == 1) {

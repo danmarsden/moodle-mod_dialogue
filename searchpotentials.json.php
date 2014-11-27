@@ -41,7 +41,7 @@ if (!confirm_sesskey()) {
 $cm      = get_coursemodule_from_id('dialogue', $id, 0, false, MUST_EXIST);
 $PAGE->set_cm($cm);
 
-list($receivers, $matches, $pagesize) = dialogue_search_potentials(new dialogue($cm), $q);
+list($receivers, $matches, $pagesize) = dialogue_search_potentials(new \mod_dialogue\dialogue($cm), $q);
 
 $return = array();
 $return['results']  = array_values($receivers);

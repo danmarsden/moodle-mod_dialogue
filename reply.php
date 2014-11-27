@@ -63,12 +63,12 @@ $PAGE->set_context($context);
 $PAGE->set_cacheable(false);
 $PAGE->set_url($pageurl);
 
-$dialogue = new dialogue($cm, $course, $activityrecord);
-$conversation = new dialogue_conversation($dialogue, $conversationid);
-$reply = new dialogue_reply($dialogue, $conversation, $replyid);
+$dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
+$conversation = new \mod_dialogue\conversation($dialogue, $conversationid);
+$reply = new \mod_dialogue\reply($dialogue, $conversation, $replyid);
 
 if (!$reply->is_author()) {
-    throw new moodle_exception("You do not have permission to view this reply it doesn't
+    throw new \moodle_exception("You do not have permission to view this reply it doesn't
                                 belong to you!");
 }
 // initialise and check form submission

@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace mod_dialogue;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -30,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property-read dialogue $page The page number used to create offset for fetching recordset.
  * @property-read dialogue $limit The number of rows to be returned in recordset.
  */
-abstract class mod_dialogue_conversations implements renderable {
+abstract class conversations implements \renderable {
     /** @var The dialogue this list of conversations belongs **/
     protected $_dialogue = null;
 
@@ -65,7 +67,7 @@ abstract class mod_dialogue_conversations implements renderable {
         if (method_exists($this, $getmethod)) {
             return $this->$getmethod();
         } else {
-            throw new coding_exception('Unknown property: ' . $name);
+            throw new \coding_exception('Unknown property: ' . $name);
         }
     }
 
@@ -77,7 +79,7 @@ abstract class mod_dialogue_conversations implements renderable {
      */
     protected function magic_get_dialogue() {
         if (is_null($this->_dialogue)) {
-            throw new coding_exception('parent dialogue is not set');
+            throw new \coding_exception('parent dialogue is not set');
         }
         return $this->_dialogue;
     }

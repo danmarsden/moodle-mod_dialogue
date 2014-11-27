@@ -44,7 +44,7 @@ $course = $DB->get_record('course', array('id' => $activityrecord->course));
 if (! $course) {
     print_error('coursemisconf');
 }
-$context = context_module::instance($cm->id, MUST_EXIST);
+$context = \context_module::instance($cm->id, MUST_EXIST);
 
 require_login($course, false, $cm);
 
@@ -62,8 +62,8 @@ $PAGE->set_context($context);
 $PAGE->set_cacheable(false);
 $PAGE->set_url($pageurl);
 
-$dialogue = new dialogue($cm, $course, $activityrecord);
-$conversation = new dialogue_conversation($dialogue, $conversationid);
+$dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
+$conversation = new \mod_dialogue\conversation($dialogue, $conversationid);
 
 // form actions
 if ($action == 'create' or $action == 'edit') {
@@ -78,7 +78,7 @@ if ($action == 'create' or $action == 'edit') {
                 if ($form->is_validated()){
                     $conversation->save_form_data();
                     $conversation->send();
-                    if ($conversation->state == dialogue::STATE_BULK_AUTOMATED) {
+                    if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
                         $sendmessage = get_string('conversationopenedcron', 'dialogue');
                     } else {
                         $sendmessage = get_string('conversationopened', 'dialogue');
@@ -159,17 +159,17 @@ if ($action == 'delete') {
 }
 
 // ready for viewing, let's just make sure not a draft, possible url manipulation by user
-if ($conversation->state == dialogue::STATE_DRAFT) {
+if ($conversation->state == \mod_dialogue\dialogue::STATE_DRAFT) {
     redirect($returnurl);
 }
 
-if ($conversation->state == dialogue::STATE_BULK_AUTOMATED) {
+if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
     if (!has_capability('mod/dialogue:bulkopenruleeditany', $context) and $conversation->author->id != $USER->id) {
         throw new moodle_exception('nopermission');
     }
 }
 
-if ($conversation->state == dialogue::STATE_OPEN or $conversation->state == dialogue::STATE_CLOSED) {
+if ($conversation->state == \mod_dialogue\dialogue::STATE_OPEN or $conversation->state == \mod_dialogue\dialogue::STATE_CLOSED) {
     if (!has_capability('mod/dialogue:viewany', $context) and !$conversation->is_participant()) {
         throw new moodle_exception('nopermission');
     }
@@ -193,7 +193,7 @@ $hasreplycapability = (has_capability('mod/dialogue:reply', $context) or
                        has_capability('mod/dialogue:replyany', $context));
 
 // conversation is open and user can reply... then output reply form
-if ($hasreplycapability and $conversation->state == dialogue::STATE_OPEN) {
+if ($hasreplycapability and $conversation->state == \mod_dialogue\dialogue::STATE_OPEN) {
     $reply = $conversation->reply();
     $form = $reply->initialise_form();
     $form->display();

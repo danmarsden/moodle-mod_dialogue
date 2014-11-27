@@ -54,10 +54,10 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
                             'M.mod_dialogue.clickredirector.init', array($cm->id));
 
-$dialogue = new dialogue($cm, $course, $activityrecord);
+$dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
 $total = 0;
 $rs = dialogue_get_bulk_open_rule_listing($dialogue, $total);
-$pagination = new paging_bar($total, $page, dialogue::PAGINATION_PAGE_SIZE, $pageurl);
+$pagination = new \paging_bar($total, $page, \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE, $pageurl);
 
 // get the dialogue module render
 $renderer = $PAGE->get_renderer('mod_dialogue');
@@ -78,8 +78,8 @@ if (!$rs) {
     $html .= html_writer::start_div('listing-meta');
     $html .= html_writer::tag('h6', get_string('displaying', 'dialogue'));
     $a = new stdClass();
-    $a->start = ($page) ? $page * dialogue::PAGINATION_PAGE_SIZE : 1;
-    $a->end = $page * dialogue::PAGINATION_PAGE_SIZE + count($rs);
+    $a->start = ($page) ? $page * \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE : 1;
+    $a->end = $page * \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE + count($rs);
     $a->total = $total;
     $html .= html_writer::tag('h6', get_string('listpaginationheader', 'dialogue', $a), array('class' => 'pull-right'));
     $html .= html_writer::end_div();

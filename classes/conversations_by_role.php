@@ -30,7 +30,7 @@ class mod_dialogue_conversations_by_role extends mod_dialogue_conversations {
 
     protected $orderbysql = '';
 
-    public function __construct(dialogue $dialogue, $roleid, $page = 0, $limit = dialogue::PAGINATION_MAX_RESULTS) {
+    public function __construct(\mod_dialogue\dialogue $dialogue, $roleid, $page = 0, $limit = dialogue::PAGINATION_MAX_RESULTS) {
         parent::__construct($dialogue, $page, $limit);
         $this->roleid   = $roleid;
     }

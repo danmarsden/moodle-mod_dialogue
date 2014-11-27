@@ -14,13 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace mod_dialogue;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class to build a list of conversations grouped by author of last message
  *
  */
-class mod_dialogue_conversations_by_author extends mod_dialogue_conversations {
+class conversations_by_author extends conversations {
 
     protected $params  = array();
 
@@ -40,7 +42,7 @@ class mod_dialogue_conversations_by_author extends mod_dialogue_conversations {
         global $DB, $USER;
 
         if (empty($this->states)) {
-            throw new moodle_exception("At least one state must be set");
+            throw new \moodle_exception("At least one state must be set");
         }
         
         list($instatesql, $instateparams) = $DB->get_in_or_equal($this->states, SQL_PARAMS_NAMED, 'lastmessagestate');
@@ -229,7 +231,7 @@ class mod_dialogue_conversations_by_author extends mod_dialogue_conversations {
                 $orderby = "ORDER BY u.firstname $directionsql";
                 break;
             default:
-                throw new moodle_exception("Cannot sort on $name");
+                throw new \moodle_exception("Cannot sort on $name");
         }
         return $this->orderbysql = $orderby;
     }

@@ -35,7 +35,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
      * @param dialogue_conversation $conversation
      * @return string
      */
-    public function render_dialogue_conversation(dialogue_conversation $conversation) {
+    public function render_conversation(mod_dialogue\conversation $conversation) {
         global $PAGE, $OUTPUT, $USER;
 
         $context = $conversation->dialogue->context; // fetch context from parent dialogue
@@ -49,17 +49,17 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $html .= html_writer::start_div('conversation-heading');
         $html .= html_writer::tag('h3', $conversation->subject, array('class' => 'heading'));
 
-        if ($conversation->state == dialogue::STATE_OPEN) {
+        if ($conversation->state == \mod_dialogue\dialogue::STATE_OPEN) {
             $span = html_writer::tag('span', get_string('open', 'dialogue'), array('class' => "state-indicator state-open"));
             $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
         }
 
-        if ($conversation->state == dialogue::STATE_CLOSED) {
+        if ($conversation->state == \mod_dialogue\dialogue::STATE_CLOSED) {
             $span = html_writer::tag('span', get_string('closed', 'dialogue'), array('class' => "state-indicator state-closed"));
             $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
         }
 
-        if ($conversation->state == dialogue::STATE_BULK_AUTOMATED) {
+        if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
             $span = html_writer::tag('span', get_string('bulkopener', 'dialogue'), array('class' => "state-indicator state-bulk"));
             $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
         }
@@ -91,7 +91,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
         $html .= html_writer::start_tag('ul', array('class' => "message-actions pull-right"));
 
-        if ($conversation->state == dialogue::STATE_OPEN) {
+        if ($conversation->state == \mod_dialogue\dialogue::STATE_OPEN) {
             $canclose = ((has_capability('mod/dialogue:close', $context) and $USER->id == $conversation->author->id) or
                           has_capability('mod/dialogue:closeany', $context));
 
@@ -134,7 +134,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
         // Display list of people who have received this conversation.
         // @todo - display rest of information, which group, has completed? etc
-        if ($conversation->state == dialogue::STATE_BULK_AUTOMATED) {
+        if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
             $receivers = $conversation->receivedby;
             if ($receivers) {
                 $html .= html_writer::start_div('participants receivedby');
@@ -188,7 +188,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
      * @param mod_dialogue_conversations $conversations
      * @return string
      */
-    public function conversation_listing(mod_dialogue_conversations $conversations) {
+    public function conversation_listing(\mod_dialogue\conversations $conversations) {
         global $OUTPUT, $PAGE;
 
         $dialogue = $conversations->dialogue;
@@ -232,7 +232,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                 $html .= html_writer::start_tag('tr', $datattributes);
 
                 $statelabel = '';
-                if ($record->state == dialogue::STATE_CLOSED) {
+                if ($record->state == \mod_dialogue\dialogue::STATE_CLOSED) {
                     $statelabel = html_writer::tag('span', get_string('closed', 'dialogue'),
                                                    array('class'=>'state-indicator state-closed'));
                 }
@@ -318,7 +318,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
      * @param dialogue_reply $reply
      * @return string
      */
-    public function render_dialogue_reply(dialogue_reply $reply) {
+    public function render_reply(\mod_dialogue\reply $reply) {
         global $OUTPUT, $USER;
 
         $context        = $reply->dialogue->context; // fetch context from parent dialogue
@@ -447,8 +447,8 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         // get state from url param
         $state = $stateurl->get_param('state');
         // state open, disable and enable closed button.
-        if ($state == dialogue::STATE_OPEN) {
-            $stateurl->param('state', dialogue::STATE_CLOSED);
+        if ($state == \mod_dialogue\dialogue::STATE_OPEN) {
+            $stateurl->param('state', \mod_dialogue\dialogue::STATE_CLOSED);
 
             $openlink = html_writer::link('#', html_writer::tag('span', get_string('open', 'dialogue')),
                                                                   array('class'=>'btn btn-small disabled'));
@@ -458,8 +458,8 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
         }
         // state closed, disable and enable open button.
-        if ($state == dialogue::STATE_CLOSED) {
-            $stateurl->param('state', dialogue::STATE_OPEN);
+        if ($state == \mod_dialogue\dialogue::STATE_CLOSED) {
+            $stateurl->param('state', \mod_dialogue\dialogue::STATE_OPEN);
 
             $openlink = html_writer::link($stateurl, html_writer::tag('span', get_string('open', 'dialogue')),
                                                                  array('class'=>'btn btn-small'));
@@ -604,7 +604,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
     }
 
-    public function tab_navigation(dialogue $dialogue) {
+    public function tab_navigation(\mod_dialogue\dialogue $dialogue) {
         global $PAGE;
 
         $config  = $dialogue->config;
