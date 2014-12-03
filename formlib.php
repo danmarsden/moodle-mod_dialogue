@@ -50,6 +50,9 @@ class mod_dialogue_message_form extends moodleform {
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
 
+        $mform->addElement('hidden', 'cmid');
+        $mform->setType('cmid', PARAM_INT);
+
         $mform->addElement('hidden', 'dialogueid');
         $mform->setType('dialogueid', PARAM_INT);
 

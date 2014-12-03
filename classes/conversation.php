@@ -248,6 +248,7 @@ class conversation extends message {
         $form = new \mod_dialogue_conversation_form();
         // setup important hiddens
         $form->set_data(array('id' => $cm->id));
+        $form->set_data(array('cmid' => $cm->id));
         $form->set_data(array('dialogueid' => $dialogueid));
         $form->set_data(array('conversationid' => $this->_conversationid));
         $form->set_data(array('messageid' => $this->_messageid));
