@@ -40,7 +40,7 @@
             <INDEX NAME="dialogueid" UNIQUE="false" FIELDS="dialogueid"/>
         </INDEXES>
     </TABLE>
-    <TABLE NAME="dialogue_participants" COMMENT="Parcipants involved in a conversation">
+    <TABLE NAME="dialogue_participants" COMMENT="Participants involved in a conversation">
         <FIELDS>
             <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
             <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
@@ -70,7 +70,7 @@
             <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         </KEYS>
     </TABLE>
-    <TABLE NAME="dialogue_messages" COMMENT="Contains all mesages">
+    <TABLE NAME="dialogue_messages" COMMENT="Contains all messages">
         <FIELDS>
             <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
             <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
