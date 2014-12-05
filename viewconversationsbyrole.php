@@ -75,8 +75,8 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
                             'M.mod_dialogue.clickredirector.init', array($cm->id));
 
-$dialogue = new dialogue($cm, $course, $activityrecord);
-$list = new mod_dialogue_conversations_by_role($dialogue, $roleid, $page, \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE);
+$dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
+$list = new \mod_dialogue\conversations_by_role($dialogue, $roleid, $page, \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE);
 $list->set_order($sort, $direction);
 
 $renderer = $PAGE->get_renderer('mod_dialogue');
@@ -107,7 +107,7 @@ $roleselector .= html_writer::end_tag('ul');
 $roleselector .= html_writer::end_div(); // end of js-control
 $roleselector .= html_writer::end_div();
 echo $roleselector;
-echo $renderer->list_sortby(mod_dialogue_conversations_by_role::get_sort_options(), $sort, $direction);
+echo $renderer->list_sortby(\mod_dialogue\conversations_by_role::get_sort_options(), $sort, $direction);
 echo $renderer->conversation_listing($list);
 echo $OUTPUT->footer($course);
 $logurl = new moodle_url('viewconversationsbyrole.php', array('id' =>  $cm->id));

@@ -14,13 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace mod_dialogue;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class to build a list of conversations grouped by role in course
  *
  */
-class mod_dialogue_conversations_by_role extends mod_dialogue_conversations {
+class conversations_by_role extends conversations {
 
     protected $params  = array();
 
@@ -30,7 +32,7 @@ class mod_dialogue_conversations_by_role extends mod_dialogue_conversations {
 
     protected $orderbysql = '';
 
-    public function __construct(\mod_dialogue\dialogue $dialogue, $roleid, $page = 0, $limit = dialogue::PAGINATION_MAX_RESULTS) {
+    public function __construct(dialogue $dialogue, $roleid, $page = 0, $limit = dialogue::PAGINATION_MAX_RESULTS) {
         parent::__construct($dialogue, $page, $limit);
         $this->roleid   = $roleid;
     }
