@@ -301,13 +301,13 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
 
         $q = optional_param('p_query', '', PARAM_TEXT);
         if (!empty($q)) {
-            $conversation = new dialogue_conversation(new dialogue($PAGE->cm, $PAGE->course, $PAGE->activityrecord));
-            $results = $conversation->person_search($q);
-            if (empty($results)) {
+            $dialogue = new \mod_dialogue\dialogue($PAGE->cm, $PAGE->course, $PAGE->activityrecord);
+            $results = dialogue_search_potentials($dialogue, $q);
+            if (empty($results[0])) {
                 $people = array(get_string('nomatchingpeople', 'dialogue', $q)=>array(''));
             } else {
                 $options = array();
-                foreach($results as $person) {
+                foreach($results[0] as $person) {
                     $options[$person->id] = fullname($person);
                 }
                 $people = array(get_string('matchingpeople', 'dialogue', count($options))=>$options);
