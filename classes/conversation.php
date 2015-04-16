@@ -41,9 +41,6 @@ class conversation extends message {
         $this->_conversationindex = 1;
 
         if ($conversationid) {
-            if (!is_int($conversationid)) {
-                throw new \coding_exception('$conversationid must be an interger');
-            }
             $this->_conversationid = $conversationid;
             $this->load();
         }
