@@ -354,6 +354,14 @@ class conversation extends message {
         return $this->_subject;
     }
 
+    public function prepare_form_data() {
+        $data               = parent::prepare_form_data();
+        $data['subject']    = $this->subject;
+        $data['rule']       = $this->bulkopenrule;
+        $data['receivers']  = $this->participants;
+        return $data;
+    }
+
     /**
      * Return a reply mapped to current dialogue.
      *
@@ -479,6 +487,29 @@ class conversation extends message {
         }
         $this->load_bulkopenrule(); // refresh
     }
+
+    public function load_form_data(\stdClass $data) {
+        $this->_participants = array();;// dirty loading from DB, do once
+
+        if (!empty($data->participants)) {
+            foreach ($data->participants as $userid) {
+                $this->add_participant($userid);
+            }
+        } else {
+            $this->clear_participants();
+        }
+        // If groupinformation we have a rule.
+        if (isset($data->groupinformation)) {
+
+        }
+
+        $this->set_subject($data->subject);
+        $this->set_body($data->body['text'], $data->body['format'], $data->body['itemid']);
+        if (isset($data->attachments)) {
+            $this->set_attachmentsdraftid($data->attachments['itemid']);
+        }
+    }
+
 
     public function save_form_data() {
         // incoming form data
