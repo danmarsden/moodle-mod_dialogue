@@ -1,0 +1,10 @@
+{
+    "name": "moodle-mod_dialogue-recipientpicker",
+    "builds": {
+        "moodle-mod_dialogue-recipientpicker": {
+            "jsfiles": [
+                "recipientpicker.js"
+            ]
+        }
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "moodle-mod_dialogue-recipientpicker": {
+        "requires": [
+            "base",
+            "node",
+            "node-event-delegate",
+            "json-parse",
+            "autocomplete",
+            "autocomplete-filters",
+            "autocomplete-highlighters",
+            "event",
+            "event-key",
+            "moodle-core-notification-exception"
+        ]
+    }
+}
