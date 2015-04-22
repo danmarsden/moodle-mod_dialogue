@@ -168,6 +168,41 @@ class message implements \renderable {
         return $this->_timemodified;
     }
 
+    public function prepare_form_data() {
+        $context = $this->dialogue->context;
+
+        $data = array();
+        $data['cmid'] = $this->dialogue->cm->id;
+        $data['dialogueid'] = $this->dialogue->activityrecord->id;
+        $data['conversationid'] = $this->conversationid;
+        $data['messageid'] = $this->messageid;
+
+        $data['authorid'] = $this->author->id;
+        $data['state'] = $this->state;
+
+
+        $draftbodyid = null;
+        $draftbodyformat = $this->_bodyformat;
+        $draftbody = file_prepare_draft_area($draftbodyid,
+                                             $context->id,
+                                             'mod_dialogue',
+                                             'message',
+                                             $this->messageid, form\message_form::editor_options(),
+                                             $this->body);
+
+        $data['body'] = array('text' => $draftbody,
+                              'format' => $draftbodyformat,
+                              'itemid' => $draftbodyid);
+
+
+        $attachmentsdraftid = null;
+        file_prepare_draft_area($attachmentsdraftid, $context->id, 'mod_dialogue', 'attachment', $this->messageid, form\message_form::attachment_options());
+
+        $data['attachments'] = array('itemid' => $attachmentsdraftid);;
+
+        return $data;
+    }
+
     public function set_flag($flag, $user = null) {
         global $DB, $USER;
 
