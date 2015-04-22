@@ -123,6 +123,58 @@ function dialogue_delete_instance($id) {
     return true;
 }
 
+function dialogue_actions_block() {
+    global $USER, $PAGE;
+
+    $bc = new block_contents();
+
+    $bc->title = get_string('dialogueactions', 'mod_dialogue');
+    $bc->attributes['class'] = 'block block_dialogue_menu';
+    $bc->content = '';
+
+    $context    = $PAGE->context;
+    $cm         = $PAGE->cm;
+
+
+    $bc->content .= html_writer::start_div('btn-group btn-group-sm');
+    if (has_capability('mod/dialogue:open', $context)) {
+        $url = new moodle_url('/mod/dialogue/conversation/create.php', array('cmid'=>$cm->id));
+        $bc->content .= html_writer::link($url, get_string('create'), array('class'=>'btn btn-danger'));
+    }
+    if (has_capability('mod/dialogue:open', $context)) {
+        $url = new moodle_url('/mod/dialogue/conversation/bulkopener/create.php', array('cmid'=>$cm->id));
+        $bc->content .= html_writer::link($url, get_string('createbulkopener', 'dialogue'), array('class'=>'btn btn-info'));
+    }
+    $bc->content .= html_writer::end_div();
+
+    $bc->content .= html_writer::start_tag('ul', array('class'=>'block_tree list'));
+
+    $url = new moodle_url('/mod/dialogue/view.php', array('id'=>$cm->id));
+    $label = get_string('conversations', 'dialogue');
+    $link = html_writer::link($url, $label);
+    $bc->content .= html_writer::tag('li', $link);
+    $url = new moodle_url('/mod/dialogue/drafts.php', array('id'=>$cm->id));
+    $label = get_string('drafts', 'dialogue');
+    $link = html_writer::link($url, $label);
+    $bc->content .= html_writer::tag('li', $link);
+    if (has_any_capability(array('mod/dialogue:bulkopenrulecreate', 'mod/dialogue:bulkopenruleeditany'), $context)) { // @todo better named capabilities
+        $url = new moodle_url('/mod/dialogue/bulkopenrules.php', array('id'=>$cm->id));
+        $label = get_string('bulkopenrules', 'dialogue');
+        $link = html_writer::link($url, $label);
+        $bc->content .= html_writer::tag('li', $link);
+    }
+
+    $bc->content .= html_writer::end_tag('ul');
+
+    $returnurl = new moodle_url('/mod/dialogue/view.php', array('id'=>$cm->id));
+    $preferenceurl = new moodle_url('/mod/dialogue/preferences.php', array('id'=>$USER->id, 'returnurl'=>$returnurl->out_as_local_url()));
+
+    $bc->footer = html_writer::link($preferenceurl, get_string('preferences'), array('class'=>''));
+
+    $defaultregion = $PAGE->blocks->get_default_region();
+    $PAGE->blocks->add_fake_block($bc, $defaultregion);
+}
+
 /**
  * Function to be run periodically according to the moodle cron
  * Mails new conversations out to participants, checks for any new
