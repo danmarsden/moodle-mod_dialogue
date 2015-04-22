@@ -66,6 +66,8 @@ $PAGE->set_url($pageurl);
 $PAGE->set_title(format_string($activityrecord->name));
 $PAGE->set_heading(format_string($course->fullname));
 
+dialogue_actions_block();
+
 $PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
                             'M.mod_dialogue.clickredirector.init', array($cm->id));
 
@@ -82,10 +84,6 @@ if (!empty($dialogue->activityrecord->intro)) {
     echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
 }
 
-// render tab navigation, toggle button groups and order by dropdown
-echo $renderer->tab_navigation($dialogue);
-echo $renderer->state_button_group();
-echo $renderer->list_sortby(\mod_dialogue\conversations_by_author::get_sort_options(), $sort, $direction);
 echo $renderer->conversation_listing($list);
 echo $OUTPUT->footer($course);
 
