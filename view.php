@@ -20,24 +20,32 @@ require_once('locallib.php');
 require_once($CFG->dirroot . '/mod/dialogue/classes/conversations.php');
 require_once($CFG->dirroot . '/mod/dialogue/classes/conversations_by_author.php');
 
-$id         = required_param('id', PARAM_INT);
+$id         = optional_param('id', 0, PARAM_INT);
+$d          = optional_param('d', 0, PARAM_INT);
 $state      = optional_param('state', \mod_dialogue\dialogue::STATE_OPEN, PARAM_ALPHA);
 $page       = optional_param('page', 0, PARAM_INT);
 $sort       = optional_param('sort', 'latest', PARAM_ALPHANUM);
 $direction  = optional_param('direction', 'asc', PARAM_ALPHA);
 
+
+
 if ($id) {
     if (! $cm = get_coursemodule_from_id('dialogue', $id)) {
         print_error('invalidcoursemodule');
     }
-    if (! $activityrecord = $DB->get_record('dialogue', array('id' => $cm->instance))) {
-        print_error('invalidid', 'dialogue');
-    }
-    if (! $course = $DB->get_record('course', array('id' => $activityrecord->course))) {
-        print_error('coursemisconf');
+} else if ($d) {
+    if (! $cm = get_coursemodule_from_instance('dialogue', $d)) {
+        print_error('invalidcoursemodule');
     }
 } else {
     print_error('missingparameter');
+
+}
+if (! $activityrecord = $DB->get_record('dialogue', array('id' => $cm->instance))) {
+    print_error('invalidid', 'dialogue');
+}
+if (! $course = $DB->get_record('course', array('id' => $activityrecord->course))) {
+    print_error('coursemisconf');
 }
 
 $context = \context_module::instance($cm->id);
