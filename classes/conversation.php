@@ -21,7 +21,23 @@ defined('MOODLE_INTERNAL') || die();
 class conversation extends message {
 
     protected $_conversationid = null;
-    protected $_subject = '';
+
+    protected $_conversationindex = 1;
+
+    /** @var string  subject or topic of conversation */
+    public $_subject = '';
+    /** @var int userid of owner, can be changed */
+    public $_owner = 0;
+    /** @var int userid of person to started conversation */
+    public $_instigator = 0;
+    /** @var int userid of person who conversation was opened with */
+    public $_recipient = 0;
+    /** @var int count of messages belonging to open conversation */
+    public $_messagecount = 0;
+
+    /** @var rule  */
+    protected $_rule = null;
+
     protected $_participants = null;
     protected $_replies = array();
     protected $_bulkopenrule = null;
@@ -34,17 +50,17 @@ class conversation extends message {
      * @param type $conversationid
      */
     public function __construct(dialogue $dialogue, $conversationid = null) {
-        global $DB;
-
+        global $USER;
         parent::__construct($dialogue, $this);
-
-        $this->_conversationindex = 1;
-
+        $this->_owner = $USER->id;
+        $this->_instigator = $USER->id;
         if ($conversationid) {
             $this->_conversationid = $conversationid;
             $this->load();
         }
     }
+
+
 
     public function add_participant($userid) {
         $dialogue = $this->dialogue;
@@ -171,27 +187,31 @@ class conversation extends message {
     protected function load() {
         global $DB;
 
-        if (is_null($this->conversationid)) {
-            throw new \coding_exception('conversationid not set so cannot load!');
+        if (is_null($this->_conversationid)) {
+            throw new \coding_exception('Conversation identifier not set so cannot load!');
         }
 
-        $sql = "SELECT dc.subject, dm.*
+        $sql = "SELECT dc.subject, dc.owner, dc.instigator, dc.recipient, dc.messagecount, dm.*
                   FROM {dialogue_conversations} dc
                   JOIN {dialogue_messages} dm ON dm.conversationid = dc.id
                  WHERE dm.conversationindex = 1
                    AND dc.id = :conversationid";
 
-        $record = $DB->get_record_sql($sql, array('conversationid' => $this->conversationid), MUST_EXIST);
+        $record = $DB->get_record_sql($sql, array('conversationid' => $this->_conversationid), MUST_EXIST);
 
-        $this->_subject = $record->subject;
-        $this->_authorid = $record->authorid;
-        $this->_messageid = $record->id;
-        $this->_body = $record->body;
-        $this->_bodyformat = $record->bodyformat;
-        $this->_attachments = $record->attachments;
-        $this->_state = $record->state;
-        $this->_timemodified = $record->timecreated;
-        $this->_timemodified = $record->timemodified;
+        $this->_subject         = $record->subject;
+        $this->_owner           = $record->owner;
+        $this->_instigator      = $record->instigator;
+        $this->_recipient       = $record->recipient;
+        $this->_messagecount    = $record->messagecount;
+
+        $this->_authorid        = $record->authorid;
+        $this->_messageid       = $record->id;
+        $this->_body            = $record->body;
+        $this->_bodyformat      = $record->bodyformat;
+        $this->_attachments     = $record->attachments;
+        $this->_state           = $record->state;
+        $this->_timemodified    = $record->timemodified;
     }
 
     protected function load_bulkopenrule() {
@@ -227,6 +247,7 @@ class conversation extends message {
      * @return \mod_dialogue_conversation_form
      * @throws moodle_exception
      */
+    /*
     public function initialise_form() {
         global $CFG, $USER, $PAGE;
         require_once($CFG->dirroot . '/mod/dialogue/formlib.php');
@@ -309,7 +330,7 @@ class conversation extends message {
         // attach initialised form to conversation class and return
         return $this->_form = $form;
     }
-
+*/
     /**
      * Do not call this method directly
      *
@@ -356,9 +377,12 @@ class conversation extends message {
 
     public function prepare_form_data() {
         $data               = parent::prepare_form_data();
-        $data['subject']    = $this->subject;
+        $data['subject']    = $this->_subject;
+        $data['recipient']  = null;
+        if ($this->_recipient) {
+            $data['recipient']  = dialogue_get_user_details($this->_dialogue, $this->_recipient);
+        }
         $data['rule']       = $this->bulkopenrule;
-        $data['receivers']  = $this->participants;
         return $data;
     }
 
@@ -418,15 +442,20 @@ class conversation extends message {
             throw new \moodle_exception("This conversation doesn't belong to you!");
         }
 
-        $course = $this->dialogue->course;
+        $course     = $this->dialogue->course;
         $dialogueid = $this->dialogue->dialogueid;
 
-        // conversation record
-        $record = new \stdClass();
-        $record->id = $this->_conversationid;
-        $record->course = $course->id;
-        $record->dialogueid = $dialogueid;
-        $record->subject = $this->_subject;
+        // Conversation record.
+        $record                 = new \stdClass();
+        $record->id             = $this->_conversationid;
+        $record->course         = $course->id;
+        $record->dialogueid     = $dialogueid;
+        $record->subject        = $this->_subject;
+        $record->owner          = $this->_owner;
+        $record->instigator     = $this->_instigator;
+        $record->recipient      = $this->_recipient;
+        $record->messagecount   = $this->_conversationindex; // @TODO this is a dirty hack until code created.
+
 
         // we need a conversationid
         if (is_null($this->_conversationid)) {
@@ -438,6 +467,7 @@ class conversation extends message {
             $DB->update_record('dialogue_conversations', $record);
         }
 
+        $this->add_participant($this->_recipient); // @TODO this is a dirty hack until code created.
         $this->save_participants();
 
         $this->save_bulk_open_rule();
@@ -489,24 +519,16 @@ class conversation extends message {
     }
 
     public function load_form_data(\stdClass $data) {
-        $this->_participants = array();;// dirty loading from DB, do once
 
-        if (!empty($data->participants)) {
-            foreach ($data->participants as $userid) {
-                $this->add_participant($userid);
-            }
-        } else {
-            $this->clear_participants();
+        $this->_recipient = $data->recipient;
+        $this->_subject = format_string($data->subject);
+        $this->set_body($data->body['text'], $data->body['format'], $data->body['itemid']);
+        if (isset($data->attachments)) {
+            $this->set_attachmentsdraftid($data->attachments['itemid']);
         }
         // If groupinformation we have a rule.
         if (isset($data->groupinformation)) {
 
-        }
-
-        $this->set_subject($data->subject);
-        $this->set_body($data->body['text'], $data->body['format'], $data->body['itemid']);
-        if (isset($data->attachments)) {
-            $this->set_attachmentsdraftid($data->attachments['itemid']);
         }
     }
 
@@ -582,11 +604,11 @@ class conversation extends message {
         $cm      = $this->dialogue->cm;
         $course  = $this->dialogue->course;
 
-        $incomplete = ((empty($this->_bulkopenrule) and empty($this->_participants)) or
+        $incomplete = ((empty($this->_bulkopenrule) and empty($this->_recipient)) or
             empty($this->_subject) or empty($this->_body));
 
         if ($incomplete) {
-            throw new \moodle_exception("Incomplete conversation cannot send!");
+            throw new \moodle_exception("Incomplete conversation, cannot send!");
         }
 
         if (!empty($this->_bulkopenrule)) {
@@ -600,6 +622,7 @@ class conversation extends message {
 
         parent::send();
     }
+
 
     protected function set_bulk_open_rule($type = null, $sourceid = null, $includefuturemembers = false, $cutoffdate = 0) {
         $rule = array();
