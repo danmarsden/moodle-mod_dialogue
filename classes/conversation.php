@@ -559,7 +559,6 @@ class conversation extends message {
 
         $participants = $this->_participants;
         if ($participants) {
-            $DB->delete_records('dialogue_participants', array('conversationid' => $conversationid));
             foreach ($participants as $userid => $participant) {
                 $params = array('conversationid' => $conversationid, 'userid' => $userid);
                 if (!$DB->record_exists('dialogue_participants', $params)) {
