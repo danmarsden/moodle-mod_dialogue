@@ -60,17 +60,17 @@ class conversation extends message {
         }
     }
 
-
-
-    public function add_participant($userid) {
-        $dialogue = $this->dialogue;
-        //$participant = $dialogue->get_user_brief_details($userid);
-        $participant = dialogue_get_user_details($dialogue, $userid);
-        return $this->_participants[$userid] = $participant;
-    }
-
-    public function clear_participants() {
-        return $this->_participants = null;
+    /**
+     * Attaches rule class to conversation and loads from database if
+     * data exists.
+     *
+     * @return rule
+     */
+    public function get_rule() {
+        if (is_null($this->_rule)) {
+            $this->_rule = new rule($this);
+        }
+        return $this->_rule;
     }
 
     /**
@@ -214,33 +214,6 @@ class conversation extends message {
         $this->_timemodified    = $record->timemodified;
     }
 
-    protected function load_bulkopenrule() {
-        global $DB;
-
-        $this->_bulkopenrule = array(); // reset to empty rule
-
-        $rule = $DB->get_record('dialogue_bulk_opener_rules', array('conversationid' => $this->_conversationid));
-        if ($rule) {
-            $this->_bulkopenrule = (array) $rule;
-        }
-    }
-
-    protected function load_participants() {
-        global $DB;
-
-        $this->_participants = array(); // clear participants array if previous loaded
-        $dialogue = $this->dialogue;
-
-        $params = array('conversationid' => $this->_conversationid);
-        $records = $DB->get_records('dialogue_participants', $params);
-        foreach ($records as $record) {
-            // key up on userid and fetch brief details from cache as value (cut down user record)
-            //$this->_participants[$record->userid] = $dialogue->get_user_brief_details($record->userid);
-            $this->_participants[$record->userid] = dialogue_get_user_details($dialogue, $record->userid);
-        }
-        return $this->_participants;
-    }
-
     /**
      *
      * @global type $CFG
@@ -331,28 +304,9 @@ class conversation extends message {
         return $this->_form = $form;
     }
 */
-    /**
-     * Do not call this method directly
-     *
-     * @global stdClass $DB
-     * @return stdClass | boolean bulkopenrule record or false
-     */
-    protected function magic_get_bulkopenrule() {
-        if (is_null($this->_bulkopenrule)) {
-            $this->load_bulkopenrule();
-        }
-        return $this->_bulkopenrule;
-    }
 
     protected function magic_get_conversationid() {
         return $this->_conversationid;
-    }
-
-    protected function magic_get_participants() {
-        if (is_null($this->_participants)) {
-            $this->load_participants();
-        }
-        return $this->_participants;
     }
 
     protected function magic_get_receivedby() {
@@ -382,7 +336,9 @@ class conversation extends message {
         if ($this->_recipient) {
             $data['recipient']  = dialogue_get_user_details($this->_dialogue, $this->_recipient);
         }
-        $data['rule']       = $this->bulkopenrule;
+        if ($this->get_rule()) {
+            $data['rule']   = $this->get_rule()->export();
+        }
         return $data;
     }
 
@@ -456,7 +412,6 @@ class conversation extends message {
         $record->recipient      = $this->_recipient;
         $record->messagecount   = $this->_conversationindex; // @TODO this is a dirty hack until code created.
 
-
         // we need a conversationid
         if (is_null($this->_conversationid)) {
             // create new record
@@ -467,135 +422,29 @@ class conversation extends message {
             $DB->update_record('dialogue_conversations', $record);
         }
 
-        $this->add_participant($this->_recipient); // @TODO this is a dirty hack until code created.
-        $this->save_participants();
-
-        $this->save_bulk_open_rule();
-
-        // now let dialogue_message do it's thing
+        // Re usability, let dialogue_message do it's thing.
         parent::save();
-    }
 
-    protected function save_bulk_open_rule() {
-        global $DB;
+        // Save rule.
+        $this->get_rule()->save();
 
-        $dialogueid = $this->dialogue->dialogueid;
-        $conversationid = $this->_conversationid;
-
-        if (is_null($conversationid)) {
-            throw new coding_exception("conversation must exist before bulk open rule can be saved!");
-        }
-
-        $rule = $this->_bulkopenrule;
-        $params = array('dialogueid' => $dialogueid, 'conversationid' => $conversationid);
-        $record = $DB->get_record('dialogue_bulk_opener_rules', $params);
-
-        if (empty($rule)) {
-            if ($record) {
-                // get rid of it
-                $DB->delete_records('dialogue_bulk_opener_rules', $params);
-            }
-        } else {
-            if ($record) {
-                // existing
-                $record->type = $rule['type'];
-                $record->sourceid = $rule['sourceid'];
-                $record->includefuturemembers = $rule['includefuturemembers'];
-                $record->cutoffdate = $rule['cutoffdate'];
-                $DB->update_record('dialogue_bulk_opener_rules', $record);
-            } else {
-                // new
-                $record = new \stdClass();
-                $record->dialogueid = $dialogueid;
-                $record->conversationid = $conversationid;
-                $record->type = $rule['type'];
-                $record->sourceid = $rule['sourceid'];
-                $record->includefuturemembers = $rule['includefuturemembers'];
-                $record->cutoffdate = $rule['cutoffdate'];
-                $DB->insert_record('dialogue_bulk_opener_rules', $record);
-            }
-        }
-        $this->load_bulkopenrule(); // refresh
     }
 
     public function load_form_data(\stdClass $data) {
+        // Single recipient mode.
+        if (isset($data->recipient)) {
+            $this->_recipient = $data->recipient;
+        }
+        // A rule for bulk opening of conversations.
+        if (isset($data->rule)) {
+            $this->get_rule()->set($data->rule);
+        }
 
-        $this->_recipient = $data->recipient;
         $this->_subject = format_string($data->subject);
         $this->set_body($data->body['text'], $data->body['format'], $data->body['itemid']);
         if (isset($data->attachments)) {
             $this->set_attachmentsdraftid($data->attachments['itemid']);
         }
-        // If groupinformation we have a rule.
-        if (isset($data->groupinformation)) {
-
-        }
-    }
-
-
-    public function save_form_data() {
-        // incoming form data
-        $data = $this->_form->get_submitted_data();
-
-        // shortcut set of participants for now @todo - make better
-        $this->clear_participants();
-        if (!empty($data->people)) {
-            $participants = (array) $data->people; // may be single value
-            foreach ($participants as $userid) {
-                $this->add_participant($userid);
-            }
-        }
-
-        // set bulk open rule
-        if (empty($data->bulkopenrule)) {
-            $this->set_bulk_open_rule(); // pass no parameters will set to nothing
-        } else {
-            $type = $data->bulkopenrule['type'];
-            $sourceid = $data->bulkopenrule['sourceid'];
-            $includefuturemembers = (empty($data->bulkopenrule['includefuturemembers'])) ? false : $data->bulkopenrule['includefuturemembers'];
-            $cutoffdate = (empty($data->bulkopenrule['cutoffdate'])) ? false : $data->bulkopenrule['cutoffdate'];
-            $this->set_bulk_open_rule($type, $sourceid, $includefuturemembers, $cutoffdate);
-        }
-
-
-        $this->set_subject($data->subject);
-        $this->set_body($data->body['text'], $data->body['format'], $data->body['itemid']);
-        if (isset($data->attachments)) {
-            $this->set_attachmentsdraftid($data->attachments['itemid']);
-        }
-        $this->save();
-
-        $this->_formdatasaved = true;
-    }
-
-// @todo tidy up handle removes
-    protected function save_participants() {
-        global $DB;
-
-        $dialogueid = $this->dialogue->dialogueid;
-        $conversationid = $this->_conversationid;
-
-        if (is_null($conversationid)) {
-            throw new \coding_exception("conversation must exist before participants can be saved!");
-        }
-
-        $participants = $this->_participants;
-        if ($participants) {
-            foreach ($participants as $userid => $participant) {
-                $params = array('conversationid' => $conversationid, 'userid' => $userid);
-                if (!$DB->record_exists('dialogue_participants', $params)) {
-                    $record = new \stdClass();
-                    $record->dialogueid = $dialogueid;
-                    $record->conversationid = $conversationid;
-                    $record->userid = $userid;
-                    $DB->insert_record('dialogue_participants', $record);
-                }
-            }
-        } else {
-            $DB->delete_records('dialogue_participants', array('conversationid' => $conversationid));
-        }
-        // refresh
-        $this->load_participants();
     }
 
     public function send() {
@@ -604,37 +453,24 @@ class conversation extends message {
         $cm      = $this->dialogue->cm;
         $course  = $this->dialogue->course;
 
-        $incomplete = ((empty($this->_bulkopenrule) and empty($this->_recipient)) or
+        $hasrule = $this->get_rule()->exists();
+
+        $incomplete = ((empty($hasrule) and empty($this->_recipient)) or
             empty($this->_subject) or empty($this->_body));
 
         if ($incomplete) {
             throw new \moodle_exception("Incomplete conversation, cannot send!");
         }
 
-        if (!empty($this->_bulkopenrule)) {
-            // clearout participants as this is now a template which will be copied
+        if ($hasrule) {
             $this->_state = dialogue::STATE_BULK_AUTOMATED;
             // update state to bulk automated
             $DB->set_field('dialogue_messages', 'state', $this->_state, array('id' => $this->_messageid));
-
+/* @TODO move to message send **/
             return true;
         }
 
         parent::send();
-    }
-
-
-    protected function set_bulk_open_rule($type = null, $sourceid = null, $includefuturemembers = false, $cutoffdate = 0) {
-        $rule = array();
-        // must have type (course, group) and sourceid (course->id, group->id) to
-        // be a rule, else is empty.
-        if (!is_null($type) and !is_null($sourceid)) {
-            $rule['type'] = (string) $type;
-            $rule['sourceid'] = (int) $sourceid;
-            $rule['includefuturemembers'] = (int) $includefuturemembers;
-            $rule['cutoffdate'] = (int) $cutoffdate;
-        }
-        $this->_bulkopenrule = $rule;
     }
 
     public function set_subject($subject) {
