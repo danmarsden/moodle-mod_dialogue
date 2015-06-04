@@ -102,6 +102,11 @@ Y.extend(RecipientPicker, Y.Base, {
         select  = Y.one(this.selectedNode);
         input   = Y.one(this.inputNode);
 
+        // Not a object, then leave.
+        if (!(record instanceof Object)) {
+            return;
+        }
+
         // Check we have all the required fields.
         Y.Array.each(this.resultRequiredFields, function(name) {
             if (!record.hasOwnProperty(name)) {
