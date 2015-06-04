@@ -19,6 +19,7 @@ namespace mod_dialogue\form;
 defined('MOODLE_INTERNAL') || die();
 
 class conversation_form extends message_form {
+
     protected function definition() {
         $data = $this->_customdata['data'];
 
@@ -30,30 +31,28 @@ class conversation_form extends message_form {
 
         $mform->disable_form_change_checker();
 
-        $mform->addElement('header', 'openwithsection', get_string('openwith', 'dialogue'));
-
-
         $html = '<div class="fitem fitem_ftext">
-                 <div class="fitemtitle"></div>
+                 <div class="fitemtitle">
+                 <label for="rp-selected">' . get_string('recipient', 'dialogue') . '</label>
+                 </div>
                  <div class="felement ftext">
                  <div id="rp-selected"></div>
-                 <input class="" type="text" placeholder="Recipient\'s name" id="rp-input">
+                 <input class="" type="text" placeholder="" id="rp-input">
                  </div>
                  </div>';
 
         $mform->addElement('html', $html);
 
-        $mform->addElement('header', 'messagesection', get_string('message', 'dialogue'));
-
         $mform->addElement('text', 'subject', get_string('subject', 'dialogue'), array('class'=>'input-xxlarge'));
         $mform->setType('subject', PARAM_TEXT);
 
-        $mform->setExpanded('messagesection', true);
-
         parent::definition();
     }
+
     public function definition_after_data() {
         global $CFG, $PAGE;
+
+        $rpmaxresults = 10;//$config = get_config('dialogue', 'rpmaxresults');
 
         parent::definition_after_data();
 
@@ -61,15 +60,16 @@ class conversation_form extends message_form {
         $this->set_data(array('id' => $data['conversationid']));
         $this->set_data(array('subject' => $data['subject']));
         $ajaxurl = $CFG->wwwroot . '/mod/dialogue/searchpotentials.json.php?q={query}&id=' . $data['cmid'] . '&sesskey=' . sesskey();
-        $participants = array_values($data['receivers']); // Need to remove php array keys. TODO research PHP array
+
+        $recipient[] = $data['recipient'];
         $arguments =
             array(
                 array('inputNode' => '#rp-input',
                     'source' => $ajaxurl,
-                    'maxResults' => 5,
+                    'maxResults' => $rpmaxresults,
                     'selectedNode' => '#rp-selected',
-                    'selectedHiddenName' => 'openwith',
-                    'selectedItems' => $participants,
+                    'selectedHiddenName' => 'recipient',
+                    'selectedItems' => $recipient,
                 )
             );
         // Add the recipient picker after data as need to be rendered.
@@ -78,9 +78,23 @@ class conversation_form extends message_form {
 
     public function get_submitted_data() {
         $data = parent::get_submitted_data();
-
-        $data->participants = optional_param_array('openwith', array(), PARAM_INT);
-
+        $recipients = optional_param_array('recipient', 0, PARAM_INT);
+        $data->recipient = isset($recipients[0]) ? $recipients[0] : 0;
         return $data;
+    }
+
+    public function validation($data, $files) {
+
+        $errors = parent::validation($data, $files);
+
+        if (empty($data['openwith'])) {
+            //$errors['openwith'] = get_string('errornoparticipant', 'dialogue'); @TODO
+        }
+
+        if (empty($data['subject'])) {
+            $errors['subject'] = get_string('erroremptysubject', 'dialogue');
+        }
+
+        return $errors;
     }
 }
