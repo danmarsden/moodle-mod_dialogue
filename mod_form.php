@@ -42,7 +42,7 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
-        $this->add_intro_editor(true, get_string('dialogueintro', 'dialogue'));
+        moodleform_mod::standard_intro_elements();
 
         $choices = get_max_upload_sizes($CFG->maxbytes, $COURSE->maxbytes, $pluginconfig->maxbytes);
 
