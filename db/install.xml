@@ -31,7 +31,11 @@
             <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
             <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
             <FIELD NAME="dialogueid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="owner" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="instigator" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+            <FIELD NAME="recipient" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
             <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+            <FIELD NAME="totalmessagecount" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
         </FIELDS>
         <KEYS>
             <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -51,7 +55,6 @@
             <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         </KEYS>
         <INDEXES>
-            <INDEX NAME="userid-dialogueid" UNIQUE="false" FIELDS="userid, dialogueid"/>
             <INDEX NAME="userid-conversationid" UNIQUE="false" FIELDS="userid, conversationid"/>
       </INDEXES>
     </TABLE>
