@@ -28,15 +28,7 @@ class bulkopener_form extends message_form {
 
         $data = $this->_customdata['data'];
 
-        if (empty($data['cmid'])) {
-            throw new \moodle_exception('Course module identifier required!');
-        }
-
         $mform = $this->_form;
-
-        $mform->disable_form_change_checker();
-
-        $mform->addElement('header', 'bulkopenrulessection', get_string('bulkopenrule', 'dialogue'));
 
         $groups = array(); // use for form
         $groups[''] = get_string('select').'...';
@@ -66,20 +58,19 @@ class bulkopener_form extends message_form {
             $actionbuttongroup[] =& $mform->createElement('submit', 'save', get_string('save', 'dialogue'), array('class'=>'savedraft-button'));
             $mform->addGroup($actionbuttongroup, 'actionbuttongroup', '', ' ', false);
             $mform->setExpanded('actionssection', true);
-
         } else {
-            $mform->addElement('header', 'messagesection', get_string('message', 'dialogue'));
             $mform->addElement('text', 'subject', get_string('subject', 'dialogue'), array('class'=>'input-xxlarge'));
             $mform->setType('subject', PARAM_TEXT);
-            $mform->setExpanded('messagesection', true);
             parent::definition();
         }
 
     }
+
+    /**
+     * Fill form from existing data.
+     *
+     */
     public function definition_after_data() {
-        global $CFG, $PAGE;
-
-
         parent::definition_after_data();
 
         $data = $this->_customdata['data'];
@@ -87,18 +78,72 @@ class bulkopener_form extends message_form {
         $this->set_data(array('id' => $data['conversationid']));
         $this->set_data(array('subject' => $data['subject']));
 
-        $groupinformation = $data['rule']['type'] . '-' . $data['rule']['sourceid'];
-        $this->set_data(array('groupinformation' => $groupinformation));
-        $this->set_data(array('includefuturemembers' => $data['rule']['includefuturemembers']));
-        $this->set_data(array('cutoffdate' => $data['rule']['cutoffdate']));
+        if (!empty($data['rule'])){
+            $groupinformation = $data['rule']['type'] . '-' . $data['rule']['sourceid'];
+            $this->set_data(array('groupinformation' => $groupinformation));
+            $this->set_data(array('includefuturemembers' => $data['rule']['includefuturemembers']));
+            $this->set_data(array('cutoffdate' => $data['rule']['cutoffdate']));
+        }
 
     }
 
+    /**
+     * We need to do some work on form data before it is usable.
+     *
+     * @return object
+     * @throws \coding_exception
+     */
     public function get_submitted_data() {
         $data = parent::get_submitted_data();
         if (optional_param('groupinformation', null, PARAM_TEXT)) {
             $data->groupinformation = optional_param('groupinformation', null, PARAM_TEXT);
+            // Strip and construct rule data structure.
+            if (!empty($data->groupinformation)) {
+                $matches = array();
+                $subject = $data->groupinformation;
+                $pattern = '/(course|group)-(\d.*)/';
+                preg_match($pattern, $subject, $matches);
+                $rule = array();
+                $rule['type'] = ($matches[1]) ? $matches[1] : '';
+                $rule['sourceid'] = ($matches[2]) ? $matches[2] : 0;
+                if (!empty($data->includefuturemembers)) {
+                    $rule['includefuturemembers'] = true;
+                    if ($data->cutoffdate) {
+                        $rule['cutoffdate'] = $data->cutoffdate;
+                    } else {
+                        //$rule['cutoffdate'] = false;
+                    }
+                }
+                $data->rule = $rule;
+            }
         }
         return $data;
+    }
+
+    /**
+     * Make sure we have everything we need before sending.
+     *
+     * @param type $data
+     * @param type $files
+     * @return array $errors
+     * @throws \coding_exception
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+        // Check a group has been selected.
+        if (empty($data['groupinformation'])) {
+            $errors['groupinformation'] = get_string('errorgroupinformation', 'dialogue');
+        }
+        // Check there is text in the subject.
+        if (empty($data['subject'])) {
+            $errors['subject'] = get_string('erroremptysubject', 'dialogue');
+        }
+        // Make sure cut off date not in the past.
+        if (!empty($data['includefuturemembers'])) {
+            if ($data['cutoffdate'] < time()) {
+                $errors['cutoffdate'] = get_string('errorcutoffdateinpast', 'dialogue');
+            }
+        }
+        return $errors;
     }
 }
