@@ -42,7 +42,7 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
-        $this->add_intro_editor(true, get_string('dialogueintro', 'dialogue'));
+        \moodleform_mod::standard_intro_elements();
 
         $choices = get_max_upload_sizes($CFG->maxbytes, $COURSE->maxbytes, $pluginconfig->maxbytes);
 
@@ -59,6 +59,10 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->addElement('checkbox', 'usecoursegroups', get_string('usecoursegroups', 'dialogue'));
         $mform->addHelpButton('usecoursegroups', 'usecoursegroups', 'dialogue');
         $mform->setDefault('usecoursegroups', 0);
+
+        $mform->addElement('checkbox', 'notifications', get_string('notifications', 'dialogue'));
+        $mform->addHelpButton('notifications', 'notifications', 'dialogue');
+        $mform->setDefault('notifications', 1);
 
         $this->standard_grading_coursemodule_elements();
 
