@@ -35,16 +35,26 @@ if ($hassiteconfig) {
     // whether to provide unread post count
     $settings->add(new admin_setting_configcheckbox('dialogue/trackunread', new lang_string('configtrackunread', 'dialogue'),
                    '', 1));
+/*
+    $settings->add(new admin_setting_configcheckbox('dialogue/notifications', new lang_string('notifications', 'dialogue'),
+        '', 1));
+*/
     // Default total maxbytes of attached files
     if (isset($CFG->maxbytes)) {
         $settings->add(new admin_setting_configselect('dialogue/maxbytes', new lang_string('maxattachmentsize', 'dialogue'),
                     new lang_string('configmaxbytes', 'dialogue'), 512000, get_max_upload_sizes($CFG->maxbytes)));
     }
 
-    $choices = array(0,1,2,3,4,5,6,7,8,9,10,20);
+    $choices = array(0=>0,1=>0,2=>2,3=>3,4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,10=>10,20=>20);
     // Default number of attachments allowed per post in all dialogues
     $settings->add(new admin_setting_configselect('dialogue/maxattachments', new lang_string('maxattachments', 'dialogue'),
                 new lang_string('configmaxattachments', 'dialogue'), 5, $choices));
+
+    $choices = array(4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,10=>10,15=>15,20=>20);
+    // Default number of attachments allowed per post in all dialogues
+    $settings->add(new admin_setting_configselect('dialogue/uimaxrecipients', new lang_string('uimaxrecipients', 'dialogue'),
+        new lang_string('configuimaxrecipients', 'dialogue'), 100, $choices));
+
 
     $settings->add(new admin_setting_configcheckbox('dialogue/viewconversationsbyrole', new lang_string('viewconversationsbyrole', 'dialogue'),
                    new lang_string('configviewconversationsbyrole', 'dialogue'), 0));
