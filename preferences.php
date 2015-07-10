@@ -34,7 +34,9 @@ $PAGE->set_title($title);
 
 $form = new \mod_dialogue\form\preference_form();
 $form->set_data(
-    array('returnurl'=>$returnurl, 'hideclosed'=>get_user_preferences('hideclosed'), 'sortedby'=>get_user_preferences('sortedby')));
+    array('returnurl'=>$returnurl,
+          'hideclosed'=>get_user_preferences('dialogue_hide_closed'),
+          'sortedby'=>get_user_preferences('dialogue_sort_by')));
 
 // Setup return url.
 if (!$returnurl) {
@@ -51,8 +53,8 @@ if ($form->is_submitted()) {
     $data = $form->get_data();
     $hideclosed = isset($data->hideclosed) ? 1 : 0;
     $sortedby = $data->sortedby;
-    set_user_preference('hideclosed', $hideclosed);
-    set_user_preference('sortedby', $sortedby);
+    set_user_preference('dialogue_hide_closed', $hideclosed);
+    set_user_preference('dialogue_sort_by', $sortedby);
     redirect($returnurl);
 }
 
