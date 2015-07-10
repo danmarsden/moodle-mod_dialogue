@@ -45,6 +45,7 @@ class backup_dialogue_activity_structure_step extends backup_activity_structure_
                                                     'notifications',
                                                     'notificationcontent',
                                                     'multipleconversations',
+                                                    'oneperperson',
                                                     'timemodified'));
   
         $conversations = new backup_nested_element('conversations');
@@ -52,7 +53,12 @@ class backup_dialogue_activity_structure_step extends backup_activity_structure_
         $conversation = new backup_nested_element('conversation', array('id'),
                                                   array('course',
                                                         'dialogueid',
-                                                        'subject'));
+                                                        'owner',
+                                                        'instigator',
+                                                        'recipient',
+                                                        'subject',
+                                                        'messagecount',
+                                                        'openrule'));
         
         $participants = new backup_nested_element('participants');
         
