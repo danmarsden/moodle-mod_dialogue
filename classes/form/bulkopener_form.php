@@ -50,14 +50,14 @@ class bulkopener_form extends message_form {
         $mform->disabledIf('cutoffdate', 'includefuturemembers', 'notchecked');
 
 
-        if ($data['state'] == dialogue::STATE_BULK_AUTOMATED) {
+        if ($data['state'] != dialogue::STATE_DRAFT) {
             $mform->addElement('hidden', 'id');
             $mform->setType('id', PARAM_INT);
             $mform->addElement('header', 'actionssection', get_string('actions', 'dialogue'));
             $actionbuttongroup = array();
             $actionbuttongroup[] =& $mform->createElement('submit', 'save', get_string('save', 'dialogue'), array('class'=>'savedraft-button'));
             $mform->addGroup($actionbuttongroup, 'actionbuttongroup', '', ' ', false);
-            $mform->setExpanded('actionssection', true);
+
         } else {
             $mform->addElement('text', 'subject', get_string('subject', 'dialogue'), array('class'=>'input-xxlarge'));
             $mform->setType('subject', PARAM_TEXT);
