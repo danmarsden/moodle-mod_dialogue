@@ -50,12 +50,12 @@ $PAGE->set_url($pageurl);
 $PAGE->set_title(format_string($activityrecord->name));
 $PAGE->set_heading(format_string($course->fullname));
 
-$PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
-                            'M.mod_dialogue.clickredirector.init', array($cm->id));
+dialogue_actions_block();
 
 $dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
 $total = 0;
-$rs = dialogue_get_draft_listing($dialogue, $total);
+$drafts = new \mod_dialogue\drafts($dialogue);
+$rs = $drafts->get_listing($page, $total);
 $pagination = new paging_bar($total, $page, \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE, $pageurl);
 
 // get the dialogue module render
@@ -66,13 +66,13 @@ if (!empty($dialogue->activityrecord->intro)) {
     echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
 }
 
-echo $renderer->tab_navigation($dialogue);
+//echo $renderer->tab_navigation($dialogue);
 $html = '';
 if (!$rs) {
     $html .= $OUTPUT->notification(get_string('nodraftsfound', 'dialogue'), 'notifyproblem');
 } else {
     $html .= html_writer::start_div('listing-meta');
-    $html .= html_writer::tag('h6', new lang_string('draftlistdisplayheader', 'dialogue'));
+    $html .= html_writer::tag('h6', new lang_string('displaying', 'dialogue'));
     $a = new stdClass();
     $a->start = ($page) ? $page * \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE : 1;
     $a->end = $page * \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE + count($rs);
@@ -84,19 +84,27 @@ if (!$rs) {
     $html .= html_writer::start_tag('tbody');
     foreach($rs as $record) {
         if (dialogue_is_a_conversation($record)) {
-            $label = html_writer::tag('span', get_string('draftconversation', 'dialogue'),
-                              array('class' => 'state-indicator state-draft'));
 
-            $datattributes = array('data-redirect' => 'conversation',
-                                   'data-action'   => 'edit',
-                                   'data-conversationid' => $record->conversationid);
+            if ($record->isbulkopener) {
+                $label = html_writer::tag('span', get_string('draftbulkopener', 'dialogue'),
+                    array('class' => 'state-indicator state-draft'));
 
-            $params = array('id' => $cm->id,
-                            'conversationid' => $record->conversationid,
-                            'action' => 'edit');
+                $icon   = $OUTPUT->pix_icon('i/edit', get_string('edit'));
+                $url    = new moodle_url('conversation/openrule/edit.php', array('id' => $record->conversationid));
+                $link   = html_writer::link($url, $icon);
 
-            $editlink = html_writer::link(new moodle_url('conversation.php', $params),
-                                      get_string('edit'), array());
+                $datattributes = array('data-edit-url'=>$url->out(false));
+            } else {
+                $label = html_writer::tag('span', get_string('draftconversation', 'dialogue'),
+                                  array('class' => 'state-indicator state-draft'));
+
+                $icon   = $OUTPUT->pix_icon('i/edit', get_string('edit'));
+                $url    = new moodle_url('conversation/edit.php', array('id' => $record->conversationid));
+                $link   = html_writer::link($url, $icon);
+
+                $datattributes = array('data-edit-url'=>$url->out(false));
+            }
+
         } else {
             $label = html_writer::tag('span', get_string('draftreply', 'dialogue'),
                               array('class' => 'state-indicator state-draft'));
@@ -111,7 +119,7 @@ if (!$rs) {
                             'messageid' => $record->id,
                             'action' => 'edit');
             
-            $editlink = html_writer::link(new moodle_url('reply.php', $params), get_string('edit'), array());
+            $link = html_writer::link(new moodle_url('reply.php', $params), get_string('edit'), array());
         }
         
 
@@ -133,7 +141,7 @@ if (!$rs) {
         }
         $html .= html_writer::tag('td', $timemodified, array('title' => userdate($record->timemodified)));
        
-        $html .= html_writer::tag('td', $editlink, array('class'=>'nonjs-control'));
+        $html .= html_writer::tag('td', $link, array('class'=>''));
         $html .= html_writer::end_tag('tr');
     }
     $html .= html_writer::end_tag('tbody');
