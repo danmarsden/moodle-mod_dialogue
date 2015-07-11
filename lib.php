@@ -136,16 +136,14 @@ function dialogue_actions_block() {
     $cm         = $PAGE->cm;
 
 
-    $bc->content .= html_writer::start_div('btn-group btn-group-sm');
     if (has_capability('mod/dialogue:open', $context)) {
         $url = new moodle_url('/mod/dialogue/conversation/create.php', array('cmid'=>$cm->id));
-        $bc->content .= html_writer::link($url, get_string('create'), array('class'=>'btn btn-danger'));
+        $bc->content .= html_writer::link($url, get_string('create'), array('class'=>'btn btn-xs btn-danger'));
     }
     if (has_capability('mod/dialogue:open', $context)) {
-        $url = new moodle_url('/mod/dialogue/conversation/bulkopener/create.php', array('cmid'=>$cm->id));
-        $bc->content .= html_writer::link($url, get_string('createbulkopener', 'dialogue'), array('class'=>'btn btn-info'));
+        $url = new moodle_url('/mod/dialogue/conversation/openrule/create.php', array('cmid'=>$cm->id));
+        $bc->content .= html_writer::link($url, get_string('createbulkopener', 'dialogue'), array('class'=>'btn btn-xs btn-info'));
     }
-    $bc->content .= html_writer::end_div();
 
     $bc->content .= html_writer::start_tag('ul', array('class'=>'block_tree list'));
 
@@ -158,7 +156,7 @@ function dialogue_actions_block() {
     $link = html_writer::link($url, $label);
     $bc->content .= html_writer::tag('li', $link);
     if (has_any_capability(array('mod/dialogue:bulkopenrulecreate', 'mod/dialogue:bulkopenruleeditany'), $context)) { // @todo better named capabilities
-        $url = new moodle_url('/mod/dialogue/bulkopenrules.php', array('id'=>$cm->id));
+        $url = new moodle_url('/mod/dialogue/openrules.php', array('id'=>$cm->id));
         $label = get_string('bulkopenrules', 'dialogue');
         $link = html_writer::link($url, $label);
         $bc->content .= html_writer::tag('li', $link);
@@ -173,6 +171,99 @@ function dialogue_actions_block() {
 
     $defaultregion = $PAGE->blocks->get_default_region();
     $PAGE->blocks->add_fake_block($bc, $defaultregion);
+}
+
+
+function dialogue_run_open_rules($conversationid = null, $trace = true) {
+    global $DB;
+
+    // Setup trace if required, mainly for cron.
+    if ($trace) {
+        $trace = new progress_trace_buffer(new text_progress_trace(), true);
+    } else {
+        $trace = new null_progress_trace();
+    }
+
+    $params = array();
+    $sql = "SELECT r.*
+              FROM {dialogue_bulk_opener_rules} r
+              JOIN {dialogue_messages} m
+                ON m.conversationid = r.conversationid
+             WHERE (r.lastrun = 0 OR r.includefuturemembers = 1) AND m.state = :state";
+
+    $params['state'] = \mod_dialogue\dialogue::STATE_OPEN;
+    if ($conversationid) {
+        $params['conversationid'] = $conversationid;
+        $sql .= " AND r.conversationid = :conversationid";
+    }
+
+    $rs = $DB->get_recordset_sql($sql, $params);
+    if ($rs->valid()) {
+        foreach ($rs as $record) {
+            try {
+                $opened = 0;
+                $dialogue = \mod_dialogue\dialogue::instance($record->dialogueid);
+                $trace->output('Processing open rule for ' . $dialogue->activityrecord->name);
+                if (!$dialogue->is_visible()){
+                    $trace->output('Hidden course or module, skipping...');
+                    continue;
+                }
+                $conversation = new \mod_dialogue\conversation($dialogue, $record->conversationid);
+                $withcapability = 'mod/dialogue:receive';
+                $groupid = 0; // it either a course or a group, default to course
+                $requiredfields = user_picture::fields('u');
+                if ($record->type == 'group') {
+                    $groupid = $record->sourceid;
+                }
+                // Get users that can receive.
+                $enrolledusers = get_enrolled_users($dialogue->context, $withcapability, $groupid, $requiredfields);
+                $enrolleduserscount = count($enrolledusers);
+                if (! $enrolleduserscount) {
+                    $trace->output("No group members, skipping...");
+                    continue;
+                }
+                // Get users that have already been sent.
+                $sentusers = $DB->get_records('dialogue_flags',
+                    array('conversationid' => $conversation->conversationid,
+                        'flag' => \mod_dialogue\dialogue::FLAG_SENT),
+                    '',
+                    'userid');
+                // Diff them.
+                $users = array_diff_key($enrolledusers, $sentusers);
+                $userscount = count($users);
+                if (! $userscount) {
+                    $trace->output("No users to send to, skipping...");
+                    continue;
+                }
+                foreach ($users as $user) {
+                    if ($user->id == $conversation->author->id) {
+                        continue;// Don't start with author, TODO tidy up.
+                    }
+                    // Create copy of the conversation and save and send.
+                    $copy = $conversation->copy();
+                    $copy->set_recipient($user->id);
+                    $copy->save();
+                    $copy->send();
+                    unset($copy);
+                    $trace->output(' - opened '. $conversation->subject . ' with ' . fullname($user));
+                    $opened++; // Increment.
+                }
+                $DB->set_field('dialogue_bulk_opener_rules', 'lastrun', time(), array('conversationid'=>$record->conversationid));
+                // Set message state.
+                if ($record->cutoffdate >= $record->lastrun) {
+                    $state = \mod_dialogue\dialogue::STATE_CLOSED;
+                } else {
+                    $state = \mod_dialogue\dialogue::STATE_OPEN;
+                }
+                $DB->set_field('dialogue_messages', 'state', $state, array('id' => $conversation->messageid));
+
+                $trace->output('Total opened:' . $opened);
+            } catch (moodle_exception $e) {
+                mtrace($e->module . ' : ' . $e->errorcode);
+            }
+        }
+    }
+    $rs->close();
 }
 
 /**
@@ -235,7 +326,7 @@ function dialogue_process_bulk_openrules() {
                     }
                     // get a copy of the conversation
                     $copy = $conversation->copy();
-                    $copy->add_participant($user->id);
+                    $copy->set_recipient($user->id);
                     $copy->save();
                     $copy->send();
                     // mark the sent in automated conversation, so can track who sent to
