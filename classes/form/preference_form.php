@@ -16,9 +16,6 @@
 
 namespace mod_dialogue\form;
 
-use mod_dialogue\conversations;
-use mod_dialogue\conversations_list;
-
 defined('MOODLE_INTERNAL') || die();
 
 // load repository lib, will load filelib and formslib
@@ -32,14 +29,6 @@ class preference_form extends \moodleform {
 
         $sortedbyoptions = array();
         foreach (conversations_list::get_sort_options() as $option) {
-            /*
-            if ($config['directional']) {
-                $sortedbyoptions[$option.':asc'] = get_string($option, 'dialogue') . ' &#x25BE';
-                $sortedbyoptions[$option.':desc'] = get_string($option, 'dialogue') .' &#x25B4';
-            } else {
-                $sortedbyoptions[$option] = get_string($option, 'dialogue');
-            }
-            */
             $sortedbyoptions[$option] = get_string($option, 'dialogue');
         }
 
