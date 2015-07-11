@@ -18,7 +18,8 @@ namespace mod_dialogue\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/dialogue/formlib.php');
+// load repository lib, will load filelib and formslib
+require_once($CFG->dirroot . '/repository/lib.php');
 
 class message_form extends \moodleform {
     public $readonly = false;
@@ -66,7 +67,7 @@ class message_form extends \moodleform {
         $mform->setType('messageid', PARAM_INT);
 
 
-        $mform->addElement('header', 'actionssection', get_string('actions', 'dialogue'));
+        //$mform->addElement('header', 'actionssection', get_string('actions', 'dialogue'));
 
         $actionbuttongroup = array();
         if (in_array('send', $actions)) {
@@ -83,7 +84,7 @@ class message_form extends \moodleform {
         }
         $mform->addGroup($actionbuttongroup, 'actionbuttongroup', '', ' ', false);
 
-        $mform->setExpanded('actionssection', true);
+        //$mform->setExpanded('actionssection', true);
 
 
     }
