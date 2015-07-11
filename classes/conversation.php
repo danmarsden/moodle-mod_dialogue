@@ -34,13 +34,16 @@ class conversation extends message {
     public $_recipient = 0;
     /** @var int count of messages belonging to open conversation */
     public $_messagecount = 0;
+    /** @var int openrule is the conversation a template with open rule */
+    public $_openrule = 0;
 
     /** @var rule  */
     protected $_rule = null;
-
+    /** @var participants  */
     protected $_participants = null;
+
     protected $_replies = array();
-    protected $_bulkopenrule = null;
+
     protected $_receivedby = null;
 
     /**
@@ -73,6 +76,12 @@ class conversation extends message {
         return $this->_rule;
     }
 
+    public function get_participants() {
+        if (is_null($this->_participants)) {
+            $this->_participants = new participants($this);
+        }
+        return $this->_participants;
+    }
     /**
      * Sets up a new conversation based on current conversation and dialogue, and
      * copies:
@@ -90,8 +99,14 @@ class conversation extends message {
     public function copy() {
         // create new conversation,
         $copy = new conversation($this->dialogue);
-        $copy->set_author($this->_authorid);
+
         $copy->set_subject($this->_subject);
+
+        $copy->set_owner($this->_owner);
+
+        $copy->set_instigator($this->_instigator);
+
+        $copy->set_author($this->_authorid);
         // prep html linked embedded if html, move to draft area
         if ($this->bodyformat == FORMAT_HTML) {
             // html
@@ -191,7 +206,8 @@ class conversation extends message {
             throw new \coding_exception('Conversation identifier not set so cannot load!');
         }
 
-        $sql = "SELECT dc.subject, dc.owner, dc.instigator, dc.recipient, dc.messagecount, dm.*
+        $sql = "SELECT dc.subject, dc.owner, dc.instigator, dc.recipient, dc.messagecount, dc.openrule,
+                       dm.*
                   FROM {dialogue_conversations} dc
                   JOIN {dialogue_messages} dm ON dm.conversationid = dc.id
                  WHERE dm.conversationindex = 1
@@ -199,111 +215,40 @@ class conversation extends message {
 
         $record = $DB->get_record_sql($sql, array('conversationid' => $this->_conversationid), MUST_EXIST);
 
-        $this->_subject         = $record->subject;
-        $this->_owner           = $record->owner;
-        $this->_instigator      = $record->instigator;
-        $this->_recipient       = $record->recipient;
+        $this->set_subject($record->subject);
+        $this->set_owner($record->owner);
+        $this->set_instigator($record->instigator);
+        $this->set_recipient($record->recipient);
         $this->_messagecount    = $record->messagecount;
-
-        $this->_authorid        = $record->authorid;
+        $this->_openrule        = $record->openrule;
+        $this->set_author($record->authorid);
         $this->_messageid       = $record->id;
         $this->_body            = $record->body;
         $this->_bodyformat      = $record->bodyformat;
+        $this->set_body($record->body, $record->bodyformat);
         $this->_attachments     = $record->attachments;
         $this->_state           = $record->state;
         $this->_timemodified    = $record->timemodified;
     }
 
-    /**
-     *
-     * @global type $CFG
-     * @return \mod_dialogue_conversation_form
-     * @throws moodle_exception
-     */
-    /*
-    public function initialise_form() {
-        global $CFG, $USER, $PAGE;
-        require_once($CFG->dirroot . '/mod/dialogue/formlib.php');
-
-        // form can only be initialise if in draft state
-        if ($this->state != dialogue::STATE_DRAFT) {
-            throw new \moodle_exception('Oh! Ah, yes... I see that you know your judo well...');
+    public function load_form_data(\stdClass $data) {
+        // Single recipient mode.
+        if (isset($data->recipient)) {
+            $this->_recipient = $data->recipient;
         }
-
-        $cm = $this->dialogue->cm;
-        $context = $this->dialogue->context;
-        $dialogueid = $this->dialogue->dialogueid;
-
-        require_capability('mod/dialogue:open', $context);
-
-        $form = new \mod_dialogue_conversation_form();
-        // setup important hiddens
-        $form->set_data(array('id' => $cm->id));
-        $form->set_data(array('cmid' => $cm->id));
-        $form->set_data(array('dialogueid' => $dialogueid));
-        $form->set_data(array('conversationid' => $this->_conversationid));
-        $form->set_data(array('messageid' => $this->_messageid));
-        if (is_null($this->_messageid)) {
-            $form->set_data(array('action' => 'create'));
-        } else {
-            $form->set_data(array('action' => 'edit'));
+        // A rule for bulk opening of conversations.
+        if (isset($data->rule)) {
+            $this->get_rule()->set($data->rule);
         }
-        // setup nonjs person selector
-        $options = array();
-        $selected = array();
-        // get participants - @todo
-        $participants = $this->participants; // insure loaded by using magic
-        if ($participants) {
-            foreach ($participants as $participant) {
-                $options[$participant->id] = fullname($participant);
-                $selected[] = $participant->id;
-            }
-            $optiongroup = array('' => $options); // cause formslib selectgroup is stupid.
-        } else {
-            $optiongroup = array(get_string('usesearch', 'dialogue') => array('' => '')); // cause formslib selectgroup is stupid.
+        // Set the subject.
+        $this->set_subject($data->subject);
+        // Set body up.
+        $this->set_body($data->body['text'], $data->body['format'], $data->body['itemid']);
+        // Attachments.
+        if (isset($data->attachments)) {
+            $this->set_attachmentsdraftid($data->attachments['itemid']);
         }
-
-        $json = json_encode($participants);
-
-        $PAGE->requires->yui_module('moodle-mod_dialogue-autocomplete',
-            'M.mod_dialogue.autocomplete.init', array($cm->id, $json));
-
-        $form->update_selectgroup('p_select', $optiongroup, $selected);
-
-        // set bulk open bulk
-        $bulkopenrule = $this->bulkopenrule; // insure loaded by using magic
-
-        if (!empty($bulkopenrule) and has_capability('mod/dialogue:bulkopenrulecreate', $context)) {
-            // format for option item e.g. course-1, group-1
-            $groupinformation = $bulkopenrule['type'] . '-' . $bulkopenrule['sourceid'];
-            $form->set_data(array('groupinformation' => $groupinformation));
-            $form->set_data(array('includefuturemembers' => $bulkopenrule['includefuturemembers']));
-            $form->set_data(array('cutoffdate' => $bulkopenrule['cutoffdate']));
-        }
-        // set subject
-        $form->set_data(array('subject' => $this->_subject));
-        // prep draft body
-        $draftbody = file_prepare_draft_area($this->_bodydraftid, $context->id, 'mod_dialogue', 'message', $this->_messageid, \mod_dialogue_conversation_form::editor_options(), $this->_body);
-        // set body
-        $form->set_data(array('body' =>
-            array('text' => $draftbody,
-                'format' => $this->_bodyformat,
-                'itemid' => $this->_bodydraftid)));
-
-        // prep draft attachments
-        file_prepare_draft_area($this->_attachmentsdraftid, $context->id, 'mod_dialogue', 'attachment', $this->_messageid, \mod_dialogue_conversation_form::attachment_options());
-        // set attachments
-        $form->set_data(array('attachments[itemid]' => $this->_attachmentsdraftid));
-
-        // remove any unecessary buttons
-        if (($USER->id != $this->author->id) or is_null($this->conversationid)) {
-            $form->remove_from_group('trash', 'actionbuttongroup');
-        }
-
-        // attach initialised form to conversation class and return
-        return $this->_form = $form;
     }
-*/
 
     protected function magic_get_conversationid() {
         return $this->_conversationid;
@@ -412,65 +357,67 @@ class conversation extends message {
         $record->recipient      = $this->_recipient;
         $record->messagecount   = $this->_conversationindex; // @TODO this is a dirty hack until code created.
 
-        // we need a conversationid
+        $rule = $this->get_rule();
+        if (!$rule->is_empty()) {
+            $record->openrule = 1;
+        }
+        // We need a conversationid.
         if (is_null($this->_conversationid)) {
-            // create new record
+            // Create new record.
             $this->_conversationid = $DB->insert_record('dialogue_conversations', $record);
         } else {
             $record->timemodified = time();
-            // update existing record
+            // Update existing record.
             $DB->update_record('dialogue_conversations', $record);
         }
-
-        // Re usability, let dialogue_message do it's thing.
+        // Save rule, won't save if no type or source.
+        if ($rule->save()) {
+            $this->_openrule = 1;
+        }
+        // Re-use, let dialogue_message do it's thing.
         parent::save();
-
-        // Save rule.
-        $this->get_rule()->save();
-
-    }
-
-    public function load_form_data(\stdClass $data) {
-        // Single recipient mode.
-        if (isset($data->recipient)) {
-            $this->_recipient = $data->recipient;
-        }
-        // A rule for bulk opening of conversations.
-        if (isset($data->rule)) {
-            $this->get_rule()->set($data->rule);
-        }
-
-        $this->_subject = format_string($data->subject);
-        $this->set_body($data->body['text'], $data->body['format'], $data->body['itemid']);
-        if (isset($data->attachments)) {
-            $this->set_attachmentsdraftid($data->attachments['itemid']);
-        }
     }
 
     public function send() {
-        global $USER, $DB;
+        global $USER, $DB, $CFG;
 
         $cm      = $this->dialogue->cm;
         $course  = $this->dialogue->course;
 
-        $hasrule = $this->get_rule()->exists();
-
-        $incomplete = ((empty($hasrule) and empty($this->_recipient)) or
-            empty($this->_subject) or empty($this->_body));
-
-        if ($incomplete) {
-            throw new \moodle_exception("Incomplete conversation, cannot send!");
+        if (empty($this->_subject)) {
+            throw new \moodle_exception("No subject, won't send!");
         }
 
-        if ($hasrule) {
-            $this->_state = dialogue::STATE_BULK_AUTOMATED;
-            // update state to bulk automated
-            $DB->set_field('dialogue_messages', 'state', $this->_state, array('id' => $this->_messageid));
-/* @TODO move to message send **/
-            return true;
+        if (empty($this->_body)) {
+            throw new \moodle_exception("No body, won't send!");
+        }
+
+        self::set_state(dialogue::STATE_OPEN);
+        self::save();
+
+        // Has rule, should process
+        if ($this->_openrule) {
+            require_once($CFG->dirroot . '/mod/dialogue/lib.php');
+            dialogue_run_open_rules($this->_conversationid, false);
+            return;
         }
 
         parent::send();
+    }
+
+    public function set_owner($owner) {
+        $this->_owner = $owner;
+        $this->get_participants()->add($owner);
+    }
+
+    public function set_instigator($instigator) {
+        $this->_instigator = $instigator;
+        $this->get_participants()->add($instigator);
+    }
+
+    public function set_recipient($recipient) {
+        $this->_recipient = $recipient;
+        $this->get_participants()->add($recipient);
     }
 
     public function set_subject($subject) {
