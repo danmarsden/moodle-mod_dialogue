@@ -52,15 +52,13 @@ class conversation_form extends message_form {
     public function definition_after_data() {
         global $CFG, $PAGE;
 
-        $rpmaxresults = 10;//$config = get_config('dialogue', 'rpmaxresults');
-
         parent::definition_after_data();
 
         $data = $this->_customdata['data'];
         $this->set_data(array('id' => $data['conversationid']));
         $this->set_data(array('subject' => $data['subject']));
         $ajaxurl = $CFG->wwwroot . '/mod/dialogue/searchpotentials.json.php?q={query}&id=' . $data['cmid'] . '&sesskey=' . sesskey();
-
+        $rpmaxresults = get_config('dialogue', 'uimaxrecipients');
         $recipient[] = $data['recipient'];
         $arguments =
             array(
@@ -84,17 +82,15 @@ class conversation_form extends message_form {
     }
 
     public function validation($data, $files) {
-
         $errors = parent::validation($data, $files);
 
-        if (empty($data['openwith'])) {
-            //$errors['openwith'] = get_string('errornoparticipant', 'dialogue'); @TODO
+        if (!optional_param_array('recipient', 0, PARAM_INT)) {
+            $errors['openwith'] = get_string('errornoparticipant', 'dialogue');
         }
 
         if (empty($data['subject'])) {
             $errors['subject'] = get_string('erroremptysubject', 'dialogue');
         }
-
         return $errors;
     }
 }
