@@ -46,50 +46,52 @@ $PAGE->set_context($context);
 $PAGE->set_cacheable(false);
 $PAGE->set_url($pageurl);
 
+dialogue_actions_block();
+
 require_capability('mod/dialogue:open', $context);
 
 $dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
 $conversation = new \mod_dialogue\conversation($dialogue); // New conversation.
+$form = new \mod_dialogue\form\conversation_form(null, array('data'=>$conversation->prepare_form_data()));
 
-$form = $conversation->initialise_form();
 if ($form->is_submitted()) {
-    $submitaction = $form->get_submit_action();
-    switch ($submitaction) {
+    $action = $form->get_submit_action();
+    switch ($action) {
         case 'cancel':
             redirect($returnurl);
         case 'send':
             if ($form->is_validated()){
-                $conversation->save_form_data();
+                $data = $form->get_submitted_data();
+                $conversation->load_form_data($data);
+                $conversation->save();
                 $conversation->send();
-                if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
-                    $sendmessage = get_string('conversationopenedcron', 'dialogue');
-                } else {
-                    $sendmessage = get_string('conversationopened', 'dialogue');
-                    // Trigger conversation created event
-                    $eventparams = array(
-                        'context' => $context,
-                        'objectid' => $conversation->conversationid
-                    );
-                    $event = \mod_dialogue\event\conversation_created::create($eventparams);
-                    $event->trigger();
-                }
-                redirect($returnurl, $sendmessage);
+                // Trigger conversation created event
+                $eventparams = array(
+                    'context' => $context,
+                    'objectid' => $conversation->conversationid
+                );
+                $event = \mod_dialogue\event\conversation_created::create($eventparams);
+                $event->trigger();
+                redirect($returnurl, get_string('conversationopened', 'dialogue'), 5);
             }
             break; // leave switch to display form page
         case 'save':
-            $conversation->save_form_data();
+            $data = $form->get_submitted_data();
+            $conversation->load_form_data($data);
+            $conversation->save();
             redirect($draftsurl, get_string('changessaved'));
-        case 'trash':
-            $conversation->trash();
-            redirect($draftsurl, get_string('draftconversationtrashed', 'dialogue'));
     }
 }
-
 // Display form page
 echo $OUTPUT->header();
 echo $OUTPUT->heading($activityrecord->name);
 if (!empty($dialogue->activityrecord->intro)) {
     echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
+}
+if (!empty($dialogue->activityrecord->oneperperson)) {
+    echo $OUTPUT->notification('<i class="fa fa-info-circle"></i><span class="message">' .
+                                get_string('oneperpersonisset', 'dialogue') .
+                               '</span>', 'notifymessage');
 }
 $form->display();
 echo $OUTPUT->footer($course);

@@ -36,7 +36,7 @@ $context = \context_module::instance($cm->id, MUST_EXIST);
 
 require_login($course, false, $cm);
 
-$pageurl = new moodle_url('/mod/dialogue/conversation/close.php');
+$pageurl = new moodle_url('/mod/dialogue/conversation/delete.php');
 $pageurl->param('id', $conversationrecord->id);
 $returnurl = new moodle_url('/mod/dialogue/view.php', array('id' => $cm->id));
 
@@ -47,7 +47,7 @@ $PAGE->set_cacheable(false);
 $PAGE->set_url($pageurl);
 
 $dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
-$conversation = new \mod_dialogue\conversation($dialogue, (int) $conversationrecord->id);
+$conversation = new \mod_dialogue\conversation($dialogue, $conversationrecord->id);
 
 if (!empty($confirm) && confirm_sesskey()) {
     $conversation->delete();
