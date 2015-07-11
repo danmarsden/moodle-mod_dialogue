@@ -75,6 +75,7 @@ body.path-mod-dialogue {
     @import "font-awesome/mixins";
     @import "font-awesome/path";
     @import "font-awesome/core";
+    .@{fa-css-prefix}-info-circle:before { content: @fa-var-info-circle; }
     .@{fa-css-prefix}-sort-alpha-asc:before { content: @fa-var-sort-alpha-asc; }
     .@{fa-css-prefix}-sort-alpha-desc:before { content: @fa-var-sort-alpha-desc; }
     .@{fa-css-prefix}-sort-amount-asc:before { content: @fa-var-sort-amount-asc; }
@@ -85,13 +86,19 @@ body.path-mod-dialogue {
     .@{fa-css-prefix}-trash-o:before { content: @fa-var-trash-o; }
 
     // Custom
-    @import "autocomplete.less";
+    //@import "autocomplete.less";
+    @import "recipientpicker.less";
     @import "conversation.less";
     @import "stateindicator.less";
 
     /* listing meta */
+    .listing-meta{
+      margin: 10px 0;
+    }
+
+
     .listing-meta h6 {
-       display: inline-block
+      display: inline-block
     }
 
     .listing-meta:before {
@@ -165,6 +172,11 @@ body.path-mod-dialogue {
       .alert-info;
     }
 
+    .alert > span.message {
+      margin: 5px;
+      background-color: deeppink;
+    }
+
     .mform fieldset {
       border: none;
     }
@@ -194,11 +206,52 @@ body.path-mod-dialogue {
     .img-rounded {
       .border-radius(6px);
     }
+
+    .input-group-btn {
+      .btn-search {
+        padding: 6px 12px;
+        border-radius: 0 4px 4px 0;
+      }
+    }
+
   }
 
-  &.jsenabled .conversation-list tr:hover,
-  &.jsenabled .draft-list tr:hover,
-  &.jsenabled .bulkopenrule-list tr:hover{
-    cursor: pointer;
+
+  .block_dialogue_menu {
+    .block_tree {
+      margin: 5px;
+      padding-left: 0px;
+      overflow: visible;
+    }
+    & .btn {
+      margin: 3px;
+    }
+  }
+
+
+
+
+
+  .conversation-list {
+    .participants {
+      max-width: 64px;
+      .organizer {
+        /*
+        border: 2px solid #337ab7;
+        border: 1px solid #d9534f;
+        border: 1px solid #DDD;
+        */
+      }
+    }
+    .userpicture {
+      margin-right: 3px;
+    }
+    .fullname {
+      padding: 0 5px;
+    }
+    .messagecount{
+      padding-left: 3px;
+      font-size: xx-small;
+    }
   }
 }
