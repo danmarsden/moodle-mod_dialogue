@@ -43,8 +43,8 @@ class message implements \renderable {
         $this->_dialogue = $dialogue;
         $this->_conversation = $conversation;
 
-        $this->_authorid = $USER->id;
-        $this->_bodyformat = editors_get_preferred_format();
+        $this->set_author($USER->id);
+        $this->set_body('', editors_get_preferred_format());
         $this->_timecreated = time();
         $this->_timemodified = time();
     }
@@ -76,13 +76,6 @@ class message implements \renderable {
     public function is_author() {
         global $USER;
         return ($USER->id == $this->_authorid);
-    }
-
-    public function is_participant() {
-        global $USER;
-
-        $participants = $this->conversation->participants;
-        return in_array($USER->id, array_keys($participants));
     }
 
     public function delete() {
@@ -169,11 +162,14 @@ class message implements \renderable {
     }
 
     public function prepare_form_data() {
-        $context = $this->dialogue->context;
+
+        $cm         = $this->dialogue->cm;
+        $context    = $this->dialogue->context;
+        $dialogue   = $this->dialogue;
 
         $data = array();
-        $data['cmid'] = $this->dialogue->cm->id;
-        $data['dialogueid'] = $this->dialogue->activityrecord->id;
+        $data['cmid'] = $cm->id;
+        $data['dialogueid'] = $dialogue->activityrecord->id;
         $data['conversationid'] = $this->conversationid;
         $data['messageid'] = $this->messageid;
 
@@ -235,6 +231,54 @@ class message implements \renderable {
         return true;
     }
 
+    /**
+     * Send details of a recent post to a user via the messaging system.
+     *
+     * @param $userto
+     * @return mixed
+     * @throws \coding_exception
+     */
+    public function notify($userto) {
+        // Setup information for MessageAPI.
+        $cm             = $this->dialogue->cm;
+        $conversationid = $this->conversation->conversationid;
+        $context        = $this->dialogue->context;
+
+        $userfrom       = $this->_authorid;
+        $subject        = format_string($this->conversation->subject, true, array('context' => $context));
+
+        $a              = new \stdClass();
+        $a->userfrom    = fullname($userfrom);
+        $a->subject     = $subject;
+
+        $url            = new \moodle_url('/mod/dialogue/view.php', array('id' => $cm->id));
+        $a->url         = $url->out(false);
+
+        $posthtml       = get_string('messageapibasicmessage', 'dialogue', $a);
+        $posttext       = html_to_text($posthtml);
+        $smallmessage   = get_string('messageapismallmessage', 'dialogue', fullname($userfrom));
+
+        $contexturlparams   = array('id' => $conversationid);
+        $contexturl         = new \moodle_url('/mod/dialogue/conversation/view.php', $contexturlparams);
+        $contexturl->set_anchor('m' . $this->_messageid);
+
+        $eventdata                      = new \stdClass();
+        $eventdata->component           = 'mod_dialogue';
+        $eventdata->name                = 'post';
+        $eventdata->userfrom            = $userfrom;
+        $eventdata->userto              = $userto;
+        $eventdata->subject             = $subject;
+        $eventdata->fullmessage         = $posttext;
+        $eventdata->fullmessageformat   = FORMAT_HTML;
+        $eventdata->fullmessagehtml     = $posthtml;
+        $eventdata->smallmessage        = $smallmessage;
+        $eventdata->notification        = 1;
+        $eventdata->contexturl          = $contexturl->out(false);
+        $eventdata->contexturlname      = $subject;
+
+        return message_send($eventdata);
+    }
+
     public function mark_read($user = null) {
         // only mark read if in a open or closed state
         return $this->set_flag(dialogue::FLAG_READ, $user);
@@ -266,6 +310,7 @@ class message implements \renderable {
             $authorid = $authorid->id;
         }
         $this->_authorid = $authorid;
+        $this->conversation->get_participants()->add($authorid);
     }
 
     public function set_state($state) {
@@ -280,17 +325,17 @@ class message implements \renderable {
             throw new \moodle_exception("This doesn't belong to you!");
         }
 
-        $context = $this->dialogue->context; // needed for filelib functions
-        $dialogueid = $this->dialogue->dialogueid;
+        $context        = $this->dialogue->context;
+        $dialogueid     = $this->dialogue->dialogueid;
         $conversationid = $this->conversation->conversationid;
 
-        $record = new \stdClass();
-        $record->id = $this->_messageid;
-        $record->dialogueid = $dialogueid;
-        $record->conversationid = $conversationid;
-        $record->conversationindex = $this->_conversationindex;
-        $record->authorid = $this->_authorid;
-        // rewrite body now if has embedded files
+        $record                     = new \stdClass();
+        $record->id                 = $this->_messageid;
+        $record->dialogueid         = $dialogueid;
+        $record->conversationid     = $conversationid;
+        $record->conversationindex  = $this->_conversationindex;
+        $record->authorid           = $this->_authorid;
+        // Rewrite body now if has embedded files.
         if (dialogue_contains_draft_files($this->_bodydraftid)) {
             $record->body = file_rewrite_urls_to_pluginfile($this->_body, $this->_bodydraftid);
         } else {
@@ -317,87 +362,47 @@ class message implements \renderable {
         }
         // deal with embedded files
         if ($this->_bodydraftid) {
-
             file_save_draft_area_files($this->_bodydraftid, $context->id, 'mod_dialogue', 'message', $this->_messageid);
         }
         // deal with attached files
         if ($this->_attachmentsdraftid) {
-
             file_save_draft_area_files($this->_attachmentsdraftid, $context->id, 'mod_dialogue', 'attachment', $this->_messageid);
         }
 
         return true;
     }
 
+
     public function send() {
         global $DB;
 
-        // add author to participants and save
-        $this->conversation->add_participant($this->_authorid);
-        $this->conversation->save_participants();
+        // Do we send out notifications.
+        $sendnotifications = $this->dialogue->activityrecord->notifications;
 
-        // update state to open
-        $this->_state = dialogue::STATE_OPEN;
+        // Set message state to open.
+        $this->set_state(dialogue::STATE_OPEN);
         $DB->set_field('dialogue_messages', 'state', $this->_state, array('id' => $this->_messageid));
 
-        // setup information for messageapi object
-        $cm = $this->dialogue->cm;
-        $conversationid = $this->conversation->conversationid;
-        $course = $this->dialogue->course;
-        $context = $this->dialogue->context;
-        $userfrom = $DB->get_record('user', array('id' => $this->_authorid), '*', MUST_EXIST);
-        $subject = format_string($this->conversation->subject, true, array('context' => $context));
+        // Save participants. TODO move up class.
+        $participants = $this->conversation->get_participants();
+        $participants->save();
 
-        $a = new \stdClass();
-        $a->userfrom = fullname($userfrom);
-        $a->subject = $subject;
-        $url = new \moodle_url('/mod/dialogue/view.php', array('id' => $cm->id));
-        $a->url = $url->out(false);
-
-        $posthtml = get_string('messageapibasicmessage', 'dialogue', $a);
-        $posttext = html_to_text($posthtml);
-        $smallmessage = get_string('messageapismallmessage', 'dialogue', fullname($userfrom));
-
-        $contexturlparams = array('id' => $cm->id, 'conversationid' => $conversationid);
-        $contexturl = new \moodle_url('/mod/dialogue/conversation.php', $contexturlparams);
-        $contexturl->set_anchor('m' . $this->_messageid);
-
-        // flags and messaging
-        $participants = $this->conversation->participants;
         foreach ($participants as $participant) {
             if ($participant->id == $this->_authorid) {
-                // so unread flag count displays properly for author, they wrote it, they should of read it.
+                // So unread flag count displays properly for author, they wrote it, they should of read it.
                 $this->set_flag(dialogue::FLAG_READ, $this->author);
                 continue;
             }
-            // give participant a sent flag
+            // Give the participant a sent flag
             $this->set_flag(dialogue::FLAG_SENT, $participant);
-
-            $userto = $DB->get_record('user', array('id' => $participant->id), '*', MUST_EXIST);
-
-            $eventdata = new \stdClass();
-            $eventdata->component = 'mod_dialogue';
-            $eventdata->name = 'post';
-            $eventdata->userfrom = $userfrom;
-            $eventdata->userto = $userto;
-            $eventdata->subject = $subject;
-            $eventdata->fullmessage = $posttext;
-            $eventdata->fullmessageformat = FORMAT_HTML;
-            $eventdata->fullmessagehtml = $posthtml;
-            $eventdata->smallmessage = $smallmessage;
-            $eventdata->notification = 1;
-            $eventdata->contexturl = $contexturl->out(false);
-            $eventdata->contexturlname = $subject;
-
-            $result = message_send($eventdata);
-
-            if (!$result) {
-                //throw new moodle_exception('message not saved');
+            // Send out message notifications.
+            if ($sendnotifications) {
+                $this->notify($participant->id);
             }
         }
-
         return true;
     }
+
 
     /**
      * Message is marked as trash so can be deleted at a later time.
