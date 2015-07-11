@@ -87,6 +87,18 @@ function dialogue_search_potentials(\mod_dialogue\dialogue $dialogue, $query = '
     // current user doesn't need to be in list
     $wheres[] = "u.id != $USER->id";
 
+    // One open conversation per person
+    if ($dialogue->activityrecord->oneperperson) {
+        $wheres[] = "u.id NOT IN (SELECT dc.recipient
+                                    FROM {dialogue_conversations} dc
+                                    JOIN {dialogue_messages} dm ON dm.conversationid = dc.id
+                                   WHERE dc.dialogueid = :nidialogueid
+                                     AND dm.conversationindex = 1 AND dm.state = :nistate)";
+
+        $params['nidialogueid'] = $dialogue->activityrecord->id;
+        $params['nistate'] = \mod_dialogue\dialogue::STATE_OPEN;
+    }
+
     $fullname = $DB->sql_concat('u.firstname', "' '", 'u.lastname');
 
     if (!empty($query)) {
@@ -134,28 +146,41 @@ function dialogue_search_potentials(\mod_dialogue\dialogue $dialogue, $query = '
  * @param int $conversationid
  * @return array
  */
+
 function dialogue_get_conversation_participants(\mod_dialogue\dialogue $dialogue, $conversationid) {
     global $DB;
 
-    static $cache = null;
+    static $initcache = null;
 
-    if (!isset($cache)) {
-        $cache = cache::make('mod_dialogue', 'participants');
-        $participants = $DB->get_records('dialogue_participants', array('dialogueid' => $dialogue->activityrecord->id), 'conversationid');
-        while ($participants) {
-            $participant = array_shift($participants);
-            $group = $cache->get($participant->conversationid);
-            if ($group) {
-                $group[] = $participant->userid;
-            } else {
-                $group = array($participant->userid);
-            }
-            $cache->set($participant->conversationid, $group);
+    $cache = cache::make('mod_dialogue', 'participants');
+    if (!isset($initcache)) {
+        // Do bulk load
+        $userfields = user_picture::fields('u', null, 'participant_id', 'participant_');
+        $sql = "SELECT dp.conversationid , $userfields
+                  FROM {dialogue_participants} dp
+                  JOIN {user} u ON u.id = dp.userid
+                 WHERE dp.dialogueid = :dialogueid
+              ORDER BY dp.conversationid";
+
+        $params['dialogueid'] = $dialogue->activityrecord->id;
+        $rs = $DB->get_recordset_sql($sql, $params);
+        $collect = array();
+        foreach ($rs as $record) {
+            $unaliased = \mod_dialogue\conversations_list::unalias($record);
+            $collect[$record->conversationid][$unaliased['participant']['id']] = $unaliased['participant'];
+        }
+        $rs->close();
+
+        foreach ($collect as $key => $value) {
+            $cache->set($key, $value);
         }
 
     }
-
-    return $cache->get($conversationid);
+    if (!$participants = $cache->get($conversationid)) {
+        //throw new \core\session\exception('WTF somehow participants missing for conversationid '. $conversationid);
+        //$rebuild
+    }
+    return $participants;
 }
 
 /**
