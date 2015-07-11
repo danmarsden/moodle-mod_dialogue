@@ -64,6 +64,10 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->addHelpButton('notifications', 'notifications', 'dialogue');
         $mform->setDefault('notifications', 1);
 
+        $mform->addElement('checkbox', 'oneperperson', get_string('oneperperson', 'dialogue'));
+        $mform->addHelpButton('oneperperson', 'oneperperson', 'dialogue');
+        $mform->setDefault('oneperperson', 0);
+
         $this->standard_grading_coursemodule_elements();
 
         $this->standard_coursemodule_elements();
@@ -71,7 +75,7 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
-     function get_data() {
+    function get_data() {
         $data = parent::get_data();
         if (!$data) {
             return false;
@@ -79,6 +83,12 @@ class mod_dialogue_mod_form extends moodleform_mod {
         if (!isset($data->usecoursegroups)) {
             $data->usecoursegroups = 0;
         }
+        if (!isset($data->notifications)) {
+            $data->notifications = 0;
+        }
+        if (!isset($data->oneperperson)) {
+             $data->oneperperson = 0;
+        }
         return $data;
-     }
+    }
 }
