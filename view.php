@@ -14,59 +14,45 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-require_once('lib.php');
-require_once('locallib.php');
-require_once($CFG->dirroot . '/mod/dialogue/classes/conversations.php');
-require_once($CFG->dirroot . '/mod/dialogue/classes/conversations_by_author.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once($CFG->dirroot . '/mod/dialogue/locallib.php');
 
-$id         = optional_param('id', 0, PARAM_INT);
+$cmid       = optional_param('id', 0, PARAM_INT);
 $d          = optional_param('d', 0, PARAM_INT);
-$state      = optional_param('state', \mod_dialogue\dialogue::STATE_OPEN, PARAM_ALPHA);
 $page       = optional_param('page', 0, PARAM_INT);
-$sort       = optional_param('sort', 'latest', PARAM_ALPHANUM);
-$direction  = optional_param('direction', 'asc', PARAM_ALPHA);
+$q          = optional_param('q', null, PARAM_TEXT);
 
-
-
-if ($id) {
-    if (! $cm = get_coursemodule_from_id('dialogue', $id)) {
+if ($cmid) {
+    $cm = get_coursemodule_from_id('dialogue', $cmid);
+    if (! $cm) {
         print_error('invalidcoursemodule');
     }
 } else if ($d) {
-    if (! $cm = get_coursemodule_from_instance('dialogue', $d)) {
+    $cm = get_coursemodule_from_instance("dialogue", $d);
+    if (! $cm) {
         print_error('invalidcoursemodule');
     }
 } else {
     print_error('missingparameter');
-
 }
-if (! $activityrecord = $DB->get_record('dialogue', array('id' => $cm->instance))) {
+
+$activityrecord = $DB->get_record('dialogue', array('id' => $cm->instance));
+if (! $activityrecord) {
     print_error('invalidid', 'dialogue');
 }
-if (! $course = $DB->get_record('course', array('id' => $activityrecord->course))) {
+$course = $DB->get_record('course', array('id' => $activityrecord->course));
+if (! $course) {
     print_error('coursemisconf');
 }
-
-$context = \context_module::instance($cm->id);
+$context = \context_module::instance($cm->id, MUST_EXIST);
 
 require_login($course, false, $cm);
 
 // now set params on pageurl will later be set on $PAGE
 $pageurl = new moodle_url('/mod/dialogue/view.php');
 $pageurl->param('id', $cm->id);
-$pageurl->param('state', $state);
-if ($page) {
-    $pageurl->param('page', $page);
-}
-$pageurl->param('sort', $sort);
-$pageurl->param('direction', $direction);
-// set up a return url that will be stored to session
-$returnurl = clone($pageurl);
-$returnurl->remove_params('page');
-$SESSION->dialoguereturnurl = $returnurl->out(false);
 
-$PAGE->set_pagetype('mod-dialogue-view-index');
+
 $PAGE->set_cm($cm, $course, $activityrecord);
 $PAGE->set_context($context);
 $PAGE->set_cacheable(false);
@@ -76,32 +62,22 @@ $PAGE->set_heading(format_string($course->fullname));
 
 dialogue_actions_block();
 
-$PAGE->requires->yui_module('moodle-mod_dialogue-clickredirector',
-                            'M.mod_dialogue.clickredirector.init', array($cm->id));
-
 $dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
-$list = new \mod_dialogue\conversations_by_author($dialogue, $page, \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE);
-$list->set_state($state);
-$list->set_order($sort, $direction);
-
-$renderer = $PAGE->get_renderer('mod_dialogue');
-
+$list = new \mod_dialogue\conversations_list($dialogue, $page, \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE);
+if (isset($q)) {
+    $pageurl->param('q', $q);
+    $list->set_user_search($q);
+}
 echo $OUTPUT->header();
 echo $OUTPUT->heading($activityrecord->name);
 if (!empty($dialogue->activityrecord->intro)) {
     echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
 }
-
-echo $renderer->conversation_listing($list);
+$renderer = $PAGE->get_renderer('mod_dialogue');
+if ($list->rows_matched()) {
+    echo $renderer->dialogue_search_form($q);
+    echo $renderer->conversation_listing($list);
+} else {
+    echo html_writer::tag('h2', get_string('noconversationsfound', 'dialogue'));
+}
 echo $OUTPUT->footer($course);
-
-// Trigger course module viewed event
-$eventparams = array(
-    'context' => $context,
-    'objectid' => $activityrecord->id
-);
-$event = \mod_dialogue\event\course_module_viewed::create($eventparams);
-$event->add_record_snapshot('course_modules', $cm);
-$event->add_record_snapshot('course', $course);
-$event->add_record_snapshot('dialogue', $activityrecord);
-$event->trigger();
