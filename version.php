@@ -23,7 +23,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2015051100;
+$plugin->version   = 2015051101;
 $plugin->requires  = 2015051100;        // See http://docs.moodle.org/dev/Moodle_Versions
 $plugin->component = 'mod_dialogue';    // Full name of the plugin (used for diagnostics)
 $plugin->release   = '2.9';             // Human-friendly version name
