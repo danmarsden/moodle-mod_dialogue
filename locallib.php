@@ -49,7 +49,7 @@ class dialogue {
     const FLAG_READ = 'read';
     const PAGINATION_PAGE_SIZE = 20;
     const PAGINATION_MAX_RESULTS = 1000;
-    
+
     protected $_course  = null;
     protected $_module  = null;
     protected $_config  = null;
@@ -505,7 +505,7 @@ class dialogue_message implements renderable {
         // add author to participants and save
         $this->conversation->add_participant($this->_authorid);
         $this->conversation->save_participants();
-        
+
         // update state to open
         $this->_state = dialogue::STATE_OPEN;
         $DB->set_field('dialogue_messages', 'state', $this->_state, array('id' => $this->_messageid));
@@ -527,7 +527,7 @@ class dialogue_message implements renderable {
         $posthtml = get_string('messageapibasicmessage', 'dialogue', $a);
         $posttext = html_to_text($posthtml);
         $smallmessage = get_string('messageapismallmessage', 'dialogue', fullname($userfrom));
-        
+
         $contexturlparams = array('id' => $cm->id, 'conversationid' => $conversationid);
         $contexturl = new moodle_url('/mod/dialogue/conversation.php', $contexturlparams);
         $contexturl->set_anchor('m' . $this->_messageid);
@@ -682,7 +682,7 @@ class dialogue_conversation extends dialogue_message {
         $context = $this->dialogue->context;
         $cm      = $this->dialogue->cm;
         $course  = $this->dialogue->course;
-        
+
         // is this a draft
         if (is_null($this->_conversationid)) {
             throw new moodle_exception('cannotclosedraftconversation', 'dialogue');
@@ -736,7 +736,7 @@ class dialogue_conversation extends dialogue_message {
         $DB->delete_records('dialogue_conversations', array('id' => $this->_conversationid));
 
         parent::delete();
-        
+
     }
 
     /**
@@ -1256,7 +1256,7 @@ class dialogue_reply extends dialogue_message {
         if ($this->conversation->state == dialogue::STATE_CLOSED) {
             $form->remove_from_group('send', 'actionbuttongroup');
         }
-        
+
          // remove any unecessary buttons
         if (($USER->id != $this->author->id) or is_null($this->messageid)) {
             $form->remove_from_group('delete', 'actionbuttongroup');
@@ -1345,7 +1345,7 @@ function dialogue_search_potentials(dialogue $dialogue, $query = '') {
                 JOIN ($esql) je ON je.id = u.id";
 
     if ($usecoursegroups) {
-        if (!has_capability('moodle/site:accessallgroups', $context)) { 
+        if (!has_capability('moodle/site:accessallgroups', $context)) {
             $groupings = groups_get_user_groups($course->id, $USER->id);
             $allgroups = $groupings[0];
             if ($allgroups) {
@@ -1454,7 +1454,7 @@ function dialogue_get_user_details(dialogue $dialogue, $userid) {
 
     $context        = $dialogue->context;
     $requiredfields = user_picture::fields('u');
-    
+
     if (!isset($cache)) {
         $cache = cache::make('mod_dialogue', 'userdetails');
     }
@@ -1466,9 +1466,9 @@ function dialogue_get_user_details(dialogue $dialogue, $userid) {
         }
         $cache->set($context->id, $enrolledusers);
     }
-    
+
     $cachedusers = $cache->get($context->id);
-    
+
     if (!isset($cachedusers[$userid])) {
         $sql = "SELECT $requiredfields
                   FROM {user} u
@@ -1705,7 +1705,9 @@ function dialogue_get_bulk_open_rule_listing(dialogue $dialogue, &$total = null)
  */
 function dialogue_generate_summary_line($subject, $body, $bodyformat, $length = 70, $separator = ' - ') {
     $subject = html_to_text($subject, 0, false);
-    $body    = html_to_text(format_text($body, $bodyformat), 0, false);
+    $body    = htmlspecialchars_decode($body);
+    $body    = html_to_text($body, 0, false);
+
 
     $diff = $length - (strlen($subject) + strlen($separator));
     if (\core_text::strlen($subject) > $length or ! $diff) {
@@ -1747,7 +1749,7 @@ function dialogue_get_conversations_count($cm, $state = null) {
     } else {
         $instates  = $states;
     }
-    
+
     $context = context_module::instance($cm->id, IGNORE_MISSING);
 
     // standard query stuff
@@ -1774,7 +1776,7 @@ function dialogue_get_conversations_count($cm, $state = null) {
     if ($joins) {
         $join = ' ' . implode("\n", $joins);
     }
-   
+
     if ($wheres) {
         $where = " WHERE " . implode(" AND ", $wheres);
     }
@@ -1893,7 +1895,7 @@ function dialogue_shorten_html($html, $ideal = 30, $exact = false, $ending = '..
 
 /**
  * Helper function, check if draftid contains any files
- * 
+ *
  * @global type $USER
  * @param type $draftid
  * @return boolean
