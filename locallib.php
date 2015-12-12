@@ -424,7 +424,8 @@ function dialogue_get_bulk_open_rule_listing(\mod_dialogue\dialogue $dialogue, &
  */
 function dialogue_generate_summary_line($subject, $body, $bodyformat, $length = 70, $separator = ' - ') {
     $subject = html_to_text($subject, 0, false);
-    $body    = html_to_text(format_text($body, $bodyformat), 0, false);
+    $body    = htmlspecialchars_decode($body);
+    $body    = html_to_text($body, 0, false);
 
     $diff = $length - (strlen($subject) + strlen($separator));
     if (\core_text::strlen($subject) > $length or ! $diff) {
