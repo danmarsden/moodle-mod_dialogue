@@ -167,7 +167,8 @@ function dialogue_process_bulk_openrules() {
                 $conversationsopened = 0;
 
                 // get users that can receive
-                $enrolledusers = get_enrolled_users($dialogue->context, $withcapability, $groupid, $requiredfields);
+                $enrolledusers = get_enrolled_users($dialogue->context, $withcapability, $groupid, $requiredfields,
+                    null, 0, \mod_dialogue\dialogue::PAGINATION_MAX_RESULTS, true);
 
                 $sentusers = $DB->get_records('dialogue_flags',
                                             array('conversationid' => $conversation->conversationid,
