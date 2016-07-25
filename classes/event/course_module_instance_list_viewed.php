@@ -26,4 +26,19 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2014 Troy Williams
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class course_module_instance_list_viewed extends \core\event\course_module_instance_list_viewed {}
+class course_module_instance_list_viewed extends \core\event\course_module_instance_list_viewed {
+    /**
+     * Create the event from course record.
+     *
+     * @param \stdClass $course
+     * @return course_module_instance_list_viewed
+     */
+    public static function create_from_course(\stdClass $course) {
+        $params = array(
+            'context' => \context_course::instance($course->id)
+        );
+        $event = course_module_instance_list_viewed::create($params);
+        $event->add_record_snapshot('course', $course);
+        return $event;
+    }
+}

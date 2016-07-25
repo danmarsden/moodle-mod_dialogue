@@ -30,9 +30,9 @@ $url = new moodle_url('/mod/dialogue/index.php', array('id' => $id));
 
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('incourse');
-$coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
+$coursecontext = context_course::instance($course->id);
 
-add_to_log($course->id, 'dialogue', 'view all', 'index.php?id=' . $course->id);
+\mod_dialogue\event\course_module_instance_list_viewed::create_from_course($course)->trigger();
 
 $strdialogue        = get_string('modulename', 'dialogue');
 $strdialogues       = get_string('modulenameplural', 'dialogue');
@@ -46,7 +46,7 @@ if (!isset($modinfo->instances['dialogue'])) {
     $modinfo->instances['dialogue'] = array();
 }
 
-/// Output the page
+/// Setup the page.
 $PAGE->navbar->add($strdialogues);
 $PAGE->set_title("$course->shortname: $strdialogues");
 $PAGE->set_heading($course->fullname);
@@ -55,7 +55,8 @@ if (!$dialogues) {
     notice('There are no dialogues', "course/view.php?id=$course->id");
     die;
 } else {
-    list($insql, $inparams) = $DB->get_in_or_equal(array(dialogue::STATE_OPEN, dialogue::STATE_CLOSED), SQL_PARAMS_NAMED);
+    $states = array(\mod_dialogue\dialogue::STATE_OPEN, mod_dialogue\dialogue::STATE_CLOSED);
+    list($insql, $inparams) = $DB->get_in_or_equal($states, SQL_PARAMS_NAMED);
     $params = array('courseid' => $course->id) + $inparams;
     
     $sql = "SELECT dc.dialogueid, COUNT(dc.dialogueid) AS count
@@ -78,7 +79,7 @@ if (!$dialogues) {
         }
         
         if (!$context = context_module::instance($cm->id, IGNORE_MISSING)) {
-            continue;   // Shouldn't happen
+            continue;   // Shouldn't happen.
         }
 
         $dialogue = $dialogues[$dialogueid];
@@ -97,13 +98,9 @@ if (!$dialogues) {
     }
 
 }
-// output page
+// Output page.
 echo $OUTPUT->header();
 echo $OUTPUT->heading($strdialogues);
 echo html_writer::table($table);
 echo $OUTPUT->footer();
-exit;
-/*
-dialogue_count_open($dialogue, $USER),
-dialogue_count_closed($dialogue, $USER, $hascapviewall));
-*/
+
