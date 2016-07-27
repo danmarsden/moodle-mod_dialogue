@@ -111,4 +111,4 @@ echo $renderer->list_sortby(\mod_dialogue\conversations_by_role::get_sort_option
 echo $renderer->conversation_listing($list);
 echo $OUTPUT->footer($course);
 $logurl = new moodle_url('viewconversationsbyrole.php', array('id' =>  $cm->id));
-add_to_log($course->id, 'dialogue', 'view by role', $logurl->out(false), $activityrecord->name, $cm->id);
+
