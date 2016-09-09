@@ -55,7 +55,7 @@ if (!$dialogues) {
     notice('There are no dialogues', "course/view.php?id=$course->id");
     die;
 } else {
-    list($insql, $inparams) = $DB->get_in_or_equal(array(dialogue::STATE_OPEN, dialogue::STATE_CLOSED), SQL_PARAMS_NAMED);
+    list($insql, $inparams) = $DB->get_in_or_equal(array(\mod_dialogue\dialogue::STATE_OPEN, \mod_dialogue\dialogue::STATE_CLOSED), SQL_PARAMS_NAMED);
     $params = array('courseid' => $course->id) + $inparams;
     
     $sql = "SELECT dc.dialogueid, COUNT(dc.dialogueid) AS count
