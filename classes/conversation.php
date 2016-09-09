@@ -18,6 +18,8 @@ namespace mod_dialogue;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once __DIR__ . '/../../../lib/filelib.php';
+
 class conversation extends message {
 
     protected $_conversationid = null;
@@ -83,7 +85,7 @@ class conversation extends message {
         if ($this->bodyformat == FORMAT_HTML) {
             // html
             $context = $this->dialogue->context;
-            $body = file_prepare_draft_area($copy->_bodydraftid, $context->id, 'mod_dialogue', 'message', $this->messageid, null, $this->body);
+            $body = \file_prepare_draft_area($copy->_bodydraftid, $context->id, 'mod_dialogue', 'message', $this->messageid, null, $this->body);
         } else {
             // plaintext
             $body = $this->body;
@@ -94,7 +96,7 @@ class conversation extends message {
         if ($this->attachments) {
             $copy->_attachments = true;
             $context = $this->dialogue->context;
-            file_prepare_draft_area($copy->_attachmentsdraftid, $context->id, 'mod_dialogue', 'attachment', $this->messageid);
+            \file_prepare_draft_area($copy->_attachmentsdraftid, $context->id, 'mod_dialogue', 'attachment', $this->messageid);
         }
         // must set state to draft as a copy
         $copy->set_state(dialogue::STATE_DRAFT);
@@ -292,7 +294,7 @@ class conversation extends message {
         // set subject
         $form->set_data(array('subject' => $this->_subject));
         // prep draft body
-        $draftbody = file_prepare_draft_area($this->_bodydraftid, $context->id, 'mod_dialogue', 'message', $this->_messageid, \mod_dialogue_conversation_form::editor_options(), $this->_body);
+        $draftbody = \file_prepare_draft_area($this->_bodydraftid, $context->id, 'mod_dialogue', 'message', $this->_messageid, \mod_dialogue_conversation_form::editor_options(), $this->_body);
         // set body
         $form->set_data(array('body' =>
             array('text' => $draftbody,
@@ -300,7 +302,7 @@ class conversation extends message {
                 'itemid' => $this->_bodydraftid)));
 
         // prep draft attachments
-        file_prepare_draft_area($this->_attachmentsdraftid, $context->id, 'mod_dialogue', 'attachment', $this->_messageid, \mod_dialogue_conversation_form::attachment_options());
+        \file_prepare_draft_area($this->_attachmentsdraftid, $context->id, 'mod_dialogue', 'attachment', $this->_messageid, \mod_dialogue_conversation_form::attachment_options());
         // set attachments
         $form->set_data(array('attachments[itemid]' => $this->_attachmentsdraftid));
 
