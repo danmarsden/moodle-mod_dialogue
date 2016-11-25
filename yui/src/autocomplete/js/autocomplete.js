@@ -32,7 +32,8 @@ M.mod_dialogue.autocomplete = {
 
         this.inputnode.plug(Y.Plugin.AutoComplete);
         this.inputnode.ac.set('resultHighlighter', 'phraseMatch');
-        this.inputnode.ac.set('source', M.cfg.wwwroot + '/mod/dialogue/searchpotentials.json.php?q={query}&id='+cmid+'&sesskey='+M.cfg.sesskey);
+        this.inputnode.ac.set('source', M.cfg.wwwroot + '/mod/dialogue/searchpotentials.json.php?q={query}&id=' +
+            cmid+'&sesskey='+M.cfg.sesskey);
         this.inputnode.ac.set('resultTextLocator', this.RESULTTEXTLOCATOR);
         this.inputnode.ac.set('resultListLocator', this.RESULTLISTLOCATOR);
         this.inputnode.ac.set('resultFormatter', this.result_formatter);
@@ -138,7 +139,8 @@ M.mod_dialogue.autocomplete = {
         var r =  Y.Array.map(results, function (result) {
                var person = result.raw;
                return '<div class="">' +
-                      '<img src="'+person.imageurl+'" alt="'+person.imagealt+'" title="'+person.imagealt+'" class="userpicture" />' +
+                      '<img src="'+person.imageurl+'" alt="'+person.imagealt+'" title="'+person.imagealt+
+                        '" class="userpicture" />' +
                       '<span class="participant-name">' + result.highlighted + '</span>' +
                       '</div>';
         
