@@ -740,6 +740,100 @@ class dialogue_conversation extends dialogue_message {
         parent::delete();
 
     }
+	
+	public function leave() {
+        global $DB, $USER;
+
+        $context = $this->dialogue->context;
+        $cm      = $this->dialogue->cm;
+        $course  = $this->dialogue->course;
+
+        // is this a draft
+        if (is_null($this->_conversationid)) {
+            throw new moodle_exception('cannotclosedraftconversation', 'dialogue');
+        }
+		
+		// basically, don't try to remove a person who has viewall/participateall permissions
+		if (is_null($this->participants[$USER->id])){
+			throw new moodle_exception('You cannot leave a conversation if you are not a participant.', 'dialogue');
+		}
+		
+		// can't leave conversation if there are only 2 people left, provide option to close instead
+		if(count($this->participants) <= 2){
+			$errorMessage = 'You cannot leave a conversation if there are only 2 participants.';
+			$canclose = (($this->_authorid == $USER->id) or has_capability('mod/dialogue:closeany', $context));
+			if($canclose){
+				$closeurl = new moodle_url('/mod/dialogue/conversation.php');
+				$closeurl->param('id', $cm->id);
+				$closeurl->param('conversationid', $this->conversationid);
+				$closeurl->param('action', 'close');
+				$errorMessage .= '<br/><a href=\''.$closeurl.'\'>Click here to close this conversation instead.</a>';
+			}
+			
+			throw new moodle_exception($errorMessage, 'dialogue');
+		}
+		
+
+        $params = array('dialogueid' => $cm->instance, 'conversationid' => $this->conversationid, 'userid' => $USER->id);
+
+        // delete record of user's participation in this conversation
+		$DB->delete_records('dialogue_participants', $params);
+        return true;
+    }
+	
+	public function addUser($usernameToAdd) {
+        global $DB, $USER, $PAGE;
+
+        $context = $this->dialogue->context;
+        $cm      = $this->dialogue->cm;
+        $course  = $this->dialogue->course;
+
+        // is this a draft
+        /*if (is_null($this->_conversationid)) {
+            throw new moodle_exception('cannotclosedraftconversation', 'dialogue');
+        }*/
+		
+		// this check is mostly just for url manipulation, since the button shouldn't appear if the user doesn't have permission
+		$canadd = ((!is_null($this->participants[$USER->id])) or has_capability('mod/dialogue:viewany', $context));
+		if (!$canadd){
+			throw new moodle_exception('You do not have permission to add a new participant to this conversation.', 'dialogue');
+		}
+		
+		// check if user given exists
+		if($result = $DB->get_record('user', array('username' => $usernameToAdd))){
+			// okay so user exists. now, is user in this course?
+			$userIdToAdd = $result->id;
+			$sql = "SELECT userid FROM {user_enrolments} UE INNER JOIN {enrol} E ON UE.enrolid = E.id WHERE E.courseid = ? AND UE.userid = ?;";
+			$params = array($course->id,$userIdToAdd);
+			if($result2 = $DB->get_records_sql($sql,$params) || has_capability('mod/dialogue:viewany', $context, $userIdToAdd)){
+				// user is either in this course, or user has permission to view all courses (probably because they're an admin)
+				// check if user is already in conversation
+				if($result3 = $DB->get_record('dialogue_participants', array('userid' => $userIdToAdd,'dialogueid' => $cm->instance, 'conversationid' => $this->conversationid))){
+					// user is already a participant in this conversation
+					throw new moodle_exception('This user is already participating in this conversation.','dialogue');
+				} else {
+					// add user to conversation.
+					$insertParams = new stdClass();
+					$insertParams->dialogueid = $cm->instance;
+					$insertParams->conversationid = $this->conversationid;
+					$insertParams->userid = $userIdToAdd;
+					if($insertResult = $DB->insert_record('dialogue_participants',$insertParams)){
+						return true;
+					} else {
+						throw new moodle_exception('Failed to add user to conversation.','dialogue');
+					}
+				}
+			} else {
+				throw new moodle_exception('Cannot add a user who is not enrolled in this course.','dialogue');
+			}
+		} else {
+			throw new moodle_exception('Cannot add a user that does not exist.','dialogue');
+		}
+		
+		// should never reach this
+		throw new moodle_exception('Could not add user.','dialogue');
+        return true;
+    }
 
     /**
      * Load DB record data onto Class, conversationid needed.

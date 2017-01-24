@@ -89,7 +89,10 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $html .= html_writer::start_div('conversation-header');
         $html .= html_writer::tag('span', $openedbyheader, array('class' => 'conversation-openedby pull-left'));
 
-        $html .= html_writer::start_tag('ul', array('class' => "message-actions pull-right"));
+		$html .= html_writer::start_div('pull-right');
+        $html .= html_writer::start_tag('ul', array('class' => "message-actions"));
+		
+		$numItemsInCurrentUL = 0;
 
         if ($conversation->state == dialogue::STATE_OPEN) {
             $canclose = ((has_capability('mod/dialogue:close', $context) and $USER->id == $conversation->author->id) or
@@ -105,6 +108,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                 $closeurl->param('action', 'close');
                 $html .= html_writer::link($closeurl,  get_string('closeconversation', 'dialogue') . $lockicon);
                 $html .= html_writer::end_tag('li');
+				$numItemsInCurrentUL++;
             }
         }
 
@@ -120,9 +124,56 @@ class mod_dialogue_renderer extends plugin_renderer_base {
             $deleteurl->param('action', 'delete');
             $html .= html_writer::link($deleteurl,  get_string('deleteconversation', 'dialogue') . $trashicon);
             $html .= html_writer::end_tag('li');
+			$numItemsInCurrentUL++;
         }
+		
+		$canleave = true;
+		
+		if($canleave){
+			if($numItemsInCurrentUL >= 2){
+				// prevents more than 2 links per row
+				$html .= html_writer::end_tag('ul');
+				$html .= html_writer::start_tag('ul', array('class' => "message-actions"));
+				$numItemsInCurrentUL = 0;
+			}
+			$html .= html_writer::start_tag('li');
+            $leaveicon = html_writer::tag('i', '', array('class' => "fa fa-sign-out"));
+            $leaveurl = new moodle_url('/mod/dialogue/conversation.php');
+            $leaveurl->param('id', $cm->id);
+            $leaveurl->param('conversationid', $conversation->conversationid);
+            $leaveurl->param('action', 'leave');
+            $html .= html_writer::link($leaveurl,  get_string('leaveconversation', 'dialogue') . $leaveicon);
+            $html .= html_writer::end_tag('li');
+			$numItemsInCurrentUL++;
+		}
+		
+		$canadd = true;
+		
+		if($canadd){
+			if($numItemsInCurrentUL >= 2){
+				// prevents more than 2 links per row
+				$html .= html_writer::end_tag('ul');
+				$html .= html_writer::start_tag('ul', array('class' => "message-actions"));
+				$numItemsInCurrentUL = 0;
+			}
+			$html .= html_writer::start_tag('li');
+			//$html .= '<input type="text" class="addUserToConversation"></input>';
+            $addicon = html_writer::tag('i', '', array('class' => "fa fa-user-plus"));
+            $addurl = new moodle_url('/mod/dialogue/conversation.php');
+            $addurl->param('id', $cm->id);
+            $addurl->param('conversationid', $conversation->conversationid);
+            $addurl->param('action', 'add');
+            //$html .= html_writer::link($addurl,  get_string('addusertoconversation', 'dialogue') . $addicon);
+			//$html .= '<a href="' . $addurl . '" onclick="var theHTML = document.getElementsByClassName(\'addUserToConversation\')[0];if(this.href != \'undefined\'){this.href += \'&usernameToAdd=\' + encodeURIComponent(theHTML.value)};">'.get_string('addusertoconversation', 'dialogue') . $addicon . '</a>';
+			$html .= '<a href="' . $addurl . '" onclick="event.preventDefault();if(this.href != \'undefined\'){$(\'.addUserInputArea\').toggle();};">'.get_string('addusertoconversation', 'dialogue') . $addicon . '</a>';
+			$html .= '<div class="addUserInputArea" style="display:none;">Username to add:<input type="text" class="addUserToConversation"></input><br/><a href="' . $addurl . '" class="btn" onclick="var theHTML = document.getElementsByClassName(\'addUserToConversation\')[0];if(this.href != \'undefined\'){this.href += \'&usernameToAdd=\' + encodeURIComponent(theHTML.value)};">Add User</a></div>';
+            $html .= html_writer::end_tag('li');
+			$numItemsInCurrentUL++;
+		}
 
         $html .= html_writer::end_tag('ul');
+		$html .= html_writer::end_div(); // end pull-right
+		
         $html .= html_writer::empty_tag('br');
         $html .= html_writer::end_div();
 
