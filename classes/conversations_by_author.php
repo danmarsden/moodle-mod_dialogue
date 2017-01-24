@@ -54,7 +54,9 @@ class mod_dialogue_conversations_by_author extends mod_dialogue_conversations {
                            JOIN {dialogue_conversations} dc ON dc.id = dp.conversationid
                            JOIN {dialogue_messages} dm ON dm.conversationid = dp.conversationid AND u.id = dm.authorid
                            JOIN (SELECT dm.conversationid, MAX(dm.conversationindex) AS conversationindex
-                                   FROM {dialogue_messages} dm
+                                   FROM (SELECT dm2.conversationid, dm2.conversationindex, dm2.dialogueid, dm2.state
+										 FROM {dialogue_messages} dm2
+								   INNER JOIN {dialogue_participants} dp2 ON dm2.authorid = dp2.userid AND dm2.conversationid = dp2.conversationid) dm
                                   WHERE dm.dialogueid = :lastmessagedialogueid
                                     AND dm.state $instatesql
                                GROUP BY dm.conversationid) lastmessage
