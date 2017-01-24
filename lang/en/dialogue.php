@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 $string['actions'] = 'Actions';
+$string['addusertoconversation'] = 'Add user to conversation';
 $string['ago'] = 'ago';
 $string['attachment'] = 'Attachment';
 $string['attachments'] = 'Attachments';
@@ -40,6 +41,10 @@ $string['conversationclosed'] = 'Conversation {$a} has been closed';
 $string['conversationdeleteconfirm'] = 'Are you sure you want to delete conversation {$a}, this cannot be undone?';
 $string['conversationdeleted'] = 'Conversation {$a} has been deleted';
 $string['conversationdiscarded'] = 'Conversation discarded';
+$string['conversationleaveconfirm'] = 'Are you sure you want to leave conversation {$a}?';
+$string['conversationleft'] = 'You have left conversation {$a}';
+$string['conversationparticipantaddconfirm'] = 'Are you sure you want to add {$a} to this conversation?';
+$string['conversationparticipantadded'] = 'You have added {$a}';
 $string['conversations'] = 'Conversations';
 $string['conversationlistdisplayheader'] = 'Displaying {$a->show} {$a->state} conversations {$a->groupname}';
 $string['conversationopened'] = 'Conversation has been opened';
@@ -85,6 +90,8 @@ $string['errornoparticipant'] = 'You must open a dialogue with somebody...';
 $string['eventconversationclosed'] = 'Conversation closed';
 $string['eventconversationcreated'] = 'Conversation created';
 $string['eventconversationdeleted'] = 'Conversation deleted';
+$string['eventconversationleft'] = 'Conversation left';
+$string['eventconversationparticipantadded'] = 'Participant added to conversation';
 $string['eventconversationviewed'] = 'Conversation viewed';
 $string['eventreplycreated'] = 'Reply created';
 $string['everybody'] = 'Everybody (free for all)';
@@ -100,6 +107,7 @@ $string['justmy'] = 'just my';
 $string['lastname'] = 'Last name';
 $string['lastranon'] = 'Last ran on ';
 $string['latest'] = 'Latest';
+$string['leaveconversation'] = 'Leave conversation';
 $string['listpaginationheader'] = '{$a->start}-{$a->end} of {$a->total}';
 $string['modulename'] = 'Dialogue';
 $string['modulename_help'] = 'Dialogues allow students or teachers to start two-way dialogues with another person. They are course activities that can be useful when the teacher wants a place to give private feedback to a student on their online activity. For example, if a student is participating in a language forum and made a grammatical error that the teacher wants to point out without embarassing the student, a dialogue is the perfect place. A dialogue activity would also be an excellent way for counsellors within an institution to interact with students - all activities are logged and email is not necessarily required';
