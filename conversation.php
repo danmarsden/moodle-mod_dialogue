@@ -31,6 +31,7 @@ $id             = required_param('id', PARAM_INT);
 $conversationid = optional_param('conversationid', null, PARAM_INT);
 $action         = optional_param('action', 'view', PARAM_ALPHA);
 $confirm        = optional_param('confirm', 0, PARAM_INT);
+$usernameToAdd	= optional_param('usernameToAdd','', PARAM_USERNAME);
 
 $cm = get_coursemodule_from_id('dialogue', $id);
 if (! $cm) {
@@ -153,6 +154,52 @@ if ($action == 'delete') {
     echo $OUTPUT->header($activityrecord->name);
     $pageurl->param('confirm', $conversationid);
     $notification = $OUTPUT->notification(get_string('conversationdeleteconfirm', 'dialogue', $conversation->subject), 'notifyproblem');
+    echo $OUTPUT->confirm($notification, $pageurl, $returnurl);
+    echo $OUTPUT->footer();
+    exit;
+}
+
+// leave conversation
+if ($action == 'leave') {
+    if (!empty($confirm) && confirm_sesskey()) {
+        $conversation->leave();
+        // Trigger conversation closed event
+        $eventparams = array(
+            'context' => $context,
+            'objectid' => $conversation->conversationid
+        );
+        $event = \mod_dialogue\event\conversation_left::create($eventparams);
+        $event->trigger();
+        redirect($returnurl, get_string('conversationleft', 'dialogue',
+                                        $conversation->subject));
+    }
+    echo $OUTPUT->header($activityrecord->name);
+    $pageurl->param('confirm', $conversationid);
+    $notification = $OUTPUT->notification(get_string('conversationleaveconfirm', 'dialogue', $conversation->subject), 'notifymessage');
+    echo $OUTPUT->confirm($notification, $pageurl, $returnurl);
+    echo $OUTPUT->footer();
+    exit;
+}
+
+// add user to conversation
+if ($action == 'add') {
+	//exit;
+    if (!empty($confirm) && confirm_sesskey()) {
+		//exit;
+        $conversation->addUser($usernameToAdd);
+        // Trigger conversation closed event
+        $eventparams = array(
+            'context' => $context,
+            'objectid' => $conversation->conversationid
+        );
+        $event = \mod_dialogue\event\conversation_participantadded::create($eventparams);
+        $event->trigger();
+        redirect($returnurl, get_string('conversationparticipantadded', 'dialogue', $usernameToAdd));
+    }
+    echo $OUTPUT->header($activityrecord->name);
+    $pageurl->param('confirm', $conversationid);
+	$pageurl->param('usernameToAdd', $usernameToAdd);
+    $notification = $OUTPUT->notification(get_string('conversationparticipantaddconfirm', 'dialogue', $usernameToAdd), 'notifymessage');
     echo $OUTPUT->confirm($notification, $pageurl, $returnurl);
     echo $OUTPUT->footer();
     exit;
