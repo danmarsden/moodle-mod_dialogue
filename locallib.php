@@ -16,6 +16,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot.'/lib/filelib.php');
+
 /**
  * Library of extra functions for the dialogue module not part of the standard add-on module API set
  * but used by scripts in the mod/dialogue folder
