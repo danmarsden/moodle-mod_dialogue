@@ -12,7 +12,12 @@ M.mod_dialogue.clickredirector = {
 
     },
     handle: function(e) {
-        var params = [];
+        var params = [],
+            page,
+            action,
+            conversationid,
+            messageid,
+            redirect;
 
         params.id = this.cmid;
 
