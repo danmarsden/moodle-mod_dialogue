@@ -340,7 +340,8 @@ class message implements \renderable {
 
             $userto = $DB->get_record('user', array('id' => $participant->id), '*', MUST_EXIST);
 
-            $eventdata = new \stdClass();
+            $eventdata = new \core\message\message();
+            $eventdata->courseid = $course->id;
             $eventdata->component = 'mod_dialogue';
             $eventdata->name = 'post';
             $eventdata->userfrom = $userfrom;
