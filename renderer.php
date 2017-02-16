@@ -509,7 +509,6 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                                                         'class' =>'btn btn-small dropdown-toggle'));
 
         $html .= get_string('sortedby', 'dialogue', get_string($sort, 'dialogue'));
-        $html .= html_writer::tag('tag', null, array('class' => 'caret'));
         $html .= html_writer::end_tag('button');
         $html .= html_writer::start_tag('ul', array('class' => 'dropdown-menu'));
         foreach ($options as $option => $settings) {
