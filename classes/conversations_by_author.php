@@ -44,13 +44,10 @@ class conversations_by_author extends conversations {
         if (empty($this->states)) {
             throw new \moodle_exception("At least one state must be set");
         }
-        
         list($instatesql, $instateparams) = $DB->get_in_or_equal($this->states, SQL_PARAMS_NAMED, 'lastmessagestate');
-
         foreach ($instateparams as $key => $value) {
             $this->params[$key] = $value;
         }
-
         $this->basesql  = "FROM {user} u
                            JOIN {dialogue_participants} dp ON dp.userid = u.id
                            JOIN {dialogue_conversations} dc ON dc.id = dp.conversationid
@@ -86,9 +83,7 @@ class conversations_by_author extends conversations {
                               'attachments' => 'dm.attachments',
                               'state' => 'dm.state',
                               'timemodified' => 'dm.timemodified');
-        
         $this->set_unread_field();
-
     }
 
     public function set_state($state) {
@@ -98,7 +93,6 @@ class conversations_by_author extends conversations {
         }
         $this->states = $state;
     }
-
 
     protected function set_unread_field() {
         global $USER, $DB;
@@ -123,6 +117,7 @@ class conversations_by_author extends conversations {
         $this->params['unreaduserid'] = $USER->id;
     }
 
+
     public function records() {
         global $DB;
 
@@ -139,12 +134,11 @@ class conversations_by_author extends conversations {
         $recordset = $DB->get_recordset_sql($select, $this->params, $offset, $this->limit);
 
         if ($recordset->valid()) {
-            foreach($recordset as $record) {
+            foreach ($recordset as $record) {
                 $records[] = $record;
             }
         }
         $recordset->close();
-
         return $records;
     }
 
@@ -153,11 +147,8 @@ class conversations_by_author extends conversations {
         global $DB;
 
         $this->setup();
-        
         return $DB->count_records_sql("SELECT COUNT(1) " . $this->basesql, $this->params);
     }
-
-    //public function rows_returned(){}
 
     /**
      * Return a structure of possible options that can be used to order the built
