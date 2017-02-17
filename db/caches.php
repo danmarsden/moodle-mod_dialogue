@@ -14,18 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 $definitions = array(
-    // Used to store basic user information need by dialogue to avoid repetitive DB queries within one request
+    // Used to store basic user information need by dialogue to avoid repetitive DB queries within one request.
     'userdetails' => array(
         'mode' => cache_store::MODE_REQUEST,
         'persistent' => true,
     ),
-    // Used to store information to avoid repetitive DB queries within one request
+    // Used to store information to avoid repetitive DB queries within one request.
     'participants' => array(
         'mode' => cache_store::MODE_REQUEST,
         'persistent' => true,
     ),
-    // Session UI params to application state
+    // Session UI params to application state.
     'params' => array(
         'mode' => cache_store::MODE_SESSION,
         'persistent' => true,
