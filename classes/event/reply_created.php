@@ -64,21 +64,9 @@ class reply_created extends \core\event\base {
      */
     public function get_url() {
 
-        $url = new \moodle_url('/mod/dialogue/conversation.php', array('conversationid' => $this->other['conversationid'], 
+        $url = new \moodle_url('/mod/dialogue/conversation.php', array('conversationid' => $this->other['conversationid'],
                                                                        'id' => $this->contextinstanceid));
-        
         $url->set_anchor('m-' . $this->objectid);
-        
         return $url;
-    }
-
-    /**
-     * Custom validation.
-     *
-     * @throws \coding_exception
-     * @return void
-     */
-    protected function validate_data() {
-        parent::validate_data();
     }
 }
