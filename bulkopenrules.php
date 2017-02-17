@@ -42,7 +42,7 @@ require_login($course, false, $cm);
 
 $pageparams = array('id' => $cm->id, 'page' => $page, 'sort' => $sort);
 $pageurl    = new moodle_url('/mod/dialogue/bulkopenrules.php', $pageparams);
-/// setup page and form
+// Setup page and form.
 $PAGE->set_pagetype('mod-dialogue-bulkopenrules');
 $PAGE->set_cm($cm, $course, $activityrecord);
 $PAGE->set_context($context);
@@ -59,7 +59,7 @@ $total = 0;
 $rs = dialogue_get_bulk_open_rule_listing($dialogue, $total);
 $pagination = new \paging_bar($total, $page, \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE, $pageurl);
 
-// get the dialogue module render
+// Get the dialogue module render.
 $renderer = $PAGE->get_renderer('mod_dialogue');
 
 echo $OUTPUT->header();
@@ -85,15 +85,15 @@ if (!$rs) {
     $html .= html_writer::end_div();
 
 
-    $html .= html_writer::start_tag('table', array('class'=>'conversation-list table table-hover table-condensed'));
+    $html .= html_writer::start_tag('table', array('class' => 'conversation-list table table-hover table-condensed'));
     $html .= html_writer::start_tag('tbody');
-    foreach($rs as $record) {
+    foreach ($rs as $record) {
 
         $datattributes = array('data-redirect' => 'conversation',
                                'data-action'   => 'view',
                                'data-conversationid' => $record->conversationid);
 
-        $html .=  html_writer::start_tag('tr', $datattributes);
+        $html .= html_writer::start_tag('tr', $datattributes);
         if ($record->lastrun) {
             $lastrun = get_string('lastranon', 'dialogue') . userdate($record->lastrun);
         } else {
@@ -119,25 +119,21 @@ if (!$rs) {
 
         if ($record->type == 'group') {
             $html .= html_writer::tag('td', $groupcache->groups[$record->sourceid]->name);
-            
         } else {
             $html .= html_writer::tag('td', get_string('allparticipants'));
         }
-        
         $subject = empty($record->subject) ? get_string('nosubject', 'dialogue') : $record->subject;
         $subject = html_writer::tag('strong', $subject);
         $html .= html_writer::tag('td', $subject);
-
         $params = array('id' => $cm->id, 'conversationid' => $record->conversationid);
         $link = html_writer::link(new moodle_url('conversation.php', $params),
-                                   get_string('view'), array());
-        $html .= html_writer::tag('td', $link, array('class'=>'nonjs-control'));
+                      get_string('view'), array());
+        $html .= html_writer::tag('td', $link, array('class' => 'nonjs-control'));
         $html .= html_writer::end_tag('tr');
     }
     $html .= html_writer::end_tag('tbody');
-    //$html .= html_writer::tag('caption', '@todo');
     $html .= html_writer::end_tag('table');
-    $html .= $OUTPUT->render($pagination); // just going to use standard pagebar, to much work to bootstrap it.
+    $html .= $OUTPUT->render($pagination); // Just going to use standard pagebar, to much work to bootstrap it.
 }
 
 echo $html;
