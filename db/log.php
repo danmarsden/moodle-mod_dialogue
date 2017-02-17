@@ -17,17 +17,27 @@
 defined('MOODLE_INTERNAL') || die();
 
 $logs = array(
-    // dialogue instance log actions
-    array('module'=>'dialogue', 'action'=>'add', 'mtable'=>'dialogue', 'field'=>'name'),
-    array('module'=>'dialogue', 'action'=>'update', 'mtable'=>'dialogue', 'field'=>'name'),
-    array('module'=>'dialogue', 'action'=>'view', 'mtable'=>'dialogue', 'field'=>'name'),
-    array('module'=>'dialogue', 'action'=>'view by role', 'mtable'=>'dialogue', 'field'=>'name'),
-    array('module'=>'dialogue', 'action'=>'view all', 'mtable'=>'dialogue', 'field'=>'name'),
-    // conversation log actions
-    array('module'=>'dialogue', 'action'=>'close conversation', 'mtable'=>'dialogue_conversations', 'field'=>'subject'),
-    array('module'=>'dialogue', 'action'=>'delete conversation', 'mtable'=>'dialogue_conversations', 'field'=>'subject'),
-    array('module'=>'dialogue', 'action'=>'open conversation', 'mtable'=>'dialogue_conversations', 'field'=>'subject'),
-    array('module'=>'dialogue', 'action'=>'view conversation', 'mtable'=>'dialogue_conversations', 'field'=>'subject'),
-    // reply log actions
-    array('module'=>'dialogue', 'action'=>'reply', 'mtable'=>'dialogue_conversations', 'field'=>'subject'),
+    // Dialogue instance log actions.
+    array('module' => 'dialogue', 'action' => 'add',
+        'mtable' => 'dialogue', 'field' => 'name'),
+    array('module' => 'dialogue', 'action' => 'update',
+        'mtable' => 'dialogue', 'field' => 'name'),
+    array('module' => 'dialogue', 'action' => 'view',
+        'mtable' => 'dialogue', 'field' => 'name'),
+    array('module' => 'dialogue', 'action' => 'view by role',
+        'mtable' => 'dialogue', 'field' => 'name'),
+    array('module' => 'dialogue', 'action' => 'view all',
+        'mtable' => 'dialogue', 'field' => 'name'),
+    // Conversation log actions.
+    array('module' => 'dialogue', 'action' => 'close conversation',
+        'mtable' => 'dialogue_conversations', 'field' => 'subject'),
+    array('module' => 'dialogue', 'action' => 'delete conversation',
+        'mtable' => 'dialogue_conversations', 'field' => 'subject'),
+    array('module' => 'dialogue', 'action' => 'open conversation',
+        'mtable' => 'dialogue_conversations', 'field' => 'subject'),
+    array('module' => 'dialogue', 'action' => 'view conversation',
+        'mtable' => 'dialogue_conversations', 'field' => 'subject'),
+    // Reply log actions.
+    array('module' => 'dialogue', 'action' => 'reply',
+        'mtable' => 'dialogue_conversations', 'field' => 'subject'),
 );
