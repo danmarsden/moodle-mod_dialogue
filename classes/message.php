@@ -90,20 +90,20 @@ class message implements \renderable {
 
         $context = $this->dialogue->context;
         $fs = get_file_storage();
-        // hasn't been saved yet
+        // Hasn't been saved yet.
         if (is_null($this->_messageid)) {
             return true;
         }
-        // permission to delete conversation
+        // Permission to delete conversation.
         $candelete = ((has_capability('mod/dialogue:delete', $context) and $USER->id == $this->_authorid) or
             has_capability('mod/dialogue:deleteany', $context));
 
         if (!$candelete) {
             throw new \moodle_exception('nopermissiontodelete', 'dialogue');
         }
-        // delete message and attachment files for message
+        // Delete message and attachment files for message.
         $fs->delete_area_files($context->id, false, false, $this->_messageid);
-        // delete message
+        // Delete message.
         $DB->delete_records('dialogue_messages', array('id' => $this->_messageid));
 
         return true;
@@ -111,7 +111,6 @@ class message implements \renderable {
 
     protected function magic_get_author() {
         $dialogue = $this->dialogue;
-        //return $dialogue->get_user_brief_details($this->_authorid);
         return dialogue_get_user_details($dialogue, $this->_authorid);
     }
 
@@ -156,7 +155,8 @@ class message implements \renderable {
 
     protected function magic_get_bodyhtml() {
         $contextid = $this->dialogue->context->id;
-        $ret = file_rewrite_pluginfile_urls($this->_body, 'pluginfile.php', $contextid, 'mod_dialogue', 'message', $this->_messageid);
+        $ret = file_rewrite_pluginfile_urls($this->_body,
+            'pluginfile.php', $contextid, 'mod_dialogue', 'message', $this->_messageid);
         return format_text($ret, $this->bodyformat);
     }
 
@@ -201,7 +201,7 @@ class message implements \renderable {
     }
 
     public function mark_read($user = null) {
-        // only mark read if in a open or closed state
+        // Only mark read if in a open or closed state.
         return $this->set_flag(dialogue::FLAG_READ, $user);
     }
 
@@ -234,18 +234,18 @@ class message implements \renderable {
     }
 
     public function set_state($state) {
-        $this->_state = $state; //@todo check actual state
+        $this->_state = $state; // Check actual state - @todo.
     }
 
     public function save() {
         global $DB, $USER;
 
-        $admin = get_admin(); // possible cronjob
+        $admin = get_admin(); // Possible cronjob.
         if ($USER->id != $admin->id and $USER->id != $this->_authorid) {
             throw new \moodle_exception("This doesn't belong to you!");
         }
 
-        $context = $this->dialogue->context; // needed for filelib functions
+        $context = $this->dialogue->context; // Needed for filelib functions.
         $dialogueid = $this->dialogue->dialogueid;
         $conversationid = $this->conversation->conversationid;
 
@@ -255,14 +255,14 @@ class message implements \renderable {
         $record->conversationid = $conversationid;
         $record->conversationindex = $this->_conversationindex;
         $record->authorid = $this->_authorid;
-        // rewrite body now if has embedded files
+        // Rewrite body now if has embedded files.
         if (dialogue_contains_draft_files($this->_bodydraftid)) {
             $record->body = file_rewrite_urls_to_pluginfile($this->_body, $this->_bodydraftid);
         } else {
             $record->body = $this->_body;
         }
         $record->bodyformat = $this->_bodyformat;
-        // mark atttachments now if has them
+        // Mark atttachments now if has them.
         if (dialogue_contains_draft_files($this->_attachmentsdraftid)) {
             $record->attachments = 1;
         } else {
@@ -273,19 +273,19 @@ class message implements \renderable {
         $record->timemodified = $this->_timemodified;
 
         if (is_null($this->_messageid)) {
-            // create new record
+            // Create new record.
             $this->_messageid = $DB->insert_record('dialogue_messages', $record);
         } else {
             $record->timemodified = time();
-            // update existing record
+            // Update existing record.
             $DB->update_record('dialogue_messages', $record);
         }
-        // deal with embedded files
+        // Deal with embedded files.
         if ($this->_bodydraftid) {
 
             file_save_draft_area_files($this->_bodydraftid, $context->id, 'mod_dialogue', 'message', $this->_messageid);
         }
-        // deal with attached files
+        // Deal with attached files.
         if ($this->_attachmentsdraftid) {
 
             file_save_draft_area_files($this->_attachmentsdraftid, $context->id, 'mod_dialogue', 'attachment', $this->_messageid);
@@ -297,15 +297,15 @@ class message implements \renderable {
     public function send() {
         global $DB;
 
-        // add author to participants and save
+        // Add author to participants and save.
         $this->conversation->add_participant($this->_authorid);
         $this->conversation->save_participants();
 
-        // update state to open
+        // Update state to open.
         $this->_state = dialogue::STATE_OPEN;
         $DB->set_field('dialogue_messages', 'state', $this->_state, array('id' => $this->_messageid));
 
-        // setup information for messageapi object
+        // Setup information for messageapi object.
         $cm = $this->dialogue->cm;
         $conversationid = $this->conversation->conversationid;
         $course = $this->dialogue->course;
@@ -327,15 +327,15 @@ class message implements \renderable {
         $contexturl = new \moodle_url('/mod/dialogue/conversation.php', $contexturlparams);
         $contexturl->set_anchor('m' . $this->_messageid);
 
-        // flags and messaging
+        // Flags and messaging.
         $participants = $this->conversation->participants;
         foreach ($participants as $participant) {
             if ($participant->id == $this->_authorid) {
-                // so unread flag count displays properly for author, they wrote it, they should of read it.
+                // So unread flag count displays properly for author, they wrote it, they should of read it.
                 $this->set_flag(dialogue::FLAG_READ, $this->author);
                 continue;
             }
-            // give participant a sent flag
+            // Give participant a sent flag.
             $this->set_flag(dialogue::FLAG_SENT, $participant);
 
             $userto = $DB->get_record('user', array('id' => $participant->id), '*', MUST_EXIST);
@@ -356,10 +356,6 @@ class message implements \renderable {
             $eventdata->contexturlname = $subject;
 
             $result = message_send($eventdata);
-
-            if (!$result) {
-                //throw new moodle_exception('message not saved');
-            }
         }
 
         return true;
@@ -374,12 +370,12 @@ class message implements \renderable {
     public function trash() {
         global $DB;
 
-        // can only only trash drafts
+        // Can only only trash drafts.
         if ($this->state != dialogue::STATE_DRAFT) {
             throw new \moodle_exception('onlydraftscanbetrashed', 'dialogue');
         }
 
-        // update state to trashed
+        // Update state to trashed.
         $this->_state = dialogue::STATE_TRASHED;
         $DB->set_field('dialogue_messages', 'state', $this->_state, array('id' => $this->_messageid));
     }
