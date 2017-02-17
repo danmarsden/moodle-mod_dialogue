@@ -23,7 +23,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/dialogue/backup/moodle2/restore_dialogue_stepslib.php'); // Because it exists (must)
+require_once($CFG->dirroot . '/mod/dialogue/backup/moodle2/restore_dialogue_stepslib.php');
 
 /**
  * assignment restore task that provides all the settings and steps to perform one
@@ -35,14 +35,14 @@ class restore_dialogue_activity_task extends restore_activity_task {
      * Define (add) particular settings this activity can have
      */
     protected function define_my_settings() {
-        // No particular settings for this activity
+        // No particular settings for this activity.
     }
 
     /**
      * Define (add) particular steps this activity can have
      */
     protected function define_my_steps() {
-        // Choice only has one structure step
+        // Choice only has one structure step.
         $this->add_step(new restore_dialogue_activity_structure_step('dialogue_structure', 'dialogue.xml'));
     }
 
@@ -63,12 +63,11 @@ class restore_dialogue_activity_task extends restore_activity_task {
         $rules = array();
 
         $rules[] = new restore_decode_rule('DIALOGUEINDEX', '/mod/dialogue/index.php?id=$1', 'course');
-        // Dialogue by cm->id and Dialogue->id
+        // Dialogue by cm->id and Dialogue->id.
         $rules[] = new restore_decode_rule('DIALOGUEVIEWBYID', '/mod/dialogue/view.php?id=$1', 'course_module');
 
         return $rules;
-
-    } 
+    }
 
     /**
      * Define the restore log rules that will be applied
