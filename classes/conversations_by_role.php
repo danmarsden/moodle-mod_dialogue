@@ -50,7 +50,8 @@ class conversations_by_role extends conversations {
             $this->params[$key] = $value;
         }
 
-        list($instatesql, $instateparams) = $DB->get_in_or_equal(array(dialogue::STATE_OPEN, dialogue::STATE_CLOSED), SQL_PARAMS_NAMED, 'lastmessagestate');
+        list($instatesql, $instateparams) = $DB->get_in_or_equal(
+            array(dialogue::STATE_OPEN, dialogue::STATE_CLOSED), SQL_PARAMS_NAMED, 'lastmessagestate');
 
         foreach ($instateparams as $key => $value) {
             $this->params[$key] = $value;
@@ -94,9 +95,7 @@ class conversations_by_role extends conversations {
                               'state' => 'dm.state',
                               'timemodified' => 'dm.timemodified');
 
-
         $this->set_unread_field();
-
     }
 
     protected function set_unread_field() {
@@ -134,7 +133,7 @@ class conversations_by_role extends conversations {
         $recordset = $DB->get_recordset_sql($select, $this->params, $offset, $this->limit);
 
         if ($recordset->valid()) {
-            foreach($recordset as $record) {
+            foreach ($recordset as $record) {
                 $records[] = $record;
             }
         }
