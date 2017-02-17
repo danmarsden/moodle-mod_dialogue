@@ -64,23 +64,9 @@ class conversation_viewed extends \core\event\base {
      */
     public function get_url() {
 
-        $url = new \moodle_url('/mod/dialogue/conversation.php', array('conversationid' => $this->objectid, 
+        $url = new \moodle_url('/mod/dialogue/conversation.php', array('conversationid' => $this->objectid,
                                                                        'id' => $this->contextinstanceid));
 
         return $url;
-    }
-
-    /**
-     * Custom validation.
-     *
-     * @throws \coding_exception
-     * @return void
-     */
-    protected function validate_data() {
-        parent::validate_data();
-
-        if ($this->contextlevel != CONTEXT_MODULE) {
-            throw new \coding_exception('Context level must be CONTEXT_MODULE.');
-        }
     }
 }
