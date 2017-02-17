@@ -21,6 +21,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Define all the restore steps that will be used by the restore_dialogue_activity_task
  */
@@ -33,13 +35,13 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
     protected function define_structure() {
 
         $paths = array();
-        // Main dialogue processor can handle legacy data
+        // Main dialogue processor can handle legacy data.
         $paths[] = new restore_path_element('dialogue', '/activity/dialogue');
 
         $userinfo = $this->get_setting_value('userinfo');
         if ($userinfo) {
             if ($this->task->get_old_moduleversion() < 2013050100) {
-                // Restoring from a version 2.0.x -> 2.4.x
+                // Restoring from a version 2.0.x -> 2.4.x.
                 $paths[] = new restore_path_element('conversation_legacy',
                                                     '/activity/dialogue/conversations/conversation');
                 $paths[] = new restore_path_element('entry_legacy',
@@ -50,22 +52,17 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
                 // Restoring from a version 2.5 or later.
                 $paths[] = new restore_path_element('conversation',
                                                     '/activity/dialogue/conversations/conversation');
-
                 $paths[] = new restore_path_element('participant',
                                                     '/activity/dialogue/conversations/conversation/participants/participant');
-                
                 $paths[] = new restore_path_element('bulkopenerrule',
                                                     '/activity/dialogue/conversations/conversation/bulkopenerrules/bulkopenerrule');
-    
                 $paths[] = new restore_path_element('message',
                                                     '/activity/dialogue/conversations/conversation/messages/message');
-
                 $paths[] = new restore_path_element('flag',
                                                     '/activity/dialogue/conversations/conversation/flags/flag');
             }
         }
-        
-        // Return the paths wrapped into standard activity structure
+        // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
     }
 
@@ -76,17 +73,11 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
 
         $data = (object)$data;
         $oldid = $data->id;
-        
         $data->course = $this->get_courseid();
         $data->maxattachments = $pluginconfig->maxattachments;
         $data->maxbytes = $pluginconfig->maxbytes;
-
         $newitemid = $DB->insert_record('dialogue', $data);
         $this->apply_activity_instance($newitemid);
-
-        // unsure if should be using mapping like this
-        // $this->set_mapping('dialogue_var_type', $oldid, $data->dialoguetype);
-        
     }
 
     protected function process_bulkopenerrule($data) {
@@ -94,10 +85,7 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
 
         $data = (object)$data;
         $oldid = $data->id;
-
-        
     }
-
 
     protected function process_conversation($data) {
         global $DB;
@@ -107,10 +95,8 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
 
         $data->course = $this->get_courseid();
         $data->dialogueid = $this->get_new_parentid('dialogue');
-
         $newitemid = $DB->insert_record('dialogue_conversations', $data);
         $this->set_mapping('dialogue_conversation', $oldid, $newitemid);
-
     }
 
     protected function process_conversation_legacy($data) {
@@ -118,17 +104,13 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
 
         $data = (object)$data;
         $oldid = $data->id;
-        
         $data->course = $this->get_courseid();
         $data->dialogueid = $this->get_new_parentid('dialogue');
-
         $newitemid = $DB->insert_record('dialogue_conversations', $data);
         $this->set_mapping('dialogue_conversation', $oldid, $newitemid);
-
-        // unsure if should be using mapping like this
+        // Unsure if should be using mapping like this.
         $this->set_mapping('dialogue_conversation_var_closed', $oldid, $data->closed);
-
-        // add user and recipient to participants, process method will do mapping
+        // Add user and recipient to participants, process method will do mapping.
         if ($data->userid) {
             $user = new stdClass();
             $user->conversationid = $oldid;
@@ -141,7 +123,6 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
             $recipient->userid = $data->recipientid;
             $this->process_participant($recipient);
         }
-
     }
 
     protected function process_entry_legacy($data) {
@@ -153,7 +134,7 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
 
         $data->dialogueid = $this->get_new_parentid('dialogue');
         $data->conversationid = $this->get_mappingid('dialogue_conversation', $data->conversationid);
-        $data->conversationindex = 0; // will need fixing, can only do after execute
+        $data->conversationindex = 0; // Will need fixing, can only do after execute.
         $data->authorid = $this->get_mappingid('user', $data->userid);
         $data->body = $data->text;
         $data->bodyformat = $data->format;
@@ -166,64 +147,54 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         $newitemid = $DB->insert_record('dialogue_messages', $data);
         $this->set_mapping('dialogue_message', $oldid, $newitemid, true);
 
-         // add user and recipient to participants, process method will do mapping
+         // Add user and recipient to participants, process method will do mapping.
         $user = new stdClass();
-        $user->conversationid = $data->conversationid;//old conversationid
-        $user->userid = $data->userid; // old userid
+        $user->conversationid = $data->conversationid; // Old conversationid.
+        $user->userid = $data->userid; // Old userid.
         $this->process_participant($user);
-        // recipientid maybe null
+        // Recipientid maybe null.
         if ($data->recipientid) {
             $recipient = new stdClass();
-            $recipient->conversationid = $data->conversationid; //old conversationid
-            $recipient->userid = $data->recipientid; // old recipientid
+            $recipient->conversationid = $data->conversationid; // Old conversationid.
+            $recipient->userid = $data->recipientid; // Old recipientid.
             $this->process_participant($recipient);
         }
-        
     }
-    
+
     protected function process_message($data) {
         global $DB;
 
         $data = (object)$data;
         $oldid = $data->id;
-        
         $data->dialogueid = $this->get_new_parentid('dialogue');
         $data->conversationid = $this->get_mappingid('dialogue_conversation', $data->conversationid);
         $data->authorid = $this->get_mappingid('user', $data->authorid);
-        
         $newitemid = $DB->insert_record('dialogue_messages', $data);
         $this->set_mapping('dialogue_message', $oldid, $newitemid, true);
-
     }
-
 
     protected function process_flag($data) {
         global $DB;
 
-        $data = (object)$data;
-        
+        $data = (object) $data;
         $data->dialogueid = $this->get_new_parentid('dialogue');
         $data->conversationid = $this->get_mappingid('dialogue_conversation', $data->conversationid);
         $data->messageid = $this->get_mappingid('dialogue_message', $data->messageid);
         $data->userid = $this->get_mappingid('user', $data->userid);
-        
         $newitemid = $DB->insert_record('dialogue_flags', $data);
     }
 
     protected function process_participant($data) {
         global $DB;
 
-        $data = (object)$data;
-
+        $data = (object) $data;
         $data->dialogueid = $this->get_new_parentid('dialogue');
         $data->conversationid = $this->get_mappingid('dialogue_conversation', $data->conversationid);
         $data->userid = $this->get_mappingid('user', $data->userid);
-
-        // record exists params
-        $params = array('dialogueid'=>$data->dialogueid,
-                        'conversationid'=>$data->conversationid,
-                        'userid'=>$data->userid);
-
+        // Record exists params.
+        $params = array('dialogueid' => $data->dialogueid,
+                        'conversationid' => $data->conversationid,
+                        'userid' => $data->userid);
         if (!$DB->record_exists('dialogue_participants', $params)) {
             $newitemid = $DB->insert_record('dialogue_participants', $data);
         }
@@ -262,7 +233,7 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
             $newfilearea = 'attachment';
         }
 
-        // Get new context, must exist or this will fail
+        // Get new context, must exist or this will fail.
         if (!$newcontextid = restore_dbops::get_backup_ids_record($restoreid, 'context', $oldcontextid)->newitemid) {
             throw new restore_dbops_exception('unknown_context_mapping', $oldcontextid);
         }
@@ -275,38 +246,36 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
                        AND filearea  = ?";
 
         $params = array($restoreid, $oldcontextid, $component, $filearea);
-        
-        $fs = get_file_storage();                      // Get moodle file storage
-        $basepath = $this->get_basepath() . '/files/'; // Get backup file pool base
+        $fs = get_file_storage();                      // Get moodle file storage.
+        $basepath = $this->get_basepath() . '/files/'; // Get backup file pool base.
         $rs = $DB->get_recordset_sql($sql, $params);
         foreach ($rs as $rec) {
-            // get mapped id
+            // Get mapped id.
             $rec->newitemid = $this->get_mappingid('dialogue_message', $rec->itemid);
 
-            if (BACKUP::RELEASE >= '2.6') { // new line of code for 2.6 or breaks
+            if (BACKUP::RELEASE >= '2.6') { // New line of code for 2.6 or breaks.
                 $file = (object) backup_controller_dbops::decode_backup_temp_info($rec->info);
             } else {
                 $file = (object) unserialize(base64_decode($rec->info));
             }
 
-            // ignore root dirs (they are created automatically)
+            // Ignore root dirs (they are created automatically).
             if ($file->filepath == '/' && $file->filename == '.') {
                 continue;
             }
 
-            // set the best possible user
+            // Set the best possible user.
             $mappeduser = restore_dbops::get_backup_ids_record($restoreid, 'user', $file->userid);
             $mappeduserid = !empty($mappeduser) ? $mappeduser->newitemid : $this->task->get_userid();
 
-            // dir found (and not root one), let's create it
+            // Dir found (and not root one), let's create it.
             if ($file->filename == '.') {
                 $fs->create_directory($newcontextid, $component, $filearea, $rec->newitemid, $file->filepath, $mappeduserid);
                 continue;
             }
 
-
             if (empty($file->repositoryid)) {
-                // this is a regular file, it must be present in the backup pool
+                // This is a regular file, it must be present in the backup pool.
                 $backuppath = $basepath . backup_file_manager::get_backup_content_file_location($file->contenthash);
 
                 // The file is not found in the backup.
@@ -319,59 +288,59 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
                     continue;
                 }
 
-                // create the file in the filepool if it does not exist yet
+                // Create the file in the filepool if it does not exist yet.
                 if (!$fs->file_exists($newcontextid, $component, $filearea, $rec->newitemid, $file->filepath, $file->filename)) {
 
                     // If no license found, use default.
-                    if ($file->license == null){
+                    if ($file->license == null) {
                         $file->license = $CFG->sitedefaultlicense;
                     }
 
-                    $file_record = array(
-                        'contextid'   => $newcontextid,
-                        'component'   => $component,
-                        'filearea'    => $newfilearea,
-                        'itemid'      => $rec->newitemid,
-                        'filepath'    => $file->filepath,
-                        'filename'    => $file->filename,
-                        'timecreated' => $file->timecreated,
-                        'timemodified'=> $file->timemodified,
-                        'userid'      => $mappeduserid,
-                        'author'      => $file->author,
-                        'license'     => $file->license,
-                        'sortorder'   => $file->sortorder
+                    $filerecord = array (
+                        'contextid'    => $newcontextid,
+                        'component'    => $component,
+                        'filearea'     => $newfilearea,
+                        'itemid'       => $rec->newitemid,
+                        'filepath'     => $file->filepath,
+                        'filename'     => $file->filename,
+                        'timecreated'  => $file->timecreated,
+                        'timemodified' => $file->timemodified,
+                        'userid'       => $mappeduserid,
+                        'author'       => $file->author,
+                        'license'      => $file->license,
+                        'sortorder'    => $file->sortorder
                     );
-                    $fs->create_file_from_pathname($file_record, $backuppath);
+                    $fs->create_file_from_pathname($filerecord, $backuppath);
                 }
 
-                // store the the new contextid and the new itemid in case we need to remap
-                // references to this file later
+                // Store the the new contextid and the new itemid if we need to remap references to this file later.
                 $DB->update_record('backup_files_temp', array(
                     'id' => $rec->bftid,
                     'newcontextid' => $newcontextid,
                     'newitemid' => $rec->newitemid), true);
 
             } else {
-                // this is an alias - we can't create it yet so we stash it in a temp
-                // table and will let the final task to deal with it
+                /* This is an alias - we can't create it yet so we stash it in a temp
+                 * table and will let the final task to deal with it.
+                 */
                 if (!$fs->file_exists($newcontextid, $component, $filearea, $rec->newitemid, $file->filepath, $file->filename)) {
                     $info = new stdClass();
-                    // oldfile holds the raw information stored in MBZ (including reference-related info)
+                    // Oldfile holds the raw information stored in MBZ (including reference-related info).
                     $info->oldfile = $file;
-                    // newfile holds the info for the new file_record with the context, user and itemid mapped
-                    $info->newfile = (object)array(
-                        'contextid'   => $newcontextid,
-                        'component'   => $component,
-                        'filearea'    => $newfilearea,
-                        'itemid'      => $rec->newitemid,
-                        'filepath'    => $file->filepath,
-                        'filename'    => $file->filename,
-                        'timecreated' => $file->timecreated,
-                        'timemodified'=> $file->timemodified,
-                        'userid'      => $mappeduserid,
-                        'author'      => $file->author,
-                        'license'     => $file->license,
-                        'sortorder'   => $file->sortorder
+                    // Newfile holds the info for the new file_record with the context, user and itemid mapped.
+                    $info->newfile = (object) array(
+                        'contextid'    => $newcontextid,
+                        'component'    => $component,
+                        'filearea'     => $newfilearea,
+                        'itemid'       => $rec->newitemid,
+                        'filepath'     => $file->filepath,
+                        'filename'     => $file->filename,
+                        'timecreated'  => $file->timecreated,
+                        'timemodified' => $file->timemodified,
+                        'userid'       => $mappeduserid,
+                        'author'       => $file->author,
+                        'license'      => $file->license,
+                        'sortorder'    => $file->sortorder
                     );
 
                     restore_dbops::set_backup_ids_record($restoreid, 'file_aliases_queue', $file->id, 0, null, $info);
@@ -383,25 +352,26 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         return $results;
     }
 
-
     protected function build_missing_conversation_index() {
         global $DB;
         $dialogueid = $this->get_new_parentid('dialogue');
 
-        $conversations = $DB->get_records('dialogue_conversations', array('dialogueid'=>$dialogueid));
+        $conversations = $DB->get_records('dialogue_conversations', array('dialogueid' => $dialogueid));
         while ($conversations) {
             $conversation = array_shift($conversations);
             $conversationindex = 0;
-            $messages = $DB->get_records('dialogue_messages', array('conversationid'=>$conversation->id), 'timecreated', 'id');
+            $messages = $DB->get_records('dialogue_messages',
+                array('conversationid' => $conversation->id), 'timecreated', 'id');
             while ($messages) {
                 $message = array_shift($messages);
-                $DB->set_field('dialogue_messages', 'conversationindex', ++$conversationindex, array('id'=>$message->id));
+                $DB->set_field('dialogue_messages', 'conversationindex', ++$conversationindex,
+                    array('id' => $message->id));
             }
         }
     }
 
     protected function after_execute() {
-        // Add entry related files
+        // Add entry related files.
         $this->add_related_files('mod_dialogue', 'intro', null);
 
         if ($this->task->get_old_moduleversion() < 2013050100) {
