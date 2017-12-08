@@ -40,6 +40,7 @@ $string['conversationclosed'] = 'Conversation {$a} has been closed';
 $string['conversationdeleteconfirm'] = 'Are you sure you want to delete conversation {$a}, this cannot be undone?';
 $string['conversationdeleted'] = 'Conversation {$a} has been deleted';
 $string['conversationdiscarded'] = 'Conversation discarded';
+$string['conversation'] = 'Conversation';
 $string['conversations'] = 'Conversations';
 $string['conversationlistdisplayheader'] = 'Displaying {$a->show} {$a->state} conversations {$a->groupname}';
 $string['conversationopened'] = 'Conversation has been opened';
@@ -182,3 +183,7 @@ $string['minute'] = 'minute';
 $string['minutes'] = 'minutes';
 $string['second'] = 'second';
 $string['seconds'] = 'seconds';
+
+$string['deleteallconversations'] = 'Delete all conversations';
+$string['deletealldrafts'] = 'Delete all drafts';
+$string['deleteallrules'] = 'Delete all opener rules';

@@ -36,6 +36,8 @@ function dialogue_supports($feature) {
         case FEATURE_GRADE_OUTCOMES:          return false;
         case FEATURE_RATE:                    return false;
         case FEATURE_BACKUP_MOODLE2:          return true;
+        case FEATURE_SHOW_DESCRIPTION:        return false;
+        case FEATURE_COMMENT:                 return false;
 
         default: return null;
     }
@@ -426,3 +428,100 @@ function dialogue_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
     send_stored_file($file, 0, 0, $forcedownload, $options);
 }
 
+/**
+ * Implementation of the function for printing the form elements that control
+ * whether the course reset functionality affects the data.
+ *
+ * @param $mform form passed by reference
+ */
+function dialogue_reset_course_form_definition(&$mform) {
+    $mform->addElement('header', 'reset_header', get_string('modulenameplural', 'dialogue'));
+    $mform->addElement('checkbox', 'reset_conversations', get_string('deleteallconversations','dialogue'));
+    $mform->addElement('checkbox', 'reset_drafts', get_string('deletealldrafts', 'dialogue'));
+    // $mform->addElement('checkbox', 'reset_rules', get_string('deleteallrules', 'dialogue')); // TODO not yet implemented.
+}
+
+/**
+ * Course reset form defaults.
+ * @return array
+ */
+function dialogue_reset_course_form_defaults($course) {
+    return array(
+        'reset_conversations' => 0,
+        'reset_drafts' => 0,
+        // 'reset_rules' => 0 // TODO not yet implemented.
+    );
+}
+
+/**
+ * Actual implementation of the reset course functionality, delete all the
+ * data responses for course $data->courseid.
+ *
+ * @global object
+ * @global object
+ * @param object $data the data submitted from the reset course.
+ * @return array status array
+ */
+function dialogue_reset_userdata($data) {
+    global $CFG, $DB;
+    require_once($CFG->libdir.'/filelib.php');
+
+    $componentname = get_string('conversation', 'dialogue');
+    $resetconversations = array();
+    $status = array();
+
+    // Get file storage.
+    $fs = get_file_storage();
+
+    $dialogues = $DB->get_records('dialogue', array('course' => $data->courseid));
+    foreach ($dialogues as $dialogue) {
+        $cm = get_coursemodule_from_instance('dialogue',
+            $dialogue->id, $dialogue->course, false, MUST_EXIST);
+        $context = context_module::instance($cm->id);
+        if (isset($data->reset_conversations)) {
+            $sql = "SELECT DISTINCT(dc.id)
+                      FROM {dialogue_conversations} dc
+                      JOIN {dialogue_messages} dm ON dm.conversationid = dc.id
+                     WHERE dc.dialogueid = :dialogueid
+                       AND dm.state IN ('open', 'closed')";
+            $conditions = array('dialogueid' => $dialogue->id);
+            $records = $DB->get_records_sql($sql, $conditions);
+            if ($records) {
+                $resetconversations = array_merge($resetconversations, array_keys($records));
+            }
+        }
+        if (isset($data->reset_drafts)) {
+            $sql = "SELECT DISTINCT(dc.id)
+                      FROM {dialogue_conversations} dc
+                      JOIN {dialogue_messages} dm ON dm.conversationid = dc.id
+                     WHERE dc.dialogueid = :dialogueid
+                       AND dm.state IN ('draft')";
+            $conditions = array('dialogueid' => $dialogue->id);
+            $records = $DB->get_records_sql($sql, $conditions);
+            if ($records) {
+                $resetconversations = array_merge($resetconversations, array_keys($records));
+            }
+        }
+        // if (isset($data->reset_rules)) {} // TODO not yet implemented.
+        $rs = $DB->get_recordset_list('dialogue_messages', 'conversationid', $resetconversations,
+            'conversationid, conversationindex');
+        foreach ($rs as $message) {
+            $fs->delete_area_files($context->id, 'mod_dialogue', 'message', $message->id);
+            if ($message->attachments) {
+                $fs->delete_area_files($context->id, 'mod_dialogue', 'attachment', $message->id);
+            }
+            $status[] = array('component' => $componentname, 'item' => get_string('deleted'), 'error' => false);
+        }
+        $rs->close();
+
+        // Delete messages.
+        $DB->delete_records_list('dialogue_messages', 'conversationid', $resetconversations);
+        // Delete conversations
+        $DB->delete_records_list('dialogue_conversations', 'id', $resetconversations);
+        // Delete participants.
+        $DB->delete_records_list('dialogue_participants', 'conversationid', $resetconversations);
+        // Delete flags.
+        $DB->delete_records_list('dialogue_flags', 'conversationid', $resetconversations);
+    }
+    return $status;
+}
