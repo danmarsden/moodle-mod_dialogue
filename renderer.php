@@ -416,7 +416,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                     $html .= html_writer::start_tag('tbody');
                     $html .= html_writer::start_tag('tr');
                     $html .= html_writer::start_tag('td');
-                    $html .= html_writer::link($downloadurl, html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url(file_mimetype_icon($mimetype)), 'class' => 'icon', 'alt' => $mimetype)));
+                    $html .= html_writer::link($downloadurl, html_writer::empty_tag('img', array('src' => $OUTPUT->image_url(file_mimetype_icon($mimetype)), 'class' => 'icon', 'alt' => $mimetype)));
                     $html .= html_writer::end_tag('td');
                     $html .= html_writer::start_tag('td');
                     $html .= html_writer::tag('i', $filename);
