@@ -64,7 +64,7 @@ if (!empty($confirm) && confirm_sesskey()) {
 }
 echo $OUTPUT->header($activityrecord->name);
 $pageurl->param('confirm', $conversation->conversationid);
-$notification = $OUTPUT->notification(get_string('conversationdeleteconfirm', 'dialogue', $conversation->subject), 'notifyproblem');
-echo $OUTPUT->confirm($notification, $pageurl, $returnurl);
+$message = get_string('conversationdeleteconfirm', 'dialogue', $conversation->subject);
+echo $OUTPUT->confirm($message, $pageurl, $returnurl);
 echo $OUTPUT->footer();
 
