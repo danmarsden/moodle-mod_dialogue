@@ -129,8 +129,8 @@ if ($action == 'close') {
     }
     echo $OUTPUT->header($activityrecord->name);
     $pageurl->param('confirm', $conversationid);
-    $notification = $OUTPUT->notification(get_string('conversationcloseconfirm', 'dialogue', $conversation->subject), 'notifymessage');
-    echo $OUTPUT->confirm($notification, $pageurl, $returnurl);
+    $message = get_string('conversationcloseconfirm', 'dialogue', $conversation->subject);
+    echo $OUTPUT->confirm($message, $pageurl, $returnurl);
     echo $OUTPUT->footer();
     exit;
 }
