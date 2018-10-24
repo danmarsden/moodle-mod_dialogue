@@ -539,6 +539,7 @@ function dialogue_get_humanfriendly_dates($epoch) {
         1 => 'second'
     );
 
+    $customdatetime['timepast'] = 1; // Default to 1 second;
     foreach ($periods as $unit => $text) {
         if ($timediff < $unit) {
             continue;
