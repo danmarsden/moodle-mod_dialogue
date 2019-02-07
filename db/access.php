@@ -139,6 +139,18 @@ $capabilities = array(
         )
     ),
 
+    'mod/dialogue:receiveother' => array(
+
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_PREVENT
+        )
+    ),
+
     'mod/dialogue:reply' => array(
 
         'captype' => 'write',

@@ -63,6 +63,7 @@ $string['dialogue:delete'] = 'Delete own';
 $string['dialogue:deleteany'] = 'Delete any';
 $string['dialogue:open'] = 'Open a conversation';
 $string['dialogue:receive'] = 'Receive, who can be the recipient when opening a conversation';
+$string['dialogue:receiveother'] = 'Receive, inc other roles who can be the recipient when opening a conversation';
 $string['dialogue:reply'] = 'Reply';
 $string['dialogue:replyany'] = 'Reply any';
 $string['dialogue:viewany'] = 'View any';
