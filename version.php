@@ -26,6 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version   = 2017111300;
 $plugin->requires  = 2017111300;        // See http://docs.moodle.org/dev/Moodle_Versions
 $plugin->component = 'mod_dialogue';    // Full name of the plugin (used for diagnostics)
-$plugin->release   = '3.4';             // Semantic version name
-$plugin->maturity  = MATURITY_STABLE;   // This version's maturity level.
-$plugin->dependencies = array();
+$plugin->release   = '3.5';             // Semantic version name
+$plugin->maturity  = MATURITY_ALPHA;    // This version's maturity level.
+$plugin->dependencies = [];
