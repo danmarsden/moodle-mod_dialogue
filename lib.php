@@ -36,7 +36,7 @@ function dialogue_supports($feature) {
         case FEATURE_GRADE_OUTCOMES:          return false;
         case FEATURE_RATE:                    return false;
         case FEATURE_BACKUP_MOODLE2:          return true;
-        case FEATURE_SHOW_DESCRIPTION:        return false;
+        case FEATURE_SHOW_DESCRIPTION:        return true;
         case FEATURE_COMMENT:                 return false;
 
         default: return null;
@@ -123,6 +123,31 @@ function dialogue_delete_instance($id) {
     $DB->delete_records('dialogue', array('id'=>$dialogue->id));
     
     return true;
+}
+
+/**
+ * Given a course_module object, this function returns any "extra" information that may be needed
+ * when printing this activity in a course listing. See get_array_of_activities() in course/lib.php
+ *
+ * @param stdClass $coursemodule
+ * @return cached_cm_info
+ */
+function dialogue_get_coursemodule_info($coursemodule) {
+    global $DB;
+
+    if (! $dialogue = $DB->get_record('dialogue', ['id' => $coursemodule->instance], 'id, name, intro, introformat')) {
+        return false;
+    }
+
+    $result = new cached_cm_info();
+    $result->name = $dialogue->name;
+
+    if ($coursemodule->showdescription) {
+        // Convert intro to html. Do not filter cached version, filters run at display time.
+        $result->content = format_module_intro('dialogue', $dialogue, $coursemodule->id, false);
+    }
+
+    return $result;
 }
 
 /**
