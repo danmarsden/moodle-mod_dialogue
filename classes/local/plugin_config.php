@@ -18,6 +18,8 @@ namespace mod_dialogue\local;
 
 defined('MOODLE_INTERNAL') || die();
 
+use coding_exception;
+
 /**
  * Class plugin_config.
  *
