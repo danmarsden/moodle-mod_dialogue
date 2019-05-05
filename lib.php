@@ -258,6 +258,8 @@ function dialogue_process_bulk_openrules() {
 function dialogue_cm_info_view(cm_info $cm) {
     global $CFG;
     require_once($CFG->dirroot . '/mod/dialogue/locallib.php');
+    
+    return; // TODO - disabled for now.
 
     // Get tracking status (once per request)
     static $initialised;
