@@ -91,7 +91,9 @@ function xmldb_dialogue_upgrade($oldversion = 0) {
         // Rename field attachments on table dialogue_messages to hasattachments.
         $field = new xmldb_field('attachments', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
         // Launch rename field hasattachments.
-        $dbman->rename_field($table, $field, 'hasattachments');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'hasattachments');
+        }
         // Define field isdraft to be added to dialogue_messages.
         $field = new xmldb_field('isdraft', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
         // Conditionally launch add field isdraft.
