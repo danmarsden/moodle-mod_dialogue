@@ -1,0 +1,21 @@
+<div id="recipent-drawer-{{uniqid}}"
+     class="recipient-drawer bg-light hidden"
+     aria-expanded="true"
+     aria-hidden="false"
+     data-region="recipient-drawer"
+     role="region">
+    <div class="header-container position-relative" data-region="header-container">
+    </div>
+    <div class="body-container position-relative" data-region="body-container">
+        <span>hello</span>
+    </div>
+    <div class="footer-container position-relative" data-region="footer-container">
+
+    </div>
+</div>
+{{#js}}
+    require(['jquery', 'mod_dialogue/recipient_drawer'], function($, RecipientDrawer) {
+    var root = $('#recipent-drawer-{{uniqid}}');
+    RecipientDrawer.init(root);
+    });
+{{/js}}

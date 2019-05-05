@@ -1,0 +1,64 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_dialogue/list_sort_selector
+
+    This template renders sort dropdown.
+
+    Example context (json):
+    {
+        "latest": true,
+        "oldest": false,
+        "unread": false
+    }
+}}
+<div id="mod-dialogue-list-sort-{{uniqid}}" class="dropdown m-b-1">
+    <button id="groupingdropdown" type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="{{#str}} aria:sortingdropdown, mod_dialogue {{/str}}">
+        {{#pix}} i/sort, mod_dialogue {{/pix}}
+        <span class="d-sm-inline-block" data-active-item-text>
+                {{#latest}}{{#str}} latest, mod_dialogue {{/str}}{{/latest}}
+            {{#oldest}}{{#str}} oldest, mod_dialogue {{/str}}{{/oldest}}
+            {{#unread}}{{#str}} unread, mod_dialogue {{/str}}{{/unread}}
+        </span>
+    </button>
+    <ul class="dropdown-menu" data-show-active-item data-active-item-text aria-labelledby="filterdropdown">
+        <li>
+            <a class="dropdown-item {{#latest}}active{{/latest}}" href="#" data-filter="filter" data-value="latest" aria-label="{{#str}} aria:latest, mod_dialogue {{/str}}" aria-controls="dialogues-view-{{uniqid}}">
+                {{#str}} latest, mod_dialogue {{/str}}
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item {{#oldest}}active{{/oldest}}" href="#" data-filter="filter" data-value="oldest" aria-label="{{#str}} aria:oldest, mod_dialogue {{/str}}" aria-controls="dialogues-view-{{uniqid}}">
+                {{#str}} oldest, mod_dialogue{{/str}}
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item {{#unread}}active{{/unread}}" href="#" data-filter="filter" data-value="unread" aria-label="{{#str}} aria:unread, mod_dialogue{{/str}}" aria-controls="dialogues-view-{{uniqid}}">
+                {{#str}} unread, mod_dialogue{{/str}}
+            </a>
+        </li>
+    </ul>
+</div>
+{{#js}}
+    require(
+    [
+    'mod_dialogue/dropdown_control'
+    ],
+    function(dropDownControl) {
+        dropDownControl.init('#mod-dialogue-list-sort-{{uniqid}}', 'mod_dialogue_list_sort');
+    });
+{{/js}}
