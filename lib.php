@@ -19,9 +19,8 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Indicates API features that the dialogue supports.
  *
- * @uses FEATURE_GROUPS
  * @uses FEATURE_MOD_INTRO
- * @uses FEATURE_BACKUP_MOODLE2
+ * @uses FEATURE_SHOW_DESCRIPTION
  * @param string $feature
  * @return mixed True if yes (some features may use other values)
  */
@@ -35,9 +34,10 @@ function dialogue_supports($feature) {
         case FEATURE_GRADE_HAS_GRADE:         return false;
         case FEATURE_GRADE_OUTCOMES:          return false;
         case FEATURE_RATE:                    return false;
-        case FEATURE_BACKUP_MOODLE2:          return true;
+        case FEATURE_BACKUP_MOODLE2:          return false;
         case FEATURE_SHOW_DESCRIPTION:        return true;
         case FEATURE_COMMENT:                 return false;
+        case FEATURE_PLAGIARISM:              return false;
 
         default: return null;
     }
@@ -161,7 +161,7 @@ function dialogue_process_bulk_openrules() {
     require_once($CFG->dirroot.'/mod/dialogue/locallib.php');
     
     mtrace('1. Dealing with bulk open rules...');
-     
+    
     $sql = "SELECT dbor.*
               FROM {dialogue_bulk_opener_rules} dbor
               JOIN {dialogue_messages} dm ON dm.conversationid = dbor.conversationid
@@ -286,7 +286,7 @@ function dialogue_cm_info_view(cm_info $cm) {
 function dialogue_user_outline($course, $user, $mod, $dialogue) {
     global $DB;
 
-    $sql = "SELECT COUNT(DISTINCT dm.timecreated) AS count, 
+    $sql = "SELECT COUNT(DISTINCT dm.timecreated) AS count,
                      MAX(dm.timecreated) AS timecreated
               FROM {dialogue_messages} dm
              WHERE dm.dialogueid = :dialogueid
