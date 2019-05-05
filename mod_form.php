@@ -22,43 +22,56 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
+defined('MOODLE_INTERNAL') || die();
 
 require_once ($CFG->dirroot.'/mod/dialogue/locallib.php');
 require_once ($CFG->dirroot.'/course/moodleform_mod.php');
 
+use mod_dialogue\local\plugin_config;
+
 class mod_dialogue_mod_form extends moodleform_mod {
 
-    function definition() {
+    public function definition() {
         global $CFG, $COURSE, $DB;
 
-        $mform    = $this->_form;
-
-        $pluginconfig = get_config('dialogue');
+        $mform = $this->_form;
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        $mform->addElement('text', 'name', get_string('dialoguename', 'dialogue'), array('size'=>'64'));
+        $mform->addElement('text', 'name', get_string('dialoguename', 'dialogue'), ['size' => '64']);
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
         moodleform_mod::standard_intro_elements();
-
-        $choices = get_max_upload_sizes($CFG->maxbytes, $COURSE->maxbytes, $pluginconfig->maxbytes);
-
-        $mform->addElement('select', 'maxbytes', get_string('maxattachmentsize', 'dialogue'), $choices);
+        $choices = \mod_dialogue\local\persistent\dialogue_persistent::get_max_bytes_choices();
+        $mform->addElement(
+            'select',
+            'maxbytes',
+            get_string('maxattachmentsize', 'dialogue'),
+            $choices
+        );
         $mform->addHelpButton('maxbytes', 'maxattachmentsize', 'dialogue');
-        $mform->setDefault('maxbytes', $pluginconfig->maxbytes);
+        $mform->setDefault('maxbytes', plugin_config::get('maxbytes'));
 
-        $choices = range(0, $pluginconfig->maxattachments);
+        $choices = \mod_dialogue\local\persistent\dialogue_persistent::get_max_attachments_choices();
         $choices[0] = get_string('uploadnotallowed');
-        $mform->addElement('select', 'maxattachments', get_string('maxattachments', 'dialogue'), $choices);
+        $mform->addElement(
+            'select',
+            'maxattachments',
+            get_string('maxattachments', 'dialogue'),
+            $choices
+        );
         $mform->addHelpButton('maxattachments', 'maxattachments', 'dialogue');
-        $mform->setDefault('maxattachments', $pluginconfig->maxattachments);
-
-        $mform->addElement('checkbox', 'usecoursegroups', get_string('usecoursegroups', 'dialogue'));
+        $mform->setDefault('maxattachments', plugin_config::get('maxattachments'));
+    
+        $mform->addElement(
+            'advcheckbox',
+            'usecoursegroups',
+            get_string('usecoursegroups', 'dialogue'),
+            [0, 1]
+        );
         $mform->addHelpButton('usecoursegroups', 'usecoursegroups', 'dialogue');
-        $mform->setDefault('usecoursegroups', 0);
+        $mform->setDefault('usecoursegroups',  0);
 
         $this->standard_grading_coursemodule_elements();
 
@@ -67,14 +80,11 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
-     function get_data() {
+    public function get_data() {
         $data = parent::get_data();
         if (!$data) {
             return false;
         }
-        if (!isset($data->usecoursegroups)) {
-            $data->usecoursegroups = 0;
-        }
         return $data;
-     }
+    }
 }
