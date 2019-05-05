@@ -52,19 +52,21 @@ function dialogue_supports($feature) {
  * of the new instance.
  *
  * @param stdClass $data
- * @param mod_dialogue_mod_form $form
- * @return int The instance id of the new dialogue or false on failure
+ * @param mod_dialogue_mod_form|null $form
+ * @return mixed
+ * @throws \core\invalid_persistent_exception
+ * @throws coding_exception
  */
-
-function dialogue_add_instance($data) {
-    global $DB;
-
-    $data->timecreated = time();
-    $data->timemodified = $data->timecreated;
-
-    $result =  $DB->insert_record('dialogue', $data);
-
-    return $result;
+function dialogue_add_instance(stdClass $data, mod_dialogue_mod_form $form = null) {
+    $dialogue = new \mod_dialogue\local\persistent\dialogue_persistent();
+    $dialogue->set('course', $data->course);
+    $dialogue->set('name', $data->name);
+    $dialogue->set('intro', $data->intro);
+    $dialogue->set('introformat', $data->introformat);
+    $dialogue->set('maxbytes', $data->maxbytes);
+    $dialogue->set('maxattachments', $data->maxattachments);
+    $dialogue->set('usecoursegroups', $data->usecoursegroups);
+    return $dialogue->create()->get('id');
 }
 
 /**
@@ -74,18 +76,20 @@ function dialogue_add_instance($data) {
  * mod.html) this function will update an existing instance with new data.
  *
  * @param stdClass $data
- * @param mod_dialogue_mod_form $form
- * @return bool true on success
+ * @param mod_dialogue_mod_form|null $form
+ * @return bool
+ * @throws \core\invalid_persistent_exception
+ * @throws coding_exception
  */
-function dialogue_update_instance($data, $mform) {
-    global $DB;
-
-    $data->timemodified = time();
-    $data->id = $data->instance;
-
-    $DB->update_record('dialogue', $data);
-
-    return true;
+function dialogue_update_instance(stdClass $data, mod_dialogue_mod_form $form = null) {
+    $dialogue = new \mod_dialogue\local\persistent\dialogue_persistent($data->instance);
+    $dialogue->set('name', $data->name);
+    $dialogue->set('intro', $data->intro);
+    $dialogue->set('introformat', $data->introformat);
+    $dialogue->set('maxbytes', $data->maxbytes);
+    $dialogue->set('maxattachments', $data->maxattachments);
+    $dialogue->set('usecoursegroups', $data->usecoursegroups);
+    return $dialogue->update();
 }
 
 /**
