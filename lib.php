@@ -44,6 +44,35 @@ function dialogue_supports($feature) {
 }
 
 /**
+ * Define setable user preferences to be used with dialogue module.
+ *
+ * @return mixed
+ */
+function mod_dialogue_user_preferences() {
+    $preferences['mod_dialogue:conversation_state_filter'] = [
+        'null' => NULL_NOT_ALLOWED,
+        'default' => 'all',
+        'type' => PARAM_ALPHA,
+        'choices' => [
+            'all',
+            'open',
+            'closed'
+        ]
+    ];
+    $preferences['mod_dialogue_list_sort'] = [
+        'null' => NULL_NOT_ALLOWED,
+        'default' => 'latest',
+        'type' => PARAM_ALPHA,
+        'choices' => [
+            'latest',
+            'oldest',
+            'unread'
+        ]
+    ];
+    return $preferences;
+}
+
+/**
  * Get icon mapping for font-awesome.
  */
 function mod_dialogue_get_fontawesome_icon_map() {
