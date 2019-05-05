@@ -162,7 +162,7 @@ $string['unreadmessages'] = 'Unread messages';
 $string['unreadmessagesnumber'] = '{$a} unread messages';
 $string['unreadmessagesone'] = '1 unread message';
 $string['usecoursegroups'] = 'Use course groups';
-$string['usecoursegroups_help'] = 'If the course has defined groups a further restriction will be added to who a dialogue can 
+$string['usecoursegroups_help'] = 'If the course has defined groups a further restriction will be added to who a dialogue can
 be opened with. Dialogues can only be opened between group members unless the person opening the dialogue has the "Access all groups"
 capability set.';
 $string['usesearch'] = 'Use search to find people to start a dialogue with';
@@ -187,3 +187,21 @@ $string['seconds'] = 'seconds';
 $string['deleteallconversations'] = 'Delete all conversations';
 $string['deletealldrafts'] = 'Delete all drafts';
 $string['deleteallrules'] = 'Delete all opener rules';
+
+$string['startanew'] = 'Start a new dialogue';
+$string['all'] = 'All';
+$string['aria:filterdropdown'] = 'Filtering dropdown';
+$string['aria:all'] = 'aria:all';
+$string['aria:open'] = 'aria:open';
+$string['aria:closed'] = 'aria:closed';
+$string['aria:controls'] = 'aria:controls';
+
+$string['latest'] = 'Latest';
+$string['aria:latest'] = 'latest';
+$string['oldest'] = 'Oldest';
+$string['aria:oldest'] = 'Oldest';
+$string['unread'] = 'Unread';
+$string['aria:unread'] = 'Unread';
+
+$string['aria:sortingdropdown'] = 'Sorting dropdown';
+$string['yournewdialogue'] = 'Your new dialogue';
