@@ -8,15 +8,14 @@ student on their online activity. For example, if a student is participating in
 a language forum and made a grammatical error that the teacher wants to point
 out without embarrassing the student, a dialogue is the perfect place.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+Branches
+--------
+The git branches here support the following versions.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details: http://www.gnu.org/copyleft/gpl.html
+| Moodle version     | Branch      |
+| ----------------- | ----------- |
+| Mooodle 3.5 - 3.8 | MOODLE_35_STABLE |
+| Moodle 3.9 and higher | main |
 
 
 Contributions
