@@ -18,8 +18,18 @@ namespace mod_dialogue;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Class reply
+ * @package mod_dialogue
+ */
 class reply extends message {
-
+    /**
+     * Rply constructor.
+     * @param dialogue|null $dialogue
+     * @param conversation|null $conversation
+     * @param integer $messageid
+     * @throws \coding_exception
+     */
     public function __construct(dialogue $dialogue = null, conversation $conversation = null, $messageid = null) {
 
         parent::__construct($dialogue, $conversation);
@@ -57,7 +67,7 @@ class reply extends message {
             $record = $DB->get_record_sql($sql, $params, MUST_EXIST);
         }
 
-        // @todo - check dialogueid and conversationid
+        // Todo - check dialogueid and conversationid.
 
         $this->_messageid = $record->id;
         $this->_authorid = $record->authorid;
@@ -70,6 +80,11 @@ class reply extends message {
         $this->_timemodified = $record->timemodified;
     }
 
+    /**
+     * Initialise form.
+     *
+     * @return \mod_dialogue_reply_form
+     */
     public function initialise_form() {
         global $CFG, $USER;
         require_once($CFG->dirroot . '/mod/dialogue/formlib.php');
@@ -79,8 +94,8 @@ class reply extends message {
         $dialogueid = $this->dialogue->dialogueid;
         $conversationid = $this->conversation->conversationid;
 
-        $form = new \mod_dialogue_reply_form('reply.php'); // point specifically
-        // setup important hiddens
+        $form = new \mod_dialogue_reply_form('reply.php'); // Point specifically.
+        // Setup important hiddens.
         $form->set_data(array('id' => $cm->id));
         $form->set_data(array('dialogueid' => $dialogueid));
         $form->set_data(array('conversationid' => $conversationid));
@@ -90,33 +105,34 @@ class reply extends message {
         } else {
             $form->set_data(array('action' => 'edit'));
         }
-        // setup body, set new $draftitemid directly on _bodydraftid and rewritten
-        // html on _body
-        $this->_body = file_prepare_draft_area($this->_bodydraftid, $context->id, 'mod_dialogue', 'message', $this->_messageid, \mod_dialogue_reply_form::editor_options(), $this->_body);
+        // Setup body, set new $draftitemid directly on _bodydraftid and rewritten
+        // html on _body.
+        $this->_body = file_prepare_draft_area($this->_bodydraftid, $context->id, 'mod_dialogue',
+            'message', $this->_messageid, \mod_dialogue_reply_form::editor_options(), $this->_body);
 
         $form->set_data(array('body' =>
             array('text' => $this->_body,
                 'format' => $this->_bodyformat,
                 'itemid' => $this->_bodydraftid)));
 
-        // setup attachments, set new $draftitemid directly on _attachmentsdraftid
-        file_prepare_draft_area($this->_attachmentsdraftid, $context->id, 'mod_dialogue', 'attachment', $this->_messageid, \mod_dialogue_reply_form::attachment_options());
+        // Setup attachments, set new $draftitemid directly on _attachmentsdraftid.
+        file_prepare_draft_area($this->_attachmentsdraftid, $context->id, 'mod_dialogue',
+            'attachment', $this->_messageid, \mod_dialogue_reply_form::attachment_options());
 
-        // using a post array for attachments
+        // Using a post array for attachments.
         $form->set_data(array('attachments[itemid]' => $this->_attachmentsdraftid));
 
-
-        // remove any form buttons the user shouldn't have
+        // Remove any form buttons the user shouldn't have.
         if ($this->conversation->state == dialogue::STATE_CLOSED) {
             $form->remove_from_group('send', 'actionbuttongroup');
         }
 
-        // remove any unecessary buttons
+        // Remove any unecessary buttons.
         if (($USER->id != $this->author->id) or is_null($this->messageid)) {
             $form->remove_from_group('delete', 'actionbuttongroup');
         }
 
-        // remove any unecessary buttons
+        // Remove any unecessary buttons.
         if (($USER->id != $this->author->id) or is_null($this->messageid)) {
             $form->remove_from_group('trash', 'actionbuttongroup');
         }
@@ -124,8 +140,12 @@ class reply extends message {
         return $this->_form = $form;
     }
 
+    /**
+     * Save form data.
+     * @throws \moodle_exception
+     */
     public function save_form_data() {
-        // get incoming form data
+        // Get incoming form data.
         $data = $this->_form->get_submitted_data();
 
         $this->set_body($data->body['text'], $data->body['format'], $data->body['itemid']);
@@ -137,13 +157,20 @@ class reply extends message {
         $this->_formdatasaved = true;
     }
 
+    /**
+     * Send it.
+     * @return bool|void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function send() {
         global $USER, $DB;
 
         $context = $this->dialogue->context;
         $conversationid = $this->conversation->conversationid;
 
-        // check permission
+        // Check permission.
         if ($USER->id != $this->_authorid or !has_capability('mod/dialogue:reply', $context)) {
             throw new \moodle_exception("This doesn't belong to you!");
         }
@@ -153,14 +180,13 @@ class reply extends message {
                  WHERE dm.conversationid = :conversationid";
 
         $params = array('conversationid' => $conversationid);
-        // get last conversation index
+        // Get last conversation index.
         $index = $DB->get_field_sql($sql, $params);
-        // increment index
+        // Increment index.
         $index++;
-        // set the conversation index, important for order of display
+        // Set the conversation index, important for order of display.
         $DB->set_field('dialogue_messages', 'conversationindex', $index, array('id' => $this->_messageid));
 
         parent::send();
     }
-
 }
