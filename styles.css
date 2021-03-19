@@ -282,7 +282,7 @@ body.path-mod-dialogue #region-main .table td {
     line-height: 20px;
     text-align: left;
     vertical-align: top;
-    border-top: 1px solid #dddddd;
+    border-top: 1px solid #ddd;
 }
 
 body.path-mod-dialogue #region-main .table th {
@@ -303,11 +303,11 @@ body.path-mod-dialogue #region-main .table thead:first-child tr:first-child td {
 }
 
 body.path-mod-dialogue #region-main .table tbody + tbody {
-    border-top: 2px solid #dddddd;
+    border-top: 2px solid #ddd;
 }
 
 body.path-mod-dialogue #region-main .table .table {
-    background-color: #ffffff;
+    background-color: #fff;
 }
 
 body.path-mod-dialogue #region-main .table-condensed th,
@@ -316,7 +316,7 @@ body.path-mod-dialogue #region-main .table-condensed td {
 }
 
 body.path-mod-dialogue #region-main .table-bordered {
-    border: 1px solid #dddddd;
+    border: 1px solid #ddd;
     border-collapse: separate;
     *border-collapse: collapse;
     border-left: 0;
@@ -327,7 +327,7 @@ body.path-mod-dialogue #region-main .table-bordered {
 
 body.path-mod-dialogue #region-main .table-bordered th,
 body.path-mod-dialogue #region-main .table-bordered td {
-    border-left: 1px solid #dddddd;
+    border-left: 1px solid #ddd;
 }
 
 body.path-mod-dialogue #region-main .table-bordered caption + thead tr:first-child th,
@@ -584,7 +584,7 @@ body.path-mod-dialogue #region-main .dropdown-menu {
     padding: 5px 0;
     margin: 2px 0 0;
     list-style: none;
-    background-color: #ffffff;
+    background-color: #fff;
     border: 1px solid #ccc;
     border: 1px solid rgba(0, 0, 0, 0.2);
     *border-right-width: 2px;
@@ -612,7 +612,7 @@ body.path-mod-dialogue #region-main .dropdown-menu .divider {
     *margin: -5px 0 5px;
     overflow: hidden;
     background-color: #e5e5e5;
-    border-bottom: 1px solid #ffffff;
+    border-bottom: 1px solid #fff;
 }
 
 body.path-mod-dialogue #region-main .dropdown-menu > li > a {
@@ -621,7 +621,7 @@ body.path-mod-dialogue #region-main .dropdown-menu > li > a {
     clear: both;
     font-weight: normal;
     line-height: 20px;
-    color: #333333;
+    color: #333;
     white-space: nowrap;
 }
 
@@ -629,14 +629,14 @@ body.path-mod-dialogue #region-main .dropdown-menu > li > a:hover,
 body.path-mod-dialogue #region-main .dropdown-menu > li > a:focus,
 body.path-mod-dialogue #region-main .dropdown-submenu:hover > a,
 body.path-mod-dialogue #region-main .dropdown-submenu:focus > a {
-    color: #ffffff;
+    color: #fff;
     text-decoration: none;
     background-color: #0081c2;
-    background-image: -moz-linear-gradient(top, #0088cc, #0077b3);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#0088cc), to(#0077b3));
-    background-image: -webkit-linear-gradient(top, #0088cc, #0077b3);
-    background-image: -o-linear-gradient(top, #0088cc, #0077b3);
-    background-image: linear-gradient(to bottom, #0088cc, #0077b3);
+    background-image: -moz-linear-gradient(top, #08c, #0077b3);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#08c), to(#0077b3));
+    background-image: -webkit-linear-gradient(top, #08c, #0077b3);
+    background-image: -o-linear-gradient(top, #08c, #0077b3);
+    background-image: linear-gradient(to bottom, #08c, #0077b3);
     background-repeat: repeat-x;
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0077b3', GradientType=0);
 }
@@ -644,14 +644,14 @@ body.path-mod-dialogue #region-main .dropdown-submenu:focus > a {
 body.path-mod-dialogue #region-main .dropdown-menu > .active > a,
 body.path-mod-dialogue #region-main .dropdown-menu > .active > a:hover,
 body.path-mod-dialogue #region-main .dropdown-menu > .active > a:focus {
-    color: #ffffff;
+    color: #fff;
     text-decoration: none;
     background-color: #0081c2;
-    background-image: -moz-linear-gradient(top, #0088cc, #0077b3);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#0088cc), to(#0077b3));
-    background-image: -webkit-linear-gradient(top, #0088cc, #0077b3);
-    background-image: -o-linear-gradient(top, #0088cc, #0077b3);
-    background-image: linear-gradient(to bottom, #0088cc, #0077b3);
+    background-image: -moz-linear-gradient(top, #08c, #0077b3);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#08c), to(#0077b3));
+    background-image: -webkit-linear-gradient(top, #08c, #0077b3);
+    background-image: -o-linear-gradient(top, #08c, #0077b3);
+    background-image: linear-gradient(to bottom, #08c, #0077b3);
     background-repeat: repeat-x;
     outline: 0;
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0077b3', GradientType=0);
@@ -660,7 +660,7 @@ body.path-mod-dialogue #region-main .dropdown-menu > .active > a:focus {
 body.path-mod-dialogue #region-main .dropdown-menu > .disabled > a,
 body.path-mod-dialogue #region-main .dropdown-menu > .disabled > a:hover,
 body.path-mod-dialogue #region-main .dropdown-menu > .disabled > a:focus {
-    color: #999999;
+    color: #999;
 }
 
 body.path-mod-dialogue #region-main .dropdown-menu > .disabled > a:hover,
@@ -735,14 +735,14 @@ body.path-mod-dialogue #region-main .dropdown-submenu > a:after {
     margin-top: 5px;
     margin-right: -10px;
     border-color: transparent;
-    border-left-color: #cccccc;
+    border-left-color: #ccc;
     border-style: solid;
     border-width: 5px 0 5px 5px;
     content: " ";
 }
 
 body.path-mod-dialogue #region-main .dropdown-submenu:hover > a:after {
-    border-left-color: #ffffff;
+    border-left-color: #fff;
 }
 
 body.path-mod-dialogue #region-main .dropdown-submenu.pull-left {
@@ -778,20 +778,20 @@ body.path-mod-dialogue #region-main .btn {
     *margin-left: .3em;
     font-size: 14px;
     line-height: 20px;
-    color: #333333;
+    color: #333;
     text-align: center;
     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
     vertical-align: middle;
     cursor: pointer;
     background-color: #f5f5f5;
     *background-color: #e6e6e6;
-    background-image: -moz-linear-gradient(top, #ffffff, #e6e6e6);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#e6e6e6));
-    background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
-    background-image: -o-linear-gradient(top, #ffffff, #e6e6e6);
-    background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
+    background-image: -moz-linear-gradient(top, #fff, #e6e6e6);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fff), to(#e6e6e6));
+    background-image: -webkit-linear-gradient(top, #fff, #e6e6e6);
+    background-image: -o-linear-gradient(top, #fff, #e6e6e6);
+    background-image: linear-gradient(to bottom, #fff, #e6e6e6);
     background-repeat: repeat-x;
-    border: 1px solid #cccccc;
+    border: 1px solid #ccc;
     *border: 0;
     border-color: #e6e6e6 #e6e6e6 #bfbfbf;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
@@ -799,7 +799,7 @@ body.path-mod-dialogue #region-main .btn {
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffe6e6e6', GradientType=0);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fffff', endColorstr='#ffe6e6e6', GradientType=0);
     filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
     *zoom: 1;
     -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -813,14 +813,14 @@ body.path-mod-dialogue #region-main .btn:active,
 body.path-mod-dialogue #region-main .btn.active,
 body.path-mod-dialogue #region-main .btn.disabled,
 body.path-mod-dialogue #region-main .btn[disabled] {
-    color: #333333;
+    color: #333;
     background-color: #e6e6e6;
     *background-color: #d9d9d9;
 }
 
 body.path-mod-dialogue #region-main .btn:active,
 body.path-mod-dialogue #region-main .btn.active {
-    background-color: #cccccc \9;
+    background-color: #ccc \9;
 }
 
 body.path-mod-dialogue #region-main .btn:first-child {
@@ -829,7 +829,7 @@ body.path-mod-dialogue #region-main .btn:first-child {
 
 body.path-mod-dialogue #region-main .btn:hover,
 body.path-mod-dialogue #region-main .btn:focus {
-    color: #333333;
+    color: #333;
     text-decoration: none;
     background-position: 0 -15px;
     -webkit-transition: background-position 0.1s linear;
@@ -933,19 +933,19 @@ body.path-mod-dialogue #region-main .btn-inverse.active {
 }
 
 body.path-mod-dialogue #region-main .btn-primary {
-    color: #ffffff;
+    color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #006dcc;
-    *background-color: #0044cc;
-    background-image: -moz-linear-gradient(top, #0088cc, #0044cc);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#0088cc), to(#0044cc));
-    background-image: -webkit-linear-gradient(top, #0088cc, #0044cc);
-    background-image: -o-linear-gradient(top, #0088cc, #0044cc);
-    background-image: linear-gradient(to bottom, #0088cc, #0044cc);
+    *background-color: #04c;
+    background-image: -moz-linear-gradient(top, #08c, #04c);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#08c), to(#04c));
+    background-image: -webkit-linear-gradient(top, #08c, #04c);
+    background-image: -o-linear-gradient(top, #08c, #04c);
+    background-image: linear-gradient(to bottom, #08c, #04c);
     background-repeat: repeat-x;
-    border-color: #0044cc #0044cc #002a80;
+    border-color: #04c #04c #002a80;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0044cc', GradientType=0);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff04c', GradientType=0);
     filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
 }
 
@@ -955,8 +955,8 @@ body.path-mod-dialogue #region-main .btn-primary:active,
 body.path-mod-dialogue #region-main .btn-primary.active,
 body.path-mod-dialogue #region-main .btn-primary.disabled,
 body.path-mod-dialogue #region-main .btn-primary[disabled] {
-    color: #ffffff;
-    background-color: #0044cc;
+    color: #fff;
+    background-color: #04c;
     *background-color: #003bb3;
 }
 
@@ -966,7 +966,7 @@ body.path-mod-dialogue #region-main .btn-primary.active {
 }
 
 body.path-mod-dialogue #region-main .btn-warning {
-    color: #ffffff;
+    color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #faa732;
     *background-color: #f89406;
@@ -988,7 +988,7 @@ body.path-mod-dialogue #region-main .btn-warning:active,
 body.path-mod-dialogue #region-main .btn-warning.active,
 body.path-mod-dialogue #region-main .btn-warning.disabled,
 body.path-mod-dialogue #region-main .btn-warning[disabled] {
-    color: #ffffff;
+    color: #fff;
     background-color: #f89406;
     *background-color: #df8505;
 }
@@ -999,7 +999,7 @@ body.path-mod-dialogue #region-main .btn-warning.active {
 }
 
 body.path-mod-dialogue #region-main .btn-danger {
-    color: #ffffff;
+    color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #da4f49;
     *background-color: #bd362f;
@@ -1021,7 +1021,7 @@ body.path-mod-dialogue #region-main .btn-danger:active,
 body.path-mod-dialogue #region-main .btn-danger.active,
 body.path-mod-dialogue #region-main .btn-danger.disabled,
 body.path-mod-dialogue #region-main .btn-danger[disabled] {
-    color: #ffffff;
+    color: #fff;
     background-color: #bd362f;
     *background-color: #a9302a;
 }
@@ -1032,7 +1032,7 @@ body.path-mod-dialogue #region-main .btn-danger.active {
 }
 
 body.path-mod-dialogue #region-main .btn-success {
-    color: #ffffff;
+    color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #5bb75b;
     *background-color: #51a351;
@@ -1054,7 +1054,7 @@ body.path-mod-dialogue #region-main .btn-success:active,
 body.path-mod-dialogue #region-main .btn-success.active,
 body.path-mod-dialogue #region-main .btn-success.disabled,
 body.path-mod-dialogue #region-main .btn-success[disabled] {
-    color: #ffffff;
+    color: #fff;
     background-color: #51a351;
     *background-color: #499249;
 }
@@ -1065,7 +1065,7 @@ body.path-mod-dialogue #region-main .btn-success.active {
 }
 
 body.path-mod-dialogue #region-main .btn-info {
-    color: #ffffff;
+    color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #49afcd;
     *background-color: #2f96b4;
@@ -1087,7 +1087,7 @@ body.path-mod-dialogue #region-main .btn-info:active,
 body.path-mod-dialogue #region-main .btn-info.active,
 body.path-mod-dialogue #region-main .btn-info.disabled,
 body.path-mod-dialogue #region-main .btn-info[disabled] {
-    color: #ffffff;
+    color: #fff;
     background-color: #2f96b4;
     *background-color: #2a85a0;
 }
@@ -1098,17 +1098,17 @@ body.path-mod-dialogue #region-main .btn-info.active {
 }
 
 body.path-mod-dialogue #region-main .btn-inverse {
-    color: #ffffff;
+    color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #363636;
-    *background-color: #222222;
-    background-image: -moz-linear-gradient(top, #444444, #222222);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#444444), to(#222222));
-    background-image: -webkit-linear-gradient(top, #444444, #222222);
-    background-image: -o-linear-gradient(top, #444444, #222222);
-    background-image: linear-gradient(to bottom, #444444, #222222);
+    *background-color: #222;
+    background-image: -moz-linear-gradient(top, #444, #222);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#444), to(#222));
+    background-image: -webkit-linear-gradient(top, #444, #222);
+    background-image: -o-linear-gradient(top, #444, #222);
+    background-image: linear-gradient(to bottom, #444, #222);
     background-repeat: repeat-x;
-    border-color: #222222 #222222 #000000;
+    border-color: #222 #222 #000000;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff444444', endColorstr='#ff222222', GradientType=0);
     filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
@@ -1120,8 +1120,8 @@ body.path-mod-dialogue #region-main .btn-inverse:active,
 body.path-mod-dialogue #region-main .btn-inverse.active,
 body.path-mod-dialogue #region-main .btn-inverse.disabled,
 body.path-mod-dialogue #region-main .btn-inverse[disabled] {
-    color: #ffffff;
-    background-color: #222222;
+    color: #fff;
+    background-color: #222;
     *background-color: #151515;
 }
 
@@ -1171,7 +1171,7 @@ body.path-mod-dialogue #region-main .btn-link[disabled] {
 }
 
 body.path-mod-dialogue #region-main .btn-link {
-    color: #0088cc;
+    color: #08c;
     cursor: pointer;
     border-color: transparent;
     -webkit-border-radius: 0;
@@ -1188,7 +1188,7 @@ body.path-mod-dialogue #region-main .btn-link:focus {
 
 body.path-mod-dialogue #region-main .btn-link[disabled]:hover,
 body.path-mod-dialogue #region-main .btn-link[disabled]:focus {
-    color: #333333;
+    color: #333;
     text-decoration: none;
 }
 
@@ -1345,7 +1345,7 @@ body.path-mod-dialogue #region-main .btn-group.open .btn.dropdown-toggle {
 }
 
 body.path-mod-dialogue #region-main .btn-group.open .btn-primary.dropdown-toggle {
-    background-color: #0044cc;
+    background-color: #04c;
 }
 
 body.path-mod-dialogue #region-main .btn-group.open .btn-warning.dropdown-toggle {
@@ -1365,7 +1365,7 @@ body.path-mod-dialogue #region-main .btn-group.open .btn-info.dropdown-toggle {
 }
 
 body.path-mod-dialogue #region-main .btn-group.open .btn-inverse.dropdown-toggle {
-    background-color: #222222;
+    background-color: #222;
 }
 
 body.path-mod-dialogue #region-main .btn .caret {
@@ -1398,8 +1398,8 @@ body.path-mod-dialogue #region-main .btn-danger .caret,
 body.path-mod-dialogue #region-main .btn-info .caret,
 body.path-mod-dialogue #region-main .btn-success .caret,
 body.path-mod-dialogue #region-main .btn-inverse .caret {
-    border-top-color: #ffffff;
-    border-bottom-color: #ffffff;
+    border-top-color: #fff;
+    border-bottom-color: #fff;
 }
 
 body.path-mod-dialogue #region-main .btn-group-vertical {
@@ -1534,7 +1534,7 @@ body.path-mod-dialogue #region-main .nav > li > a {
 body.path-mod-dialogue #region-main .nav > li > a:hover,
 body.path-mod-dialogue #region-main .nav > li > a:focus {
     text-decoration: none;
-    background-color: #eeeeee;
+    background-color: #eee;
 }
 
 body.path-mod-dialogue #region-main .nav > li > a > img {
@@ -1551,7 +1551,7 @@ body.path-mod-dialogue #region-main .nav-header {
     font-size: 11px;
     font-weight: bold;
     line-height: 20px;
-    color: #999999;
+    color: #999;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
 }
@@ -1580,9 +1580,9 @@ body.path-mod-dialogue #region-main .nav-list > li > a {
 body.path-mod-dialogue #region-main .nav-list > .active > a,
 body.path-mod-dialogue #region-main .nav-list > .active > a:hover,
 body.path-mod-dialogue #region-main .nav-list > .active > a:focus {
-    color: #ffffff;
+    color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
-    background-color: #0088cc;
+    background-color: #08c;
 }
 
 body.path-mod-dialogue #region-main .nav-list [class^="icon-"],
@@ -1597,7 +1597,7 @@ body.path-mod-dialogue #region-main .nav-list .divider {
     *margin: -5px 0 5px;
     overflow: hidden;
     background-color: #e5e5e5;
-    border-bottom: 1px solid #ffffff;
+    border-bottom: 1px solid #fff;
 }
 
 body.path-mod-dialogue #region-main .nav-tabs,
@@ -1652,15 +1652,15 @@ body.path-mod-dialogue #region-main .nav-tabs > li > a {
 
 body.path-mod-dialogue #region-main .nav-tabs > li > a:hover,
 body.path-mod-dialogue #region-main .nav-tabs > li > a:focus {
-    border-color: #eeeeee #eeeeee #dddddd;
+    border-color: #eee #eee #ddd;
 }
 
 body.path-mod-dialogue #region-main .nav-tabs > .active > a,
 body.path-mod-dialogue #region-main .nav-tabs > .active > a:hover,
 body.path-mod-dialogue #region-main .nav-tabs > .active > a:focus {
-    color: #555555;
+    color: #555;
     cursor: default;
-    background-color: #ffffff;
+    background-color: #fff;
     border: 1px solid #ddd;
     border-bottom-color: transparent;
 }
@@ -1678,8 +1678,8 @@ body.path-mod-dialogue #region-main .nav-pills > li > a {
 body.path-mod-dialogue #region-main .nav-pills > .active > a,
 body.path-mod-dialogue #region-main .nav-pills > .active > a:hover,
 body.path-mod-dialogue #region-main .nav-pills > .active > a:focus {
-    color: #ffffff;
-    background-color: #0088cc;
+    color: #fff;
+    background-color: #08c;
 }
 
 body.path-mod-dialogue #region-main .nav-stacked > li {
@@ -1747,8 +1747,8 @@ body.path-mod-dialogue #region-main .nav-pills .dropdown-menu {
 
 body.path-mod-dialogue #region-main .nav .dropdown-toggle .caret {
     margin-top: 6px;
-    border-top-color: #0088cc;
-    border-bottom-color: #0088cc;
+    border-top-color: #08c;
+    border-bottom-color: #08c;
 }
 
 body.path-mod-dialogue #region-main .nav .dropdown-toggle:hover .caret,
@@ -1767,8 +1767,8 @@ body.path-mod-dialogue #region-main .nav .active .dropdown-toggle .caret {
 }
 
 body.path-mod-dialogue #region-main .nav-tabs .active .dropdown-toggle .caret {
-    border-top-color: #555555;
-    border-bottom-color: #555555;
+    border-top-color: #555;
+    border-bottom-color: #555;
 }
 
 body.path-mod-dialogue #region-main .nav > .dropdown.active > a:hover,
@@ -1780,24 +1780,24 @@ body.path-mod-dialogue #region-main .nav-tabs .open .dropdown-toggle,
 body.path-mod-dialogue #region-main .nav-pills .open .dropdown-toggle,
 body.path-mod-dialogue #region-main .nav > li.dropdown.open.active > a:hover,
 body.path-mod-dialogue #region-main .nav > li.dropdown.open.active > a:focus {
-    color: #ffffff;
-    background-color: #999999;
-    border-color: #999999;
+    color: #fff;
+    background-color: #999;
+    border-color: #999;
 }
 
 body.path-mod-dialogue #region-main .nav li.dropdown.open .caret,
 body.path-mod-dialogue #region-main .nav li.dropdown.open.active .caret,
 body.path-mod-dialogue #region-main .nav li.dropdown.open a:hover .caret,
 body.path-mod-dialogue #region-main .nav li.dropdown.open a:focus .caret {
-    border-top-color: #ffffff;
-    border-bottom-color: #ffffff;
+    border-top-color: #fff;
+    border-bottom-color: #fff;
     opacity: 1;
     filter: alpha(opacity=100);
 }
 
 body.path-mod-dialogue #region-main .tabs-stacked .open > a:hover,
 body.path-mod-dialogue #region-main .tabs-stacked .open > a:focus {
-    border-color: #999999;
+    border-color: #999;
 }
 
 body.path-mod-dialogue #region-main .tabbable {
@@ -1889,14 +1889,14 @@ body.path-mod-dialogue #region-main .tabs-left > .nav-tabs > li > a {
 
 body.path-mod-dialogue #region-main .tabs-left > .nav-tabs > li > a:hover,
 body.path-mod-dialogue #region-main .tabs-left > .nav-tabs > li > a:focus {
-    border-color: #eeeeee #dddddd #eeeeee #eeeeee;
+    border-color: #eee #ddd #eee #eee;
 }
 
 body.path-mod-dialogue #region-main .tabs-left > .nav-tabs .active > a,
 body.path-mod-dialogue #region-main .tabs-left > .nav-tabs .active > a:hover,
 body.path-mod-dialogue #region-main .tabs-left > .nav-tabs .active > a:focus {
     border-color: #ddd transparent #ddd #ddd;
-    *border-right-color: #ffffff;
+    *border-right-color: #fff;
 }
 
 body.path-mod-dialogue #region-main .tabs-right > .nav-tabs {
@@ -1914,18 +1914,18 @@ body.path-mod-dialogue #region-main .tabs-right > .nav-tabs > li > a {
 
 body.path-mod-dialogue #region-main .tabs-right > .nav-tabs > li > a:hover,
 body.path-mod-dialogue #region-main .tabs-right > .nav-tabs > li > a:focus {
-    border-color: #eeeeee #eeeeee #eeeeee #dddddd;
+    border-color: #eee #eee #eee #ddd;
 }
 
 body.path-mod-dialogue #region-main .tabs-right > .nav-tabs .active > a,
 body.path-mod-dialogue #region-main .tabs-right > .nav-tabs .active > a:hover,
 body.path-mod-dialogue #region-main .tabs-right > .nav-tabs .active > a:focus {
     border-color: #ddd #ddd #ddd transparent;
-    *border-left-color: #ffffff;
+    *border-left-color: #fff;
 }
 
 body.path-mod-dialogue #region-main .nav > .disabled > a {
-    color: #999999;
+    color: #999;
 }
 
 body.path-mod-dialogue #region-main .nav > .disabled > a:hover,
@@ -1981,7 +1981,7 @@ body.path-mod-dialogue #region-main .thumbnail {
 
 body.path-mod-dialogue #region-main a.thumbnail:hover,
 body.path-mod-dialogue #region-main a.thumbnail:focus {
-    border-color: #0088cc;
+    border-color: #08c;
     -webkit-box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
     -moz-box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
     box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
@@ -1996,7 +1996,7 @@ body.path-mod-dialogue #region-main .thumbnail > img {
 
 body.path-mod-dialogue #region-main .thumbnail .caption {
     padding: 9px;
-    color: #555555;
+    color: #555;
 }
 
 body.path-mod-dialogue #region-main .media,
@@ -2042,11 +2042,11 @@ body.path-mod-dialogue #region-main .badge {
     font-size: 11.844px;
     font-weight: bold;
     line-height: 14px;
-    color: #ffffff;
+    color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     white-space: nowrap;
     vertical-align: baseline;
-    background-color: #999999;
+    background-color: #999;
 }
 
 body.path-mod-dialogue #region-main .badge {
@@ -2063,7 +2063,7 @@ body.path-mod-dialogue #region-main .badge:empty {
 
 body.path-mod-dialogue #region-main a.badge:hover,
 body.path-mod-dialogue #region-main a.badge:focus {
-    color: #ffffff;
+    color: #fff;
     text-decoration: none;
     cursor: pointer;
 }
@@ -2110,7 +2110,7 @@ body.path-mod-dialogue #region-main .badge-info[href] {
 
 body.path-mod-dialogue #region-main .label-inverse,
 body.path-mod-dialogue #region-main .badge-inverse {
-    background-color: #333333;
+    background-color: #333;
 }
 
 body.path-mod-dialogue #region-main .label-inverse[href],
@@ -2206,9 +2206,9 @@ body.path-mod-dialogue #region-main .yui3-aclist-field > ul:empty {
 
 body.path-mod-dialogue #region-main .yui3-aclist-field {
     padding: 3px 3px;
-    color: #555555;
-    background-color: #FFFFFF;
-    border: 1px solid #CCCCCC;
+    color: #555;
+    background-color: #fff;
+    border: 1px solid #ccc;
     border-radius: 4px 4px 4px 4px;
 }
 
@@ -2352,7 +2352,7 @@ body.path-mod-dialogue #region-main .state-indicator {
     font-size: 75%;
     font-weight: bold;
     line-height: 1;
-    color: #ffffff;
+    color: #fff;
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
@@ -2422,8 +2422,8 @@ body.path-mod-dialogue #region-main .btn-create {
     *margin-left: .3em;
     font-size: 14px;
     line-height: 20px;
-    color: #333333;
-    color: #ffffff;
+    color: #333;
+    color: #fff;
     text-align: center;
     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
@@ -2432,29 +2432,29 @@ body.path-mod-dialogue #region-main .btn-create {
     background-color: #f5f5f5;
     background-color: #006dcc;
     *background-color: #e6e6e6;
-    *background-color: #0044cc;
-    background-image: -moz-linear-gradient(top, #ffffff, #e6e6e6);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#e6e6e6));
-    background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
-    background-image: -o-linear-gradient(top, #ffffff, #e6e6e6);
-    background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
-    background-image: -moz-linear-gradient(top, #0088cc, #0044cc);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#0088cc), to(#0044cc));
-    background-image: -webkit-linear-gradient(top, #0088cc, #0044cc);
-    background-image: -o-linear-gradient(top, #0088cc, #0044cc);
-    background-image: linear-gradient(to bottom, #0088cc, #0044cc);
+    *background-color: #04c;
+    background-image: -moz-linear-gradient(top, #fff, #e6e6e6);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fff), to(#e6e6e6));
+    background-image: -webkit-linear-gradient(top, #fff, #e6e6e6);
+    background-image: -o-linear-gradient(top, #fff, #e6e6e6);
+    background-image: linear-gradient(to bottom, #fff, #e6e6e6);
+    background-image: -moz-linear-gradient(top, #08c, #04c);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#08c), to(#04c));
+    background-image: -webkit-linear-gradient(top, #08c, #04c);
+    background-image: -o-linear-gradient(top, #08c, #04c);
+    background-image: linear-gradient(to bottom, #08c, #04c);
     background-repeat: repeat-x;
-    border: 1px solid #cccccc;
+    border: 1px solid #ccc;
     *border: 0;
     border-color: #e6e6e6 #e6e6e6 #bfbfbf;
-    border-color: #0044cc #0044cc #002a80;
+    border-color: #04c #04c #002a80;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
     border-bottom-color: #b3b3b3;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffe6e6e6', GradientType=0);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0044cc', GradientType=0);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fffff', endColorstr='#ffe6e6e6', GradientType=0);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff04c', GradientType=0);
     filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
     *zoom: 1;
     -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -2468,14 +2468,14 @@ body.path-mod-dialogue #region-main .btn-create:active,
 body.path-mod-dialogue #region-main .btn-create.active,
 body.path-mod-dialogue #region-main .btn-create.disabled,
 body.path-mod-dialogue #region-main .btn-create[disabled] {
-    color: #333333;
+    color: #333;
     background-color: #e6e6e6;
     *background-color: #d9d9d9;
 }
 
 body.path-mod-dialogue #region-main .btn-create:active,
 body.path-mod-dialogue #region-main .btn-create.active {
-    background-color: #cccccc \9;
+    background-color: #ccc \9;
 }
 
 body.path-mod-dialogue #region-main .btn-create:first-child {
@@ -2484,7 +2484,7 @@ body.path-mod-dialogue #region-main .btn-create:first-child {
 
 body.path-mod-dialogue #region-main .btn-create:hover,
 body.path-mod-dialogue #region-main .btn-create:focus {
-    color: #333333;
+    color: #333;
     text-decoration: none;
     background-position: 0 -15px;
     -webkit-transition: background-position 0.1s linear;
@@ -2530,8 +2530,8 @@ body.path-mod-dialogue #region-main .btn-create:active,
 body.path-mod-dialogue #region-main .btn-create.active,
 body.path-mod-dialogue #region-main .btn-create.disabled,
 body.path-mod-dialogue #region-main .btn-create[disabled] {
-    color: #ffffff;
-    background-color: #0044cc;
+    color: #fff;
+    background-color: #04c;
     *background-color: #003bb3;
 }
 
@@ -2541,13 +2541,13 @@ body.path-mod-dialogue #region-main .btn-create.active {
 }
 
 body.path-mod-dialogue #region-main .btn-create .caret {
-    border-top-color: #ffffff;
-    border-bottom-color: #ffffff;
+    border-top-color: #fff;
+    border-bottom-color: #fff;
 }
 
 body.path-mod-dialogue #region-main a.btn:link,
 body.path-mod-dialogue #region-main a.btn:visited {
-    color: #555555;
+    color: #555;
 }
 
 body.path-mod-dialogue #region-main a.btn-create:link,
@@ -2559,7 +2559,7 @@ body.path-mod-dialogue #region-main hr {
     margin: 20px 0;
     border: 0;
     border-top: 1px solid #eee;
-    border-bottom: 1px solid #ffffff;
+    border-bottom: 1px solid #fff;
 }
 
 body.path-mod-dialogue #region-main .notifyproblem {
