@@ -58,14 +58,14 @@ if ($form->is_submitted()) {
         case 'cancel':
             redirect($returnurl);
         case 'send':
-            if ($form->is_validated()){
+            if ($form->is_validated()) {
                 $conversation->save_form_data();
                 $conversation->send();
                 if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
                     $sendmessage = get_string('conversationopenedcron', 'dialogue');
                 } else {
                     $sendmessage = get_string('conversationopened', 'dialogue');
-                    // Trigger conversation created event
+                    // Trigger conversation created event.
                     $eventparams = array(
                         'context' => $context,
                         'objectid' => $conversation->conversationid
@@ -75,7 +75,7 @@ if ($form->is_submitted()) {
                 }
                 redirect($returnurl, $sendmessage);
             }
-            break; // leave switch to display form page
+            break; // Leave switch to display form page.
         case 'save':
             $conversation->save_form_data();
             redirect($draftsurl, get_string('changessaved'));
@@ -85,7 +85,7 @@ if ($form->is_submitted()) {
     }
 }
 
-// Display form page
+// Display form page.
 echo $OUTPUT->header();
 echo $OUTPUT->heading($activityrecord->name);
 if (!empty($dialogue->activityrecord->intro)) {

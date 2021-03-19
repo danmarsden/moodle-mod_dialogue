@@ -27,11 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  *
- */
-
-
-/**
- *
  * @global stdClass $DB
  * @global stdClass $USER
  * @global stdClass $PAGE
@@ -49,7 +44,6 @@ function dialogue_search_potentials(\mod_dialogue\dialogue $dialogue, $query = '
     $wheres = array();
     $wheresql  = '';
 
-
     $userfields = user_picture::fields('u');
 
     $cm                 = $dialogue->cm;
@@ -64,7 +58,7 @@ function dialogue_search_potentials(\mod_dialogue\dialogue $dialogue, $query = '
                 JOIN ($esql) je ON je.id = u.id";
 
     if ($usecoursegroups) {
-        if (!has_capability('moodle/site:accessallgroups', $context)) { 
+        if (!has_capability('moodle/site:accessallgroups', $context)) {
             $groupings = groups_get_user_groups($course->id, $USER->id);
             $allgroups = $groupings[0];
             if ($allgroups) {
@@ -75,16 +69,16 @@ function dialogue_search_potentials(\mod_dialogue\dialogue $dialogue, $query = '
                 if (!empty($viewallgroupsusers)) {
                     list($agsql, $agparams) = $DB->get_in_or_equal(array_keys($viewallgroupsusers), SQL_PARAMS_NAMED, 'ag');
                     $params = array_merge($params, $agparams);
-                    $wheres[] =  "($groupsql OR u.id $agsql)";
+                    $wheres[] = "($groupsql OR u.id $agsql)";
                 } else {
-                    $wheres[] =  "($groupsql)";
+                    $wheres[] = "($groupsql)";
                 }
 
             }
         }
     }
 
-    // current user doesn't need to be in list
+    // Current user doesn't need to be in list.
     $wheres[] = "u.id != $USER->id";
 
     $fullname = $DB->sql_concat('u.firstname', "' '", 'u.lastname');
@@ -141,7 +135,8 @@ function dialogue_get_conversation_participants(\mod_dialogue\dialogue $dialogue
 
     if (!isset($cache)) {
         $cache = cache::make('mod_dialogue', 'participants');
-        $participants = $DB->get_records('dialogue_participants', array('dialogueid' => $dialogue->activityrecord->id), 'conversationid');
+        $participants = $DB->get_records('dialogue_participants',
+            array('dialogueid' => $dialogue->activityrecord->id), 'conversationid');
         while ($participants) {
             $participant = array_shift($participants);
             $group = $cache->get($participant->conversationid);
@@ -173,21 +168,21 @@ function dialogue_get_user_details(\mod_dialogue\dialogue $dialogue, $userid) {
 
     $context        = $dialogue->context;
     $requiredfields = user_picture::fields('u');
-    
+
     if (!isset($cache)) {
         $cache = cache::make('mod_dialogue', 'userdetails');
     }
 
     if (!$cache->get($context->id)) {
         $enrolledusers = get_enrolled_users($context, null, null, $requiredfields);
-        foreach($enrolledusers as &$enrolleduser) {
+        foreach ($enrolledusers as &$enrolleduser) {
             dialogue_add_user_picture_fields($enrolleduser);
         }
         $cache->set($context->id, $enrolledusers);
     }
-    
+
     $cachedusers = $cache->get($context->id);
-    
+
     if (!isset($cachedusers[$userid])) {
         $sql = "SELECT $requiredfields
                   FROM {user} u
@@ -209,16 +204,16 @@ function dialogue_get_user_details(\mod_dialogue\dialogue $dialogue, $userid) {
  * @param stdClass $user
  */
 function dialogue_add_user_picture_fields(stdClass &$user) {
-        global $PAGE;
+    global $PAGE;
 
-        $user->fullname = fullname($user);
-        $userpic = new user_picture($user);
-        $imageurl = $userpic->get_url($PAGE);
-        $user->imageurl = $imageurl->out();
-        if (empty($user->imagealt)) {
-            $user->imagealt = get_string('pictureof', '', $user->fullname);
-        }
-        return;
+    $user->fullname = fullname($user);
+    $userpic = new user_picture($user);
+    $imageurl = $userpic->get_url($PAGE);
+    $user->imageurl = $imageurl->out();
+    if (empty($user->imagealt)) {
+        $user->imagealt = get_string('pictureof', '', $user->fullname);
+    }
+    return;
 }
 
 /**
@@ -286,7 +281,7 @@ function dialogue_cm_unread_total(\mod_dialogue\dialogue $dialogue) {
     $params['unuserid']     = $userid;
     $params['unflag']       = \mod_dialogue\dialogue::FLAG_READ;
 
-    // Most restrictive: view own
+    // Most restrictive: view own.
     $sql = "SELECT
                  (SELECT COUNT(1)
                     FROM {dialogue_messages} dm
@@ -302,7 +297,7 @@ function dialogue_cm_unread_total(\mod_dialogue\dialogue $dialogue) {
                      AND df.userid = :unuserid
                      AND df.flag = :unflag) AS unread";
 
-    // Least restrictive: view any
+    // Least restrictive: view any.
     if (has_capability('mod/dialogue:viewany', $dialogue->context)) {
         $sql = "SELECT
                      (SELECT COUNT(1)
@@ -316,7 +311,7 @@ function dialogue_cm_unread_total(\mod_dialogue\dialogue $dialogue) {
                          AND df.flag = :unflag) AS unread";
     }
 
-    // get user's total unread count for a dialogue
+    // Get user's total unread count for a dialogue.
     $record = (array) $DB->get_record_sql($sql, $params);
     if (isset($record['unread']) and $record['unread'] > 0) {
         return (int) $record['unread'];
@@ -331,7 +326,7 @@ function dialogue_get_draft_listing(\mod_dialogue\dialogue $dialogue, &$total = 
     $page = $url->get_param('page');
     $page = isset($pages) ? $page : 0;
 
-    // Base fields used in query
+    // Base fields used in query.
     $fields = "dm.id, dc.subject, dm.dialogueid, dm.conversationid, dm.conversationindex,
                dm.authorid, dm.body, dm.bodyformat, dm.attachments,
                dm.state, dm.timemodified";
@@ -356,7 +351,7 @@ function dialogue_get_draft_listing(\mod_dialogue\dialogue $dialogue, &$total = 
     $total = $DB->count_records_sql($countsql, $params);
 
     $records = array();
-    if ($total) { // don't bother running select if total zero
+    if ($total) { // Don't bother running select if total zero.
         $limit = \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE;
         $offset = $page * $limit;
         $records = $DB->get_records_sql($selectsql, $params, $offset, $limit);
@@ -372,7 +367,7 @@ function dialogue_get_bulk_open_rule_listing(\mod_dialogue\dialogue $dialogue, &
     $page = $url->get_param('page');
     $page = isset($pages) ? $page : 0;
 
-    // Base fields used in query
+    // Base fields used in query.
     $fields = "dm.id, dc.subject, dm.dialogueid, dm.conversationid, dm.conversationindex,
                dm.authorid, dm.body, dm.bodyformat, dm.attachments,
                dm.state, dm.timemodified,
@@ -385,7 +380,6 @@ function dialogue_get_bulk_open_rule_listing(\mod_dialogue\dialogue $dialogue, &
                   ON dbor.conversationid = dc.id
                WHERE dm.dialogueid = :dialogueid
                  AND dm.state = :state";
-              //   AND dm.authorid = :userid";
 
     $orderby = "ORDER BY dm.timemodified DESC";
 
@@ -400,7 +394,7 @@ function dialogue_get_bulk_open_rule_listing(\mod_dialogue\dialogue $dialogue, &
     $total = $DB->count_records_sql($countsql, $params);
 
     $records = array();
-    if ($total) { // don't bother running select if total zero
+    if ($total) { // Don't bother running select if total zero.
         $limit = \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE;
         $offset = $page * $limit;
         $records = $DB->get_records_sql($selectsql, $params, $offset, $limit);
@@ -408,9 +402,6 @@ function dialogue_get_bulk_open_rule_listing(\mod_dialogue\dialogue $dialogue, &
 
     return $records;
 }
-
-
-/// EXTRA FUNCTIONS ///
 
 /**
  * Generates a summary line for a conversation using subject and body, used in
@@ -467,17 +458,17 @@ function dialogue_get_conversations_count($cm, $state = null) {
     } else {
         $instates  = $states;
     }
-    
+
     $context = \context_module::instance($cm->id, IGNORE_MISSING);
 
-    // standard query stuff
+    // Standard query stuff.
     $wheres[] = "dc.course = :courseid";
     $params['courseid'] = $cm->course;
     $wheres[] = "dc.dialogueid = :dialogueid";
     $params['dialogueid'] = $cm->instance;
     $wheres[] = "dm.conversationindex = 1";
     $joins[] = "JOIN {dialogue_messages} dm ON dm.conversationid = dc.id";
-    // state sql
+    // State sql.
     list($insql, $inparams) = $DB->get_in_or_equal($instates, SQL_PARAMS_NAMED);
     $wheres[] = "dm.state $insql";
     $params = $params + $inparams;
@@ -494,7 +485,7 @@ function dialogue_get_conversations_count($cm, $state = null) {
     if ($joins) {
         $join = ' ' . implode("\n", $joins);
     }
-   
+
     if ($wheres) {
         $where = " WHERE " . implode(" AND ", $wheres);
     }
@@ -511,7 +502,7 @@ function dialogue_get_conversations_count($cm, $state = null) {
  * @return boolean
  */
 function dialogue_is_a_conversation(stdClass $message) {
-    if ($message->conversationindex == 1) { // opener always has index of 1
+    if ($message->conversationindex == 1) { // Opener always has index of 1.
         return true;
     }
     return false;
@@ -544,8 +535,10 @@ function dialogue_get_humanfriendly_dates($epoch) {
             continue;
         }
         $numberofunits = floor($timediff / $unit);
-        $customdatetime['timepast'] = $numberofunits . ' ' . (($numberofunits > 1) ? new lang_string($text . 's', 'dialogue') : new lang_string($text, 'dialogue'));
-        break; // leave on first, this will be largest unit
+        $customdatetime['timepast'] = $numberofunits . ' ' . (($numberofunits > 1) ?
+                new lang_string($text . 's', 'dialogue') :
+                new lang_string($text, 'dialogue'));
+        break; // Leave on first, this will be largest unit.
     }
 
     $customdatetime['datefull'] = $datetime['mday'] . ' ' . $datetime['month'] . ' ' . $datetime['year'];
@@ -573,7 +566,7 @@ function dialogue_shorten_html($html, $ideal = 30, $exact = false, $ending = '..
 
 /**
  * Helper function, check if draftid contains any files
- * 
+ *
  * @global type $USER
  * @param type $draftid
  * @return boolean

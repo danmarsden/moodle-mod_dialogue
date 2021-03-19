@@ -79,7 +79,7 @@ $string['draftlistdisplayheader'] = 'Displaying my drafts';
 $string['draftreply'] = 'Draft reply';
 $string['draftreplytrashed'] = 'Draft reply trashed';
 $string['drafts'] = 'Drafts';
-$string['errorcutoffdateinpast'] =  'Cut off date cannot be set in the past';
+$string['errorcutoffdateinpast'] = 'Cut off date cannot be set in the past';
 $string['erroremptymessage'] = 'Message cannot be empty';
 $string['erroremptysubject'] = 'Subject cannot be empty.';
 $string['errornoparticipant'] = 'You must open a dialogue with somebody...';
@@ -162,13 +162,13 @@ $string['unreadmessages'] = 'Unread messages';
 $string['unreadmessagesnumber'] = '{$a} unread messages';
 $string['unreadmessagesone'] = '1 unread message';
 $string['usecoursegroups'] = 'Use course groups';
-$string['usecoursegroups_help'] = 'If the course has defined groups a further restriction will be added to who a dialogue can 
+$string['usecoursegroups_help'] = 'If the course has defined groups a further restriction will be added to who a dialogue can
 be opened with. Dialogues can only be opened between group members unless the person opening the dialogue has the "Access all groups"
 capability set.';
 $string['usesearch'] = 'Use search to find people to start a dialogue with';
 $string['viewconversations'] = 'View conversations';
 $string['viewconversationsbyrole'] = 'View conversations by role';
-// DateTime labels
+// DateTime labels.
 $string['year'] = 'year';
 $string['years'] = 'years';
 $string['month'] = 'month';

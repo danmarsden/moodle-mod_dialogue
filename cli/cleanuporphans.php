@@ -22,11 +22,11 @@ require_once($CFG->libdir.'/filelib.php');
 require_once($CFG->dirroot.'/mod/dialogue/lib.php');
 require_once($CFG->dirroot.'/mod/dialogue/locallib.php');
 
-// we may need a lot of memory here
+// We may need a lot of memory here.
 @set_time_limit(0);
 raise_memory_limit(MEMORY_HUGE);
 
-// now get cli options
+// Now get cli options.
 list($options, $unrecognized) = cli_get_params(
     array(
         'non-interactive'   => false,
@@ -43,8 +43,7 @@ if ($unrecognized) {
 }
 
 if ($options['help']) {
-    $help =
-"Dialogue module: clean up orphaned messages
+    $help = "Dialogue module: clean up orphaned messages
 
 Please note you must execute this script with the same uid as apache!
 
@@ -71,21 +70,20 @@ if ($interactive) {
     }
 }
 
-// Start output log
+// Start output log.
 $starttime = microtime();
 mtrace("Server Time: ".date('r')."\n");
 
-// Do work!
-$sql =  "SELECT dm.*
+$sql = "SELECT dm.*
          FROM {dialogue_messages} dm
-         WHERE NOT EXISTS (SELECT dc.id 
-                          FROM {dialogue_conversations} dc 
+         WHERE NOT EXISTS (SELECT dc.id
+                          FROM {dialogue_conversations} dc
                           WHERE dc.id = dm.conversationid)
-         ORDER BY dm.conversationid, dm.conversationindex";       
+         ORDER BY dm.conversationid, dm.conversationindex";
 
 $rs = $DB->get_recordset_sql($sql, array());
 if ($rs->valid()) {
-    // Get file storage
+    // Get file storage.
     $fs = get_file_storage();
 
     foreach ($rs as $record) {
@@ -95,9 +93,9 @@ if ($rs->valid()) {
             continue;
         }
         $context = context_module::instance($cm->id, MUST_EXIST);
-        // delete message and attachment files for message
+        // Delete message and attachment files for message.
         $fs->delete_area_files($context->id, false, false, $record->id);
-        // delete message
+        // Delete message.
         $DB->delete_records('dialogue_messages', array('id' => $record->id));
 
         mtrace("Message#{$record->id} has been cleaned out.");
@@ -105,12 +103,12 @@ if ($rs->valid()) {
 }
 $rs->close();
 
-$pre_dbqueries = null;
-$pre_dbqueries = $DB->perf_get_queries();
-$pre_time      = microtime(1);
-if (isset($pre_dbqueries)) {
-    mtrace("... used " . ($DB->perf_get_queries() - $pre_dbqueries) . " dbqueries");
-    mtrace("... used " . (microtime(1) - $pre_time) . " seconds");
+$predbqueries = null;
+$predbqueries = $DB->perf_get_queries();
+$pretime      = microtime(1);
+if (isset($predbqueries)) {
+    mtrace("... used " . ($DB->perf_get_queries() - $predbqueries) . " dbqueries");
+    mtrace("... used " . (microtime(1) - $pretime) . " seconds");
 }
 
 gc_collect_cycles();

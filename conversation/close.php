@@ -40,7 +40,6 @@ $pageurl = new moodle_url('/mod/dialogue/conversation/close.php');
 $pageurl->param('id', $conversationrecord->id);
 $returnurl = new moodle_url('/mod/dialogue/view.php', array('id' => $cm->id));
 
-//$PAGE->set_pagelayout('base');
 $PAGE->set_cm($cm, $course, $activityrecord);
 $PAGE->set_context($context);
 $PAGE->set_cacheable(false);
@@ -51,7 +50,7 @@ $conversation = new \mod_dialogue\conversation($dialogue, (int) $conversationrec
 
 if (!empty($confirm) && confirm_sesskey()) {
     $conversation->close();
-    // Trigger conversation closed event
+    // Trigger conversation closed event.
     $eventparams = array(
         'context' => $context,
         'objectid' => $conversation->conversationid

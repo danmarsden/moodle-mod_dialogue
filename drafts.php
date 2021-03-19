@@ -25,10 +25,10 @@ if ($id) {
     if (! $cm = get_coursemodule_from_id('dialogue', $id)) {
         print_error('invalidcoursemodule');
     }
-    if (! $activityrecord = $DB->get_record("dialogue", array("id"=>$cm->instance))) {
+    if (! $activityrecord = $DB->get_record("dialogue", array("id" => $cm->instance))) {
         print_error('invalidid', 'dialogue');
     }
-    if (! $course = $DB->get_record("course", array("id"=>$activityrecord->course))) {
+    if (! $course = $DB->get_record("course", array("id" => $activityrecord->course))) {
         print_error('coursemisconf');
     }
 } else {
@@ -39,9 +39,9 @@ $context = context_module::instance($cm->id);
 
 require_login($course, false, $cm);
 
-$pageparams = array('id'=>$cm->id);
+$pageparams = array('id' => $cm->id);
 $pageurl    = new moodle_url('/mod/dialogue/drafts.php', $pageparams);
-/// setup page and form
+
 $PAGE->set_pagetype('mod-dialogue-drafts');
 $PAGE->set_cm($cm, $course, $activityrecord);
 $PAGE->set_context($context);
@@ -58,7 +58,6 @@ $total = 0;
 $rs = dialogue_get_draft_listing($dialogue, $total);
 $pagination = new paging_bar($total, $page, \mod_dialogue\dialogue::PAGINATION_PAGE_SIZE, $pageurl);
 
-// get the dialogue module render
 $renderer = $PAGE->get_renderer('mod_dialogue');
 
 echo $OUTPUT->header();
@@ -80,9 +79,9 @@ if (!$rs) {
     $html .= html_writer::tag('h6', new lang_string('listpaginationheader', 'dialogue', $a), array('class' => 'pull-right'));
     $html .= html_writer::end_div();
 
-    $html .= html_writer::start_tag('table', array('class'=>'conversation-list table table-hover table-condensed'));
+    $html .= html_writer::start_tag('table', array('class' => 'conversation-list table table-hover table-condensed'));
     $html .= html_writer::start_tag('tbody');
-    foreach($rs as $record) {
+    foreach ($rs as $record) {
         if (dialogue_is_a_conversation($record)) {
             $label = html_writer::tag('span', get_string('draftconversation', 'dialogue'),
                               array('class' => 'state-indicator state-draft'));
@@ -110,19 +109,18 @@ if (!$rs) {
                             'conversationid' => $record->conversationid,
                             'messageid' => $record->id,
                             'action' => 'edit');
-            
+
             $editlink = html_writer::link(new moodle_url('reply.php', $params), get_string('edit'), array());
         }
-        
 
-        $html .=  html_writer::start_tag('tr', $datattributes);
+        $html .= html_writer::start_tag('tr', $datattributes);
         $html .= html_writer::tag('td', $label);
         $subject = empty($record->subject) ? get_string('nosubject', 'dialogue') : $record->subject;
         $subject = html_writer::tag('strong', $subject);
         $shortenedbody = dialogue_shorten_html($record->body, 60);
         $shortenedbody = html_writer::tag('span', $shortenedbody);
         $html .= html_writer::tag('td', $subject.' - '.$shortenedbody);
-        
+
         $date = (object) dialogue_get_humanfriendly_dates($record->timemodified);
         if ($date->today) {
             $timemodified = $date->time;
@@ -132,14 +130,13 @@ if (!$rs) {
             $timemodified = new lang_string('datefullyear', 'dialogue', $date);
         }
         $html .= html_writer::tag('td', $timemodified, array('title' => userdate($record->timemodified)));
-       
-        $html .= html_writer::tag('td', $editlink, array('class'=>'nonjs-control'));
+
+        $html .= html_writer::tag('td', $editlink, array('class' => 'nonjs-control'));
         $html .= html_writer::end_tag('tr');
     }
     $html .= html_writer::end_tag('tbody');
-    //$html .= html_writer::tag('caption', '@todo');
     $html .= html_writer::end_tag('table');
-    $html .= $OUTPUT->render($pagination); // just going to use standard pagebar, to much work to bootstrap it.
+    $html .= $OUTPUT->render($pagination); // Just going to use standard pagebar, to much work to bootstrap it.
 }
 echo $html;
 echo $OUTPUT->footer($course);

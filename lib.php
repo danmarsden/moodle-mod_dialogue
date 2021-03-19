@@ -27,19 +27,31 @@ defined('MOODLE_INTERNAL') || die();
  */
 function dialogue_supports($feature) {
     switch($feature) {
-        case FEATURE_GROUPS:                  return false;
-        case FEATURE_GROUPINGS:               return false;
-        case FEATURE_MOD_INTRO:               return true;
-        case FEATURE_COMPLETION_TRACKS_VIEWS: return false;
-        case FEATURE_COMPLETION_HAS_RULES:    return false;
-        case FEATURE_GRADE_HAS_GRADE:         return false;
-        case FEATURE_GRADE_OUTCOMES:          return false;
-        case FEATURE_RATE:                    return false;
-        case FEATURE_BACKUP_MOODLE2:          return true;
-        case FEATURE_SHOW_DESCRIPTION:        return true;
-        case FEATURE_COMMENT:                 return false;
+        case FEATURE_GROUPS:
+            return false;
+        case FEATURE_GROUPINGS:
+            return false;
+        case FEATURE_MOD_INTRO:
+            return true;
+        case FEATURE_COMPLETION_TRACKS_VIEWS:
+            return false;
+        case FEATURE_COMPLETION_HAS_RULES:
+            return false;
+        case FEATURE_GRADE_HAS_GRADE:
+            return false;
+        case FEATURE_GRADE_OUTCOMES:
+            return false;
+        case FEATURE_RATE:
+            return false;
+        case FEATURE_BACKUP_MOODLE2:
+            return true;
+        case FEATURE_SHOW_DESCRIPTION:
+            return true;
+        case FEATURE_COMMENT:
+            return false;
 
-        default: return null;
+        default:
+            return null;
     }
 }
 
@@ -62,7 +74,7 @@ function dialogue_add_instance($data) {
     $data->timecreated = time();
     $data->timemodified = $data->timecreated;
 
-    $result =  $DB->insert_record('dialogue', $data);
+    $result = $DB->insert_record('dialogue', $data);
 
     return $result;
 }
@@ -99,29 +111,26 @@ function dialogue_update_instance($data, $mform) {
 function dialogue_delete_instance($id) {
     global $DB;
 
-    $dialogue = $DB->get_record('dialogue', array('id'=>$id), '*', MUST_EXIST);
-    
+    $dialogue = $DB->get_record('dialogue', array('id' => $id), '*', MUST_EXIST);
     $cm = get_coursemodule_from_instance('dialogue', $dialogue->id, $dialogue->course, false, MUST_EXIST);
-    
     $context = context_module::instance($cm->id);
-    
     $fs = get_file_storage();
-    
-    // delete files
+
+    // Delete files.
     $fs->delete_area_files($context->id);
-    // delete flags
-    $DB->delete_records('dialogue_flags', array('dialogueid'=>$dialogue->id));
-    // delete bulk open rules
-    $DB->delete_records('dialogue_bulk_opener_rules', array('dialogueid'=>$dialogue->id));
-    // delete participants
-    $DB->delete_records('dialogue_participants', array('dialogueid'=>$dialogue->id));
-    // delete messages
-    $DB->delete_records('dialogue_messages', array('dialogueid'=>$dialogue->id));
-    // delete conversations
-    $DB->delete_records('dialogue_conversations', array('dialogueid'=>$dialogue->id));
-    // delete dialogue
-    $DB->delete_records('dialogue', array('id'=>$dialogue->id));
-    
+    // Delete flags.
+    $DB->delete_records('dialogue_flags', array('dialogueid' => $dialogue->id));
+    // Delete bulk open rules.
+    $DB->delete_records('dialogue_bulk_opener_rules', array('dialogueid' => $dialogue->id));
+    // Delete participants.
+    $DB->delete_records('dialogue_participants', array('dialogueid' => $dialogue->id));
+    // Delete messages.
+    $DB->delete_records('dialogue_messages', array('dialogueid' => $dialogue->id));
+    // Delete conversations.
+    $DB->delete_records('dialogue_conversations', array('dialogueid' => $dialogue->id));
+    // Delete dialogue.
+    $DB->delete_records('dialogue', array('id' => $dialogue->id));
+
     return true;
 }
 
@@ -159,9 +168,8 @@ function dialogue_get_coursemodule_info($coursemodule) {
 function dialogue_process_bulk_openrules() {
     global $CFG, $DB;
     require_once($CFG->dirroot.'/mod/dialogue/locallib.php');
-    
+
     mtrace('1. Dealing with bulk open rules...');
-     
     $sql = "SELECT dbor.*
               FROM {dialogue_bulk_opener_rules} dbor
               JOIN {dialogue_messages} dm ON dm.conversationid = dbor.conversationid
@@ -173,19 +181,19 @@ function dialogue_process_bulk_openrules() {
     $rs = $DB->get_recordset_sql($sql, $params);
     if ($rs->valid()) {
         foreach ($rs as $record) {
-            // try and die elegantly
+            // Try and die elegantly.
             try {
-                // setup dialogue
+                // Setup dialogue.
                 $dialogue = \mod_dialogue\dialogue::instance($record->dialogueid);
-                if (!$dialogue->is_visible()){
+                if (!$dialogue->is_visible()) {
                     mtrace(' Skipping hidden dialogue: '.$dialogue->activityrecord->name);
                     continue;
                 }
-                // setup conversation
+                // Setup conversation.
                 $conversation = new \mod_dialogue\conversation($dialogue, (int) $record->conversationid);
 
                 $withcapability = 'mod/dialogue:receive';
-                $groupid = 0; // it either a course or a group, default to course
+                $groupid = 0; // It either a course or a group, default to course.
                 $requiredfields = user_picture::fields('u');
                 if ($record->type == 'group') {
                     $groupid = $record->sourceid;
@@ -193,7 +201,7 @@ function dialogue_process_bulk_openrules() {
 
                 $conversationsopened = 0;
 
-                // get users that can receive
+                // Get users that can receive.
                 $enrolledusers = get_enrolled_users($dialogue->context, $withcapability, $groupid, $requiredfields,
                     null, 0, \mod_dialogue\dialogue::PAGINATION_MAX_RESULTS, true);
 
@@ -205,24 +213,24 @@ function dialogue_process_bulk_openrules() {
 
                 $users = array_diff_key($enrolledusers, $sentusers);
                 foreach ($users as $user) {
-                    // don't start with author
+                    // Don't start with author.
                     if ($user->id == $conversation->author->id) {
                         continue;
                     }
-                    // get a copy of the conversation
+                    // Get a copy of the conversation.
                     $copy = $conversation->copy();
                     $copy->add_participant($user->id);
                     $copy->save();
                     $copy->send();
-                    // mark the sent in automated conversation, so can track who sent to
+                    // Mark the sent in automated conversation, so can track who sent to.
                     $conversation->set_flag(\mod_dialogue\dialogue::FLAG_SENT, $user);
                     unset($copy);
                     mtrace('  opened '. $conversation->subject . ' with ' . fullname($user));
-                    // up open count
+                    // Up open count.
                     $conversationsopened++;
 
                 }
-                $DB->set_field('dialogue_bulk_opener_rules', 'lastrun', time(), array('conversationid'=>$record->conversationid));
+                $DB->set_field('dialogue_bulk_opener_rules', 'lastrun', time(), array('conversationid' => $record->conversationid));
                 mtrace(' Opened '. $conversationsopened . ' for conversation ' . $conversation->subject);
             } catch (moodle_exception $e) {
                 mtrace($e->module . ' : ' . $e->errorcode);
@@ -232,7 +240,7 @@ function dialogue_process_bulk_openrules() {
         mtrace(' None to process');
     }
     $rs->close();
-   
+
     return true;
 }
 
@@ -245,7 +253,7 @@ function dialogue_cm_info_view(cm_info $cm) {
     global $CFG;
     require_once($CFG->dirroot . '/mod/dialogue/locallib.php');
 
-    // Get tracking status (once per request)
+    // Get tracking status (once per request).
     static $initialised;
     static $usetracking, $strunreadmessagesone;
     if (!isset($initialised)) {
@@ -286,7 +294,7 @@ function dialogue_cm_info_view(cm_info $cm) {
 function dialogue_user_outline($course, $user, $mod, $dialogue) {
     global $DB;
 
-    $sql = "SELECT COUNT(DISTINCT dm.timecreated) AS count, 
+    $sql = "SELECT COUNT(DISTINCT dm.timecreated) AS count,
                      MAX(dm.timecreated) AS timecreated
               FROM {dialogue_messages} dm
              WHERE dm.dialogueid = :dialogueid
@@ -353,7 +361,7 @@ function dialogue_get_view_actions() {
  * @return array of post action labels
  */
 function dialogue_get_post_actions() {
-    return array('open conversation', 'close conversation', 'delete conversation','reply');
+    return array('open conversation', 'close conversation', 'delete conversation', 'reply');
 }
 
 /**
@@ -377,20 +385,20 @@ function dialogue_get_extra_capabilities() {
  * @return boolean
  */
 function dialogue_can_track_dialogue($user = false) {
-    global $USER, $CFG;
+    global $USER;
 
     $trackunread = get_config('dialogue', 'trackunread');
-    // return unless enabled at site level
+    // Return unless enabled at site level.
     if (empty($trackunread)) {
         return false;
     }
 
-    // default to logged if no user passed as param
+    // Default to logged if no user passed as param.
     if ($user === false) {
         $user = $USER;
     }
 
-    // dont allow guests to track
+    // Dont allow guests to track.
     if (isguestuser($user) or empty($user->id)) {
         return false;
     }
@@ -411,7 +419,7 @@ function dialogue_can_track_dialogue($user = false) {
  * @return bool false if file not found, does not return if found - justsend the file
  */
 function dialogue_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload = true, $options = array()) {
-    global $CFG, $DB, $USER;
+    global $DB;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
@@ -425,15 +433,15 @@ function dialogue_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
     }
 
     $itemid = (int)array_shift($args);
-    if (!$message = $DB->get_record('dialogue_messages', array('id'=>$itemid))) {
+    if (!$message = $DB->get_record('dialogue_messages', array('id' => $itemid))) {
         return false;
     }
 
-    if (!$conversation = $DB->get_record('dialogue_conversations', array('id'=>$message->conversationid))) {
+    if (!$conversation = $DB->get_record('dialogue_conversations', array('id' => $message->conversationid))) {
         return false;
     }
 
-    if (!$dialogue = $DB->get_record('dialogue', array('id'=>$cm->instance))) {
+    if (!$dialogue = $DB->get_record('dialogue', array('id' => $cm->instance))) {
         return false;
     }
 
@@ -441,15 +449,15 @@ function dialogue_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
     $relativepath = implode('/', $args);
     $fullpath = "/$context->id/mod_dialogue/$filearea/$itemid/$relativepath";
     if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
-       return false;
+        return false;
     }
 
-    // Force non image formats to be downloaded
+    // Force non image formats to be downloaded.
     if (!$file->is_valid_image()) {
         $forcedownload = true;
     }
 
-    // Send the file
+    // Send the file.
     send_stored_file($file, 0, 0, $forcedownload, $options);
 }
 
@@ -461,9 +469,8 @@ function dialogue_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
  */
 function dialogue_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'reset_header', get_string('modulenameplural', 'dialogue'));
-    $mform->addElement('checkbox', 'reset_conversations', get_string('deleteallconversations','dialogue'));
+    $mform->addElement('checkbox', 'reset_conversations', get_string('deleteallconversations', 'dialogue'));
     $mform->addElement('checkbox', 'reset_drafts', get_string('deletealldrafts', 'dialogue'));
-    // $mform->addElement('checkbox', 'reset_rules', get_string('deleteallrules', 'dialogue')); // TODO not yet implemented.
 }
 
 /**
@@ -473,8 +480,7 @@ function dialogue_reset_course_form_definition(&$mform) {
 function dialogue_reset_course_form_defaults($course) {
     return array(
         'reset_conversations' => 0,
-        'reset_drafts' => 0,
-        // 'reset_rules' => 0 // TODO not yet implemented.
+        'reset_drafts' => 0
     );
 }
 
@@ -527,7 +533,6 @@ function dialogue_reset_userdata($data) {
                 $resetconversations = array_merge($resetconversations, array_keys($records));
             }
         }
-        // if (isset($data->reset_rules)) {} // TODO not yet implemented.
         $rs = $DB->get_recordset_list('dialogue_messages', 'conversationid', $resetconversations,
             'conversationid, conversationindex');
         foreach ($rs as $message) {
@@ -541,7 +546,7 @@ function dialogue_reset_userdata($data) {
 
         // Delete messages.
         $DB->delete_records_list('dialogue_messages', 'conversationid', $resetconversations);
-        // Delete conversations
+        // Delete conversations.
         $DB->delete_records_list('dialogue_conversations', 'id', $resetconversations);
         // Delete participants.
         $DB->delete_records_list('dialogue_participants', 'conversationid', $resetconversations);

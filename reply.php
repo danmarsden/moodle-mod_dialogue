@@ -71,7 +71,7 @@ if (!$reply->is_author()) {
     throw new \moodle_exception("You do not have permission to view this reply it doesn't
                                 belong to you!");
 }
-// initialise and check form submission
+// Initialise and check form submission.
 $form = $reply->initialise_form();
 if ($form->is_submitted()) {
     $formaction = $form->get_submit_action();
@@ -79,7 +79,7 @@ if ($form->is_submitted()) {
         case 'cancel':
             redirect($returnurl);
         case 'send':
-            if ($form->is_validated()){
+            if ($form->is_validated()) {
                 $reply->save_form_data();
                 $reply->send();
                 $eventparams = array(
@@ -93,28 +93,28 @@ if ($form->is_submitted()) {
                 $event->trigger();
                 redirect($returnurl, get_string('replysent', 'dialogue'));
             }
-            break; // leave switch to display form page
+            break; // Leave switch to display form page.
         case 'save':
             if ($form->is_validated()) {
                 $reply->save_form_data();
                 redirect($draftsurl, get_string('changessaved'));
             }
-            break; // leave switch to display form page
-       case 'trash':
+            break; // Leave switch to display form page.
+        case 'trash':
             $reply->trash();
             redirect($draftsurl, get_string('draftreplytrashed', 'dialogue'));
     }
 }
 $renderer = $PAGE->get_renderer('mod_dialogue');
 echo $OUTPUT->header();
-// render conversation
+// Render conversation.
 echo $renderer->render($conversation);
-// render replies
+// Render replies.
 if ($conversation->replies()) {
     foreach ($conversation->replies() as $reply) {
         echo $renderer->render($reply);
     }
 }
-// output form
+
 $form->display();
 echo $OUTPUT->footer($course);

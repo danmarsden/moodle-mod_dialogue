@@ -65,7 +65,6 @@ $PAGE->set_url($pageurl);
 $dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
 $conversation = new \mod_dialogue\conversation($dialogue, $conversationid);
 
-// form actions
 if ($action == 'create' or $action == 'edit') {
     require_capability('mod/dialogue:open', $context);
     $form = $conversation->initialise_form();
@@ -75,14 +74,14 @@ if ($action == 'create' or $action == 'edit') {
             case 'cancel':
                 redirect($returnurl);
             case 'send':
-                if ($form->is_validated()){
+                if ($form->is_validated()) {
                     $conversation->save_form_data();
                     $conversation->send();
                     if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
                         $sendmessage = get_string('conversationopenedcron', 'dialogue');
                     } else {
                         $sendmessage = get_string('conversationopened', 'dialogue');
-                        // Trigger conversation created event
+                        // Trigger conversation created event.
                         $eventparams = array(
                             'context' => $context,
                             'objectid' => $conversation->conversationid
@@ -92,7 +91,7 @@ if ($action == 'create' or $action == 'edit') {
                     }
                     redirect($returnurl, $sendmessage);
                 }
-                break; // leave switch to display form page
+                break; // Leave switch to display form page.
             case 'save':
                 $conversation->save_form_data();
                 redirect($draftsurl, get_string('changessaved'));
@@ -102,7 +101,7 @@ if ($action == 'create' or $action == 'edit') {
         }
     }
 
-    // display form page
+    // Display form page.
     echo $OUTPUT->header();
     echo $OUTPUT->heading($activityrecord->name);
     if (!empty($dialogue->activityrecord->intro)) {
@@ -113,11 +112,11 @@ if ($action == 'create' or $action == 'edit') {
     exit;
 }
 
-// close conversation
+// Close conversation.
 if ($action == 'close') {
     if (!empty($confirm) && confirm_sesskey()) {
         $conversation->close();
-        // Trigger conversation closed event
+        // Trigger conversation closed event.
         $eventparams = array(
             'context' => $context,
             'objectid' => $conversation->conversationid
@@ -135,11 +134,11 @@ if ($action == 'close') {
     exit;
 }
 
-// delete conversation
+// Delete conversation.
 if ($action == 'delete') {
     if (!empty($confirm) && confirm_sesskey()) {
         $conversation->delete();
-        // Trigger conversation created event
+        // Trigger conversation created event.
         $eventparams = array(
             'context' => $context,
             'objectid' => $conversation->conversationid
@@ -158,7 +157,7 @@ if ($action == 'delete') {
     exit;
 }
 
-// ready for viewing, let's just make sure not a draft, possible url manipulation by user
+// Ready for viewing, let's just make sure not a draft, possible url manipulation by user.
 if ($conversation->state == \mod_dialogue\dialogue::STATE_DRAFT) {
     redirect($returnurl);
 }
@@ -174,13 +173,13 @@ if ($conversation->state == \mod_dialogue\dialogue::STATE_OPEN or $conversation-
         throw new moodle_exception('nopermission');
     }
 }
-// view conversation by default
+// View conversation by default.
 $renderer = $PAGE->get_renderer('mod_dialogue');
 echo $OUTPUT->header($activityrecord->name);
 echo $renderer->render($conversation);
 $conversation->mark_read();
 
-// render replies
+// Render replies.
 if ($conversation->replies()) {
     foreach ($conversation->replies() as $reply) {
         echo $renderer->render($reply);
@@ -188,18 +187,18 @@ if ($conversation->replies()) {
     }
 }
 
-// output reply form if meets criteria
+// Output reply form if meets criteria.
 $hasreplycapability = (has_capability('mod/dialogue:reply', $context) or
                        has_capability('mod/dialogue:replyany', $context));
 
-// conversation is open and user can reply... then output reply form
+// Conversation is open and user can reply... then output reply form.
 if ($hasreplycapability and $conversation->state == \mod_dialogue\dialogue::STATE_OPEN) {
     $reply = $conversation->reply();
     $form = $reply->initialise_form();
     $form->display();
 }
 echo $OUTPUT->footer($course);
-// Trigger conversation viewed event
+// Trigger conversation viewed event.
 $eventparams = array(
     'context' => $context,
     'objectid' => $conversation->conversationid

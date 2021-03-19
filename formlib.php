@@ -24,11 +24,17 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  */
 
-// load repository lib, will load filelib and formslib
 require_once($CFG->dirroot . '/repository/lib.php');
 
+/**
+ * Class mod_dialogue_message_form
+ */
 class mod_dialogue_message_form extends moodleform {
-
+    /**
+     * Form definition.
+     * @throws coding_exception
+     * @throws dml_exception
+     */
     protected function definition() {
         global $PAGE;
 
@@ -39,8 +45,10 @@ class mod_dialogue_message_form extends moodleform {
         $mform->addElement('editor', 'body', get_string('message', 'dialogue'), null, self::editor_options());
         $mform->setType('body', PARAM_RAW);
 
-        if (!get_config('dialogue', 'maxattachments') or !empty($PAGE->activityrecord->maxattachments))  {  //  0 = No attachments at all
-            $mform->addElement('filemanager', 'attachments[itemid]', get_string('attachments', 'dialogue'), null, self::attachment_options());
+        // Maxattachments = 0 = No attachments at all.
+        if (!get_config('dialogue', 'maxattachments') or !empty($PAGE->activityrecord->maxattachments)) {
+            $mform->addElement('filemanager', 'attachments[itemid]',
+                get_string('attachments', 'dialogue'), null, self::attachment_options());
         }
 
         $mform->addElement('hidden', 'action');
@@ -62,20 +70,21 @@ class mod_dialogue_message_form extends moodleform {
         $mform->addElement('hidden', 'messageid');
         $mform->setType('messageid', PARAM_INT);
 
-
         $mform->addElement('header', 'actionssection', get_string('actions', 'dialogue'));
 
         $actionbuttongroup = array();
-        $actionbuttongroup[] =& $mform->createElement('submit', 'send', get_string('send', 'dialogue'), array('class'=>'send-button'));
-        $actionbuttongroup[] =& $mform->createElement('submit', 'save', get_string('savedraft', 'dialogue'), array('class'=>'savedraft-button'));
-        $actionbuttongroup[] =& $mform->createElement('submit', 'cancel', get_string('cancel'), array('class'=>'cancel-button'));
+        $actionbuttongroup[] =& $mform->createElement('submit', 'send',
+            get_string('send', 'dialogue'), array('class' => 'send-button'));
+        $actionbuttongroup[] =& $mform->createElement('submit', 'save',
+            get_string('savedraft', 'dialogue'), array('class' => 'savedraft-button'));
+        $actionbuttongroup[] =& $mform->createElement('submit', 'cancel',
+            get_string('cancel'), array('class' => 'cancel-button'));
 
-        $actionbuttongroup[] =& $mform->createElement('submit', 'trash', get_string('trashdraft', 'dialogue'), array('class'=>'trashdraft-button pull-right'));
+        $actionbuttongroup[] =& $mform->createElement('submit', 'trash',
+            get_string('trashdraft', 'dialogue'), array('class' => 'trashdraft-button pull-right'));
         $mform->addGroup($actionbuttongroup, 'actionbuttongroup', '', ' ', false);
 
         $mform->setExpanded('actionssection', true);
-
-
     }
 
     /**
@@ -87,7 +96,7 @@ class mod_dialogue_message_form extends moodleform {
         global $OUTPUT;
 
         if ($this->_form->_errors) {
-            foreach($this->_form->_errors as $error) {
+            foreach ($this->_form->_errors as $error) {
                 echo $OUTPUT->notification($error, 'notifyproblem');
             }
             unset($this->_form->_errors);
@@ -122,7 +131,7 @@ class mod_dialogue_message_form extends moodleform {
     public function update_selectgroup($name, $options, $selected=array()) {
         $mform   = $this->_form;
         $element = $mform->getElement($name);
-        $element->_optGroups = array(); //reset the optgroup array()
+        $element->_optGroups = array(); // Reset the optgroup array().
         return $element->loadArrayOptGroups($options, $selected);
     }
 
@@ -139,9 +148,9 @@ class mod_dialogue_message_form extends moodleform {
             'collapsed' => true,
             'maxfiles' => EDITOR_UNLIMITED_FILES,
             'maxbytes' => $maxbytes,
-            'trusttext'=> true,
+            'trusttext' => true,
             'accepted_types' => '*',
-            'return_types'=> FILE_INTERNAL | FILE_EXTERNAL
+            'return_types' => FILE_INTERNAL | FILE_EXTERNAL
         );
     }
 
@@ -152,7 +161,8 @@ class mod_dialogue_message_form extends moodleform {
      */
     public static function attachment_options() {
         global $CFG, $COURSE, $PAGE;
-        $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes, $PAGE->activityrecord->maxbytes);
+        $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes,
+            $COURSE->maxbytes, $PAGE->activityrecord->maxbytes);
         return array(
             'subdirs' => 0,
             'maxbytes' => $maxbytes,
@@ -184,7 +194,7 @@ class mod_dialogue_message_form extends moodleform {
      */
     public function get_submit_action() {
         $submitactions = array('send', 'save', 'cancel', 'trash');
-        foreach($submitactions as $submitaction) {
+        foreach ($submitactions as $submitaction) {
             if (optional_param($submitaction, false, PARAM_BOOL)) {
                 return $submitaction;
             }
@@ -216,28 +226,30 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
         $cm       = $PAGE->cm;
         $context  = $PAGE->context;
 
-        //$mform->disable_form_change_checker();
-
         $mform->addElement('header', 'openwithsection', get_string('openwith', 'dialogue'));
 
-        /** autocomplete javascript **/
+        // Autocomplete javascript.
         $html = '';
-        $html .= html_writer::start_tag('div', array('class'=>'fitem fitem_ftext'));
-        $html .= html_writer::start_tag('div', array( 'class'=>'fitemtitle'));
-        $html .= html_writer::tag('label', get_string('people', 'dialogue'), array('for'=>'people_autocomplete_input'));
+        $html .= html_writer::start_tag('div', array('class' => 'fitem fitem_ftext'));
+        $html .= html_writer::start_tag('div', array( 'class' => 'fitemtitle'));
+        $html .= html_writer::tag('label', get_string('people', 'dialogue'), array('for' => 'people_autocomplete_input'));
         $html .= html_writer::end_tag('div');
-        $html .= html_writer::start_tag('div', array('class'=>'felement ftext'));
-        $html .= html_writer::start_tag('div', array('id'=>'participant_autocomplete_field', 'class' => 'js-control yui3-aclist-field'));
-        $html .= html_writer::tag('input', '', array('id'=>'participant_autocomplete_input', 'class' => 'input-xxlarge', 'placeholder' => get_string('searchpotentials', 'dialogue')));
-        $html .= html_writer::tag('span', '', array('class'=>'drop-down-arrow'));
+        $html .= html_writer::start_tag('div', array('class' => 'felement ftext'));
+        $html .= html_writer::start_tag('div', array('id' => 'participant_autocomplete_field',
+            'class' => 'js-control yui3-aclist-field'));
+        $html .= html_writer::tag('input', '',
+            array('id' => 'participant_autocomplete_input', 'class' => 'input-xxlarge',
+                'placeholder' => get_string('searchpotentials', 'dialogue')));
+        $html .= html_writer::tag('span', '', array('class' => 'drop-down-arrow'));
         $html .= html_writer::end_tag('div');
         $html .= html_writer::end_tag('div');
         $html .= html_writer::end_tag('div');
-        // add to form
+        // Add to form.
         $mform->addElement('html', $html);
-        /** non javascript **/
-        $mform->addElement('html', '<div class="nonjs-control">'); // non-js wrapper
-        $mform->addElement('text', 'p_query'); //'Person search'
+
+        // Non javascript.
+        $mform->addElement('html', '<div class="nonjs-control">'); // Non-js wrapper.
+        $mform->addElement('text', 'p_query'); // Person search.
         $mform->setType('p_query', PARAM_RAW);
         $psearchbuttongroup = array();
         $psearchbuttongroup[] = $mform->createElement('submit', 'p_search', get_string('search'));
@@ -252,11 +264,11 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
                            array(),
                            $attributes);
 
-        $mform->addElement('html', '</div>'); // end non-js wrapper
+        $mform->addElement('html', '</div>'); // End non-js wrapper.
 
-        // bulk open rule section
-        if (has_capability('mod/dialogue:bulkopenrulecreate', $context)){
-            $groups = array(); // use for form
+        // Bulk open rule section.
+        if (has_capability('mod/dialogue:bulkopenrulecreate', $context)) {
+            $groups = array(); // Use for form.
             $groups[''] = get_string('select').'...';
             $groups['course-'.$PAGE->course->id] = get_string('allparticipants');
             if (has_capability('moodle/site:accessallgroups', $context)) {
@@ -267,12 +279,12 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
             foreach ($allowedgroups as $allowedgroup) {
                 $groups['group-'.$allowedgroup->id] = $allowedgroup->name;
             }
-            // make sure have groups, possible group mode but no groups yada yada
+            // Make sure have groups, possible group mode but no groups yada yada.
             if ($groups) {
                 $mform->addElement('header', 'bulkopenrulessection', get_string('bulkopenrule', 'dialogue'));
                 $notify = $OUTPUT->notification(get_string('bulkopenrulenotifymessage', 'dialogue'), 'notifymessage');
                 $mform->addElement('html', $notify);
-                $mform->addElement('select','groupinformation', get_string('group'), $groups);
+                $mform->addElement('select', 'groupinformation', get_string('group'), $groups);
                 $mform->addElement('checkbox', 'includefuturemembers', get_string('includefuturemembers', 'dialogue'));
                 $mform->disabledIf('includefuturemembers', 'groupinformation', 'eq', '');
                 $mform->addElement('date_selector', 'cutoffdate', get_string('cutoffdate', 'dialogue'));
@@ -283,7 +295,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
 
         $mform->addElement('header', 'messagesection', get_string('message', 'dialogue'));
 
-        $mform->addElement('text', 'subject', get_string('subject', 'dialogue'), array('size'=>'100%'));
+        $mform->addElement('text', 'subject', get_string('subject', 'dialogue'), array('size' => '100%'));
         $mform->setType('subject', PARAM_TEXT);
 
         $mform->setExpanded('messagesection', true);
@@ -295,7 +307,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
      *
      * @return boolean
      */
-    public function definition_after_data(){
+    public function definition_after_data() {
         global $PAGE;
         $mform   = $this->_form;
 
@@ -304,29 +316,28 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
             $dialogue = new \mod_dialogue\dialogue($PAGE->cm, $PAGE->course, $PAGE->activityrecord);
             $results = dialogue_search_potentials($dialogue, $q);
             if (empty($results[0])) {
-                $people = array(get_string('nomatchingpeople', 'dialogue', $q)=>array(''));
+                $people = array(get_string('nomatchingpeople', 'dialogue', $q) => array(''));
             } else {
                 $options = array();
-                foreach($results[0] as $person) {
+                foreach ($results[0] as $person) {
                     $options[$person->id] = fullname($person);
                 }
-                $people = array(get_string('matchingpeople', 'dialogue', count($options))=>$options);
+                $people = array(get_string('matchingpeople', 'dialogue', count($options)) => $options);
                 if ($mform->getElement('p_select')->getMultiple()) {
                     $selected = optional_param_array('p_select', array(), PARAM_INT);
                 } else {
                     $selected = optional_param('p_select', array(), PARAM_INT);
                 }
                 $this->update_selectgroup('p_select', $people, $selected);
-                
             }
         }
-        // Clear out query string and selectgroup form data
+        // Clear out query string and selectgroup form data.
         if (optional_param('p_clear', false, PARAM_BOOL)) {
             $mform   = $this->_form;
             $pquery = $mform->getElement('p_query');
             $pquery->setValue('');
             $this->update_selectgroup('p_select',
-                                      array(get_string('usesearch','dialogue')=>array(''=>'')));
+                                      array(get_string('usesearch', 'dialogue') => array('' => '')));
 
         }
         return true;
@@ -342,7 +353,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
 
         $errors = parent::validation($data, $files);
         if (optional_param_array('p', array(), PARAM_INT)) {
-            // js people search
+            // JS people search.
             $people = optional_param_array('p', array(), PARAM_INT);
             if (isset($people['clear'])) {
                 $data['people'] = array();
@@ -350,7 +361,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
                 $data['people'] = $people;
             }
         } else if (optional_param('p_select', array(), PARAM_INT)) {
-            // nonjs people search select
+            // Non-js people search select.
             $data['people'] = optional_param('p_select', array(), PARAM_INT);
         } else {
             $data['people'] = array();
@@ -372,7 +383,12 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
         return $errors;
     }
 
-    // Get everything we need
+    /**
+     * Get submitted data.
+     *
+     * @return object|null
+     * @throws coding_exception
+     */
     public function get_submitted_data() {
         $mform   = $this->_form;
         $data = parent::get_submitted_data();
@@ -392,15 +408,13 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
                 }
             }
             $data->bulkopenrule = $bulkopenrule;
-        } else {
-            //$data->bulkopenrule = false;
         }
         unset($data->cutoffdate);
         unset($data->includefuturemembers);
         unset($data->groupinformation);
 
         if (optional_param_array('p', array(), PARAM_INT)) {
-            // js people search
+            // Js people search.
             $people = optional_param_array('p', array(), PARAM_INT);
             if (isset($people['clear'])) {
                 $data->people = array();
@@ -408,13 +422,12 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
                 $data->people = $people;
             }
         } else if (optional_param('p_select', array(), PARAM_INT)) {
-            // nonjs people search select
+            // Non-js people search select.
             $data->people = optional_param('p_select', array(), PARAM_INT);
         } else {
             $data->people = array();
         }
-        
+
         return $data;
     }
-
 }

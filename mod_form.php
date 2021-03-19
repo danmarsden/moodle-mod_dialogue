@@ -24,13 +24,20 @@
 
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
-require_once ($CFG->dirroot.'/mod/dialogue/locallib.php');
-require_once ($CFG->dirroot.'/course/moodleform_mod.php');
+require_once($CFG->dirroot.'/mod/dialogue/locallib.php');
+require_once($CFG->dirroot.'/course/moodleform_mod.php');
 
+/**
+ * Class mod_dialogue_mod_form
+ */
 class mod_dialogue_mod_form extends moodleform_mod {
-
-    function definition() {
-        global $CFG, $COURSE, $DB;
+    /**
+     * Definition
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function definition() {
+        global $CFG, $COURSE;
 
         $mform    = $this->_form;
 
@@ -38,7 +45,7 @@ class mod_dialogue_mod_form extends moodleform_mod {
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        $mform->addElement('text', 'name', get_string('dialoguename', 'dialogue'), array('size'=>'64'));
+        $mform->addElement('text', 'name', get_string('dialoguename', 'dialogue'), array('size' => '64'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
@@ -67,7 +74,7 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
-     function get_data() {
+    public function get_data() {
         $data = parent::get_data();
         if (!$data) {
             return false;
@@ -76,5 +83,5 @@ class mod_dialogue_mod_form extends moodleform_mod {
             $data->usecoursegroups = 0;
         }
         return $data;
-     }
+    }
 }

@@ -49,7 +49,7 @@ if (!$roleid) {
     $roleid  = $DB->get_field('role', 'id', array('shortname' => 'student'), MUST_EXIST);
 }
 
-// now set params on pageurl will later be set on $PAGE
+// Now set params on pageurl will later be set on $PAGE.
 $pageurl = new moodle_url('/mod/dialogue/viewconversationsbyrole.php');
 $pageurl->param('id', $cm->id);
 if ($page) {
@@ -57,7 +57,7 @@ if ($page) {
 }
 $pageurl->param('sort', $sort);
 $pageurl->param('direction', $direction);
-// set up a return url that will be stored to session
+// Set up a return url that will be stored to session.
 $returnurl = clone($pageurl);
 $returnurl->remove_params('page');
 $SESSION->dialoguereturnurl = $returnurl->out(false);
@@ -87,12 +87,12 @@ if (!empty($dialogue->activityrecord->intro)) {
     echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
 }
 
-// render tab navigation, toggle button groups and order by dropdown
+// Render tab navigation, toggle button groups and order by dropdown.
 echo $renderer->tab_navigation($dialogue);
 $roleselector = '';
 $roleselector .= html_writer::start_div('dropdown-group');
-$roleselector .= html_writer::start_div('js-control btn-group'); // btn-group required for js
-$attributes = array('data-toggle' => 'dropdown', 'class' =>'btn btn-small dropdown-toggle');
+$roleselector .= html_writer::start_div('js-control btn-group'); // The btn-group required for js.
+$attributes = array('data-toggle' => 'dropdown', 'class' => 'btn btn-small dropdown-toggle');
 $roleselector .= html_writer::start_tag('button', $attributes);
 $roleselector .= $rolenames[$roleid] . ' ' . html_writer::tag('span', null, array('class' => 'caret'));
 $roleselector .= html_writer::end_tag('button');
@@ -104,11 +104,11 @@ foreach ($rolenames as $roleid => $rolename) {
     $roleselector .= html_writer::end_tag('li');
 }
 $roleselector .= html_writer::end_tag('ul');
-$roleselector .= html_writer::end_div(); // end of js-control
+$roleselector .= html_writer::end_div(); // End of js-control.
 $roleselector .= html_writer::end_div();
 echo $roleselector;
 echo $renderer->list_sortby(\mod_dialogue\conversations_by_role::get_sort_options(), $sort, $direction);
 echo $renderer->conversation_listing($list);
 echo $OUTPUT->footer($course);
-$logurl = new moodle_url('viewconversationsbyrole.php', array('id' =>  $cm->id));
+$logurl = new moodle_url('viewconversationsbyrole.php', array('id' => $cm->id));
 

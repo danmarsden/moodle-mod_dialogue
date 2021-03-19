@@ -17,7 +17,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $messageproviders = array (
-    /// Ordinary message
+    // Ordinary message.
     'post' => array()
 );
 

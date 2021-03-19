@@ -20,7 +20,7 @@ require_once(dirname(__FILE__).'/locallib.php');
 
 $id = required_param('id', PARAM_INT); // Course identifier.
 
-$course = $DB->get_record('course', array('id'=>$id), '*', MUST_EXIST);
+$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 $coursecontext = context_course::instance($course->id);
 
 require_course_login($course);
@@ -58,12 +58,12 @@ foreach ($dialogues as $dialogue) {
     }
     $attrs = array();
     if (!$cm->visible) {
-        $attrs['class'] ='dimmed';
+        $attrs['class'] = 'dimmed';
     }
     $dialoguename = format_string($dialogue->name, true);
     $dialogueintro = shorten_text(format_module_intro('dialogue', $dialogue, $dialogue->coursemodule), 300);
     $dialoguelink = html_writer::link(
-        new moodle_url('/mod/dialogue/view.php', array('id'=>$dialogue->coursemodule)),
+        new moodle_url('/mod/dialogue/view.php', array('id' => $dialogue->coursemodule)),
         $dialoguename,
         $attrs);
     $conversationcount = dialogue_get_conversations_count($cm);

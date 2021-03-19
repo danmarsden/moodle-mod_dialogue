@@ -17,17 +17,17 @@
 define('CLI_SCRIPT', true);
 
 require(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
-require_once($CFG->libdir.'/clilib.php');         // cli only functions
+require_once($CFG->libdir.'/clilib.php');
 require_once($CFG->libdir.'/cronlib.php');
 require_once($CFG->libdir.'/filelib.php');
 require_once($CFG->dirroot.'/mod/dialogue/lib.php');
 require_once($CFG->dirroot.'/mod/dialogue/locallib.php');
 
-// we may need a lot of memory here
+// We may need a lot of memory here.
 @set_time_limit(0);
 raise_memory_limit(MEMORY_HUGE);
 
-// now get cli options
+// Now get cli options.
 list($options, $unrecognized) = cli_get_params(
     array(
         'non-interactive'   => false,
@@ -44,8 +44,7 @@ if ($unrecognized) {
 }
 
 if ($options['help']) {
-    $help =
-"Command line Dialogue module cron.
+    $help = "Command line Dialogue module cron.
 
 Please note you must execute this script with the same uid as apache!
 
@@ -55,17 +54,11 @@ Options:
 
 Example:
 \$sudo -u www-data /usr/bin/php mod/dialogue/cli/cron.php
-"; //TODO: localize - to be translated later when everything is finished
+";
 
     echo $help;
     die;
 }
-
-// Force a debugging mode regardless the settings in the site administration
-//@error_reporting(1023);  // NOT FOR PRODUCTION SERVERS!
-//@ini_set('display_errors', '1'); // NOT FOR PRODUCTION SERVERS!
-//$CFG->debug = 38911;  // DEBUG_DEVELOPER // NOT FOR PRODUCTION SERVERS!
-//$CFG->debugdisplay = true;   // NOT FOR PRODUCTION SERVERS!
 
 $interactive = empty($options['non-interactive']);
 
@@ -81,27 +74,27 @@ if ($interactive) {
 set_time_limit(0);
 $starttime = microtime();
 
-// Increase memory limit
+// Increase memory limit.
 raise_memory_limit(MEMORY_EXTRA);
 
-// Emulate normal session - we use admin accoutn by default
+// Emulate normal session - we use admin accoutn by default.
 cron_setup_user();
 
-// Start output log
+// Start output log.
 $timenow  = time();
 mtrace("Server Time: ".date('r', $timenow)."\n\n");
 mtrace("Processing Dialogue module cron ...", '');
 cron_trace_time_and_memory();
-$pre_dbqueries = null;
-$pre_dbqueries = $DB->perf_get_queries();
-$pre_time      = microtime(1);
-// Process bulk open rules
+$predbqueries = null;
+$predbqueries = $DB->perf_get_queries();
+$pretime      = microtime(1);
+// Process bulk open rules.
 dialogue_process_bulk_openrules();
-if (isset($pre_dbqueries)) {
-    mtrace("... used " . ($DB->perf_get_queries() - $pre_dbqueries) . " dbqueries");
-    mtrace("... used " . (microtime(1) - $pre_time) . " seconds");
+if (isset($predbqueries)) {
+    mtrace("... used " . ($DB->perf_get_queries() - $predbqueries) . " dbqueries");
+    mtrace("... used " . (microtime(1) - $pretime) . " seconds");
 }
-// Reset possible changes by modules to time_limit. MDL-11597
+// Reset possible changes by modules to time_limit. MDL-11597.
 @set_time_limit(0);
 mtrace("done.");
 
