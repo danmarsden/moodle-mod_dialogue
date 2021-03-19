@@ -25,20 +25,14 @@ define('AJAX_SCRIPT', true);
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot.'/mod/dialogue/locallib.php');
 
-// Course module identifier.
-$id = required_param('id', PARAM_INT);
-// Search text.
-$q = required_param('q', PARAM_RAW);
-// Check access.
-if (!isloggedin()) {
-    print_error('mustbeloggedin');
-}
-// Check session.
-if (!confirm_sesskey()) {
-    print_error('invalidsesskey');
-}
+$id = required_param('id', PARAM_INT); // Course module identifier.
+$q = required_param('q', PARAM_RAW); // Search text.
 
 $cm = get_coursemodule_from_id('dialogue', $id, 0, false, MUST_EXIST);
+
+require_login($cm->course, false, $cm);
+require_sesskey();
+
 $PAGE->set_cm($cm);
 
 list($receivers, $matches, $pagesize) = dialogue_search_potentials(new \mod_dialogue\dialogue($cm), $q);
