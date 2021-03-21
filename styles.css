@@ -152,7 +152,6 @@ body.path-mod-dialogue #region-main button,
 body.path-mod-dialogue #region-main input,
 body.path-mod-dialogue #region-main select,
 body.path-mod-dialogue #region-main textarea {
-    margin: 0;
     font-size: 100%;
     vertical-align: middle;
 }
@@ -770,113 +769,6 @@ body.path-mod-dialogue #region-main .typeahead {
     border-radius: 4px;
 }
 
-body.path-mod-dialogue #region-main .btn {
-    display: inline-block;
-    *display: inline;
-    padding: 4px 12px;
-    margin-bottom: 0;
-    *margin-left: .3em;
-    font-size: 14px;
-    line-height: 20px;
-    color: #333;
-    text-align: center;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
-    vertical-align: middle;
-    cursor: pointer;
-    background-color: #f5f5f5;
-    *background-color: #e6e6e6;
-    background-image: -moz-linear-gradient(top, #fff, #e6e6e6);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fff), to(#e6e6e6));
-    background-image: -webkit-linear-gradient(top, #fff, #e6e6e6);
-    background-image: -o-linear-gradient(top, #fff, #e6e6e6);
-    background-image: linear-gradient(to bottom, #fff, #e6e6e6);
-    background-repeat: repeat-x;
-    border: 1px solid #ccc;
-    *border: 0;
-    border-color: #e6e6e6 #e6e6e6 #bfbfbf;
-    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-    border-bottom-color: #b3b3b3;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fffff', endColorstr='#ffe6e6e6', GradientType=0);
-    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
-    *zoom: 1;
-    -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
-    -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-body.path-mod-dialogue #region-main .btn:hover,
-body.path-mod-dialogue #region-main .btn:focus,
-body.path-mod-dialogue #region-main .btn:active,
-body.path-mod-dialogue #region-main .btn.active,
-body.path-mod-dialogue #region-main .btn.disabled,
-body.path-mod-dialogue #region-main .btn[disabled] {
-    color: #333;
-    background-color: #e6e6e6;
-    *background-color: #d9d9d9;
-}
-
-body.path-mod-dialogue #region-main .btn:active,
-body.path-mod-dialogue #region-main .btn.active {
-    background-color: #ccc \9;
-}
-
-body.path-mod-dialogue #region-main .btn:first-child {
-    *margin-left: 0;
-}
-
-body.path-mod-dialogue #region-main .btn:hover,
-body.path-mod-dialogue #region-main .btn:focus {
-    color: #333;
-    text-decoration: none;
-    background-position: 0 -15px;
-    -webkit-transition: background-position 0.1s linear;
-    -moz-transition: background-position 0.1s linear;
-    -o-transition: background-position 0.1s linear;
-    transition: background-position 0.1s linear;
-}
-
-body.path-mod-dialogue #region-main .btn:focus {
-    outline: thin dotted #333;
-    outline: 5px auto -webkit-focus-ring-color;
-    outline-offset: -2px;
-}
-
-body.path-mod-dialogue #region-main .btn.active,
-body.path-mod-dialogue #region-main .btn:active {
-    background-image: none;
-    outline: 0;
-    -webkit-box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
-    -moz-box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-body.path-mod-dialogue #region-main .btn.disabled,
-body.path-mod-dialogue #region-main .btn[disabled] {
-    cursor: default;
-    background-image: none;
-    opacity: 0.65;
-    filter: alpha(opacity=65);
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
-    box-shadow: none;
-}
-
-body.path-mod-dialogue #region-main .btn-large {
-    padding: 11px 19px;
-    font-size: 17.5px;
-    -webkit-border-radius: 6px;
-    -moz-border-radius: 6px;
-    border-radius: 6px;
-}
-
-body.path-mod-dialogue #region-main .btn-large [class^="icon-"],
-body.path-mod-dialogue #region-main .btn-large [class*=" icon-"] {
-    margin-top: 4px;
-}
-
 body.path-mod-dialogue #region-main .btn-small {
     padding: 2px 10px;
     font-size: 11.9px;
@@ -921,48 +813,6 @@ body.path-mod-dialogue #region-main input[type="submit"].btn-block,
 body.path-mod-dialogue #region-main input[type="reset"].btn-block,
 body.path-mod-dialogue #region-main input[type="button"].btn-block {
     width: 100%;
-}
-
-body.path-mod-dialogue #region-main .btn-primary.active,
-body.path-mod-dialogue #region-main .btn-warning.active,
-body.path-mod-dialogue #region-main .btn-danger.active,
-body.path-mod-dialogue #region-main .btn-success.active,
-body.path-mod-dialogue #region-main .btn-info.active,
-body.path-mod-dialogue #region-main .btn-inverse.active {
-    color: rgba(255, 255, 255, 0.75);
-}
-
-body.path-mod-dialogue #region-main .btn-primary {
-    color: #fff;
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-    background-color: #006dcc;
-    *background-color: #04c;
-    background-image: -moz-linear-gradient(top, #08c, #04c);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#08c), to(#04c));
-    background-image: -webkit-linear-gradient(top, #08c, #04c);
-    background-image: -o-linear-gradient(top, #08c, #04c);
-    background-image: linear-gradient(to bottom, #08c, #04c);
-    background-repeat: repeat-x;
-    border-color: #04c #04c #002a80;
-    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff04c', GradientType=0);
-    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
-}
-
-body.path-mod-dialogue #region-main .btn-primary:hover,
-body.path-mod-dialogue #region-main .btn-primary:focus,
-body.path-mod-dialogue #region-main .btn-primary:active,
-body.path-mod-dialogue #region-main .btn-primary.active,
-body.path-mod-dialogue #region-main .btn-primary.disabled,
-body.path-mod-dialogue #region-main .btn-primary[disabled] {
-    color: #fff;
-    background-color: #04c;
-    *background-color: #003bb3;
-}
-
-body.path-mod-dialogue #region-main .btn-primary:active,
-body.path-mod-dialogue #region-main .btn-primary.active {
-    background-color: #003399 \9;
 }
 
 body.path-mod-dialogue #region-main .btn-warning {
@@ -1130,36 +980,6 @@ body.path-mod-dialogue #region-main .btn-inverse.active {
     background-color: #080808 \9;
 }
 
-body.path-mod-dialogue #region-main button.btn,
-body.path-mod-dialogue #region-main input[type="submit"].btn {
-    *padding-top: 3px;
-    *padding-bottom: 3px;
-}
-
-body.path-mod-dialogue #region-main button.btn::-moz-focus-inner,
-body.path-mod-dialogue #region-main input[type="submit"].btn::-moz-focus-inner {
-    padding: 0;
-    border: 0;
-}
-
-body.path-mod-dialogue #region-main button.btn.btn-large,
-body.path-mod-dialogue #region-main input[type="submit"].btn.btn-large {
-    *padding-top: 7px;
-    *padding-bottom: 7px;
-}
-
-body.path-mod-dialogue #region-main button.btn.btn-small,
-body.path-mod-dialogue #region-main input[type="submit"].btn.btn-small {
-    *padding-top: 3px;
-    *padding-bottom: 3px;
-}
-
-body.path-mod-dialogue #region-main button.btn.btn-mini,
-body.path-mod-dialogue #region-main input[type="submit"].btn.btn-mini {
-    *padding-top: 1px;
-    *padding-bottom: 1px;
-}
-
 body.path-mod-dialogue #region-main .btn-link,
 body.path-mod-dialogue #region-main .btn-link:active,
 body.path-mod-dialogue #region-main .btn-link[disabled] {
@@ -1248,10 +1068,6 @@ body.path-mod-dialogue #region-main .btn-group > .btn-small {
     font-size: 11.9px;
 }
 
-body.path-mod-dialogue #region-main .btn-group > .btn-large {
-    font-size: 17.5px;
-}
-
 body.path-mod-dialogue #region-main .btn-group > .btn:first-child {
     margin-left: 0;
     -webkit-border-bottom-left-radius: 4px;
@@ -1326,13 +1142,6 @@ body.path-mod-dialogue #region-main .btn-group > .btn-small + .dropdown-toggle {
     *padding-bottom: 4px;
 }
 
-body.path-mod-dialogue #region-main .btn-group > .btn-large + .dropdown-toggle {
-    *padding-top: 7px;
-    padding-right: 12px;
-    *padding-bottom: 7px;
-    padding-left: 12px;
-}
-
 body.path-mod-dialogue #region-main .btn-group.open .dropdown-toggle {
     background-image: none;
     -webkit-box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -1373,23 +1182,9 @@ body.path-mod-dialogue #region-main .btn .caret {
     margin-left: 0;
 }
 
-body.path-mod-dialogue #region-main .btn-large .caret {
-    margin-top: 6px;
-}
-
-body.path-mod-dialogue #region-main .btn-large .caret {
-    border-top-width: 5px;
-    border-right-width: 5px;
-    border-left-width: 5px;
-}
-
 body.path-mod-dialogue #region-main .btn-mini .caret,
 body.path-mod-dialogue #region-main .btn-small .caret {
     margin-top: 8px;
-}
-
-body.path-mod-dialogue #region-main .dropup .btn-large .caret {
-    border-bottom-width: 5px;
 }
 
 body.path-mod-dialogue #region-main .btn-primary .caret,
@@ -1434,18 +1229,6 @@ body.path-mod-dialogue #region-main .btn-group-vertical > .btn:last-child {
     -webkit-border-radius: 0 0 4px 4px;
     -moz-border-radius: 0 0 4px 4px;
     border-radius: 0 0 4px 4px;
-}
-
-body.path-mod-dialogue #region-main .btn-group-vertical > .btn-large:first-child {
-    -webkit-border-radius: 6px 6px 0 0;
-    -moz-border-radius: 6px 6px 0 0;
-    border-radius: 6px 6px 0 0;
-}
-
-body.path-mod-dialogue #region-main .btn-group-vertical > .btn-large:last-child {
-    -webkit-border-radius: 0 0 6px 6px;
-    -moz-border-radius: 0 0 6px 6px;
-    border-radius: 0 0 6px 6px;
 }
 
 body.path-mod-dialogue #region-main .alert {
@@ -2543,11 +2326,6 @@ body.path-mod-dialogue #region-main .btn-create.active {
 body.path-mod-dialogue #region-main .btn-create .caret {
     border-top-color: #fff;
     border-bottom-color: #fff;
-}
-
-body.path-mod-dialogue #region-main a.btn:link,
-body.path-mod-dialogue #region-main a.btn:visited {
-    color: #555;
 }
 
 body.path-mod-dialogue #region-main a.btn-create:link,
