@@ -17,8 +17,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * A custom renderer class that extends the plugin_renderer_base and is used by
- * the dialogue module.
+ * A custom renderer class used by the dialogue module.
  *
  * @package   mod_dialogue
  * @copyright 2013 Troy Williams
@@ -29,8 +28,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
     /**
      * Render conversation, just the conversation
      *
-     * @global type $USER
-     * @param dialogue_conversation $conversation
+     * @param mod_dialogue\conversation $conversation
      * @return string
      */
     public function render_conversation(mod_dialogue\conversation $conversation) {
@@ -129,7 +127,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $html .= html_writer::end_div();
 
         // Display list of people who have received this conversation
-        // @todo - display rest of information, which group, has completed? etc.
+        // Todo - display rest of information, which group, has completed? etc.
         if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
             $receivers = $conversation->receivedby;
             if ($receivers) {
@@ -158,7 +156,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                 $html .= html_writer::end_div();
             }
         }
-        // This should only display on open and closed conversations @todo - tidy + css.
+        // This should only display on open and closed conversations todo - tidy + css.
         $participants = $conversation->participants;
         if ($participants) {
             $html .= html_writer::start_div('participants');
@@ -179,7 +177,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
     /**
      * Render a list of conversations in a dialogue for a particular user.
      *
-     * @param mod_dialogue_conversations $conversations
+     * @param \mod_dialogue\conversations $conversations
      * @return string
      */
     public function conversation_listing(\mod_dialogue\conversations $conversations) {
@@ -306,7 +304,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
     /**
      * Render a reply related to conversation.
      *
-     * @param dialogue_reply $reply
+     * @param \mod_dialogue\reply $reply
      * @return string
      */
     public function render_reply(\mod_dialogue\reply $reply) {
@@ -426,7 +424,11 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         return $html;
     }
 
-
+    /**
+     * State button group
+     * @return string
+     * @throws coding_exception
+     */
     public function state_button_group() {
         $stateurl = clone($this->page->url);
         $html = '';
@@ -535,6 +537,12 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
     }
 
+    /**
+     * sort by dropdown.
+     * @param array $options
+     * @return string
+     * @throws coding_exception
+     */
     public function sort_by_dropdown($options) {
         $html = '';
 
@@ -585,6 +593,13 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
     }
 
+    /**
+     * Tab navigation
+     * @param \mod_dialogue\dialogue $dialogue
+     * @return string
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
     public function tab_navigation(\mod_dialogue\dialogue $dialogue) {
         $config  = $dialogue->config;
         $context = $dialogue->context;

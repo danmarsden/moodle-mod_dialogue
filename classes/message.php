@@ -68,9 +68,7 @@ class message implements \renderable {
 
     /**
      * Returns true/false if current user is the author
-     * of this message;
      *
-     * @global type $USER
      * @return boolean
      */
     public function is_author() {
@@ -78,6 +76,10 @@ class message implements \renderable {
         return ($USER->id == $this->_authorid);
     }
 
+    /**
+     * Is participant
+     * @return bool
+     */
     public function is_participant() {
         global $USER;
 
@@ -234,7 +236,7 @@ class message implements \renderable {
     }
 
     public function set_state($state) {
-        $this->_state = $state; // Check actual state - @todo.
+        $this->_state = $state; // Check actual state - todo.
     }
 
     public function save() {
@@ -364,8 +366,7 @@ class message implements \renderable {
     /**
      * Message is marked as trash so can be deleted at a later time.
      *
-     * @global stdClass $DB
-     * @throws moodle_exception
+     * @throws \moodle_exception
      */
     public function trash() {
         global $DB;

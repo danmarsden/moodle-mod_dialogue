@@ -15,8 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package moodlecore
- * @subpackage backup-moodle2
+ * Dialogue backup class
+ *
+ * @package mod_dialogue
  * @copyright 2010 -
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -24,9 +25,16 @@
 defined('MOODLE_INTERNAL') || die;
 
 /**
- * Define all the backup steps that will be used by the backup_dialogue_activity_task
+ * Class backup_dialogue_activity_structure_step
  */
 class backup_dialogue_activity_structure_step extends backup_activity_structure_step {
+    /**
+     * Define structure
+     *
+     * @return backup_nested_element
+     * @throws base_element_struct_exception
+     * @throws base_step_exception
+     */
     protected function define_structure() {
 
         // To know if we are including userinfo.

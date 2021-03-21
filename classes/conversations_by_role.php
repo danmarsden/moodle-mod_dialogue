@@ -20,23 +20,44 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class to build a list of conversations grouped by role in course
- *
+ * @package mod_dialogue
  */
 class conversations_by_role extends conversations {
-
+    /**
+     * @var array
+     */
     protected $params  = array();
-
+    /**
+     * @var null
+     */
     protected $basesql = null;
-
+    /**
+     * @var array
+     */
     protected $wheresql = array();
-
+    /**
+     * @var string
+     */
     protected $orderbysql = '';
 
+    /**
+     * conversations_by_role constructor.
+     * @param dialogue $dialogue
+     * @param int $roleid
+     * @param int $page
+     * @param int $limit
+     */
     public function __construct(dialogue $dialogue, $roleid, $page = 0, $limit = dialogue::PAGINATION_MAX_RESULTS) {
         parent::__construct($dialogue, $page, $limit);
         $this->roleid   = $roleid;
     }
 
+    /**
+     * Setup
+     * @return mixed|void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function setup() {
         global $DB, $USER;
 
@@ -98,6 +119,11 @@ class conversations_by_role extends conversations {
         $this->set_unread_field();
     }
 
+    /**
+     * Set unread field
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     protected function set_unread_field() {
         global $USER, $DB;
 
@@ -117,6 +143,12 @@ class conversations_by_role extends conversations {
         $this->params['unreaduserid'] = $USER->id;
     }
 
+    /**
+     * Records
+     * @return array
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function records() {
         global $DB;
 
@@ -142,6 +174,12 @@ class conversations_by_role extends conversations {
         return $records;
     }
 
+    /**
+     * Rows matched
+     * @return int|mixed
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function rows_matched() {
         global $DB;
 
@@ -150,6 +188,10 @@ class conversations_by_role extends conversations {
         return $DB->count_records_sql("SELECT COUNT(1) " . $this->basesql, $this->params);
     }
 
+    /**
+     * Get sort options
+     * @return array
+     */
     public static function get_sort_options() {
 
         $options = array(
@@ -179,6 +221,12 @@ class conversations_by_role extends conversations {
         return $options;
     }
 
+    /**
+     * Set order
+     * @param string $name
+     * @param string $direction
+     * @return string
+     */
     public function set_order($name, $direction = 'asc') {
         global $DB;
 

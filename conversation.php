@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * View, create or edit a conversation in a dialogue. Also displays reply
- * form if open conversation.
+ * View, create, edit or reply to a conversation in a dialogue.
  *
  * @package   mod_dialogue
  * @copyright 2013 Troy Williams

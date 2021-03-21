@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Library of extra functions for the dialogue module not part of the standard add-on module API set
  * but used by scripts in the mod/dialogue folder
@@ -25,11 +23,10 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
- *
- * @global stdClass $DB
- * @global stdClass $USER
- * @global stdClass $PAGE
+ * Dialogue search potentials
  * @param \mod_dialogue\dialogue $dialogue
  * @param string $query
  * @return array()
@@ -117,12 +114,10 @@ function dialogue_search_potentials(\mod_dialogue\dialogue $dialogue, $query = '
 
 /**
  * Uses cache to eliminate multiple database calls when rendering listing pages
- * such as view. Currently using request type cache needs work.
  *
- * @todo move to application cache, rework code with invalid event or clear
+ * Todo move to application cache, rework code with invalid event or clear
  *  on reply in class.
  *
- * @global stdClass $DB
  * @staticvar null $cache
  * @param \mod_dialogue\dialogue $dialogue
  * @param int $conversationid
@@ -154,12 +149,10 @@ function dialogue_get_conversation_participants(\mod_dialogue\dialogue $dialogue
 }
 
 /**
- *
- * @global type $DB
- * @global type $PAGE
+ * Dialogue get user details.
  * @staticvar type $cache
  * @param \mod_dialogue\dialogue $dialogue
- * @param type $userid
+ * @param int $userid
  * @return type
  */
 function dialogue_get_user_details(\mod_dialogue\dialogue $dialogue, $userid) {
@@ -197,10 +190,8 @@ function dialogue_get_user_details(\mod_dialogue\dialogue $dialogue, $userid) {
 }
 
 /**
- * Adds the extra fields to user object required for
- * displaying user avatar.
+ * Adds the extra fields to user object required for displaying user avatar.
  *
- * @global moodle_page $PAGE
  * @param stdClass $user
  */
 function dialogue_add_user_picture_fields(stdClass &$user) {
@@ -217,12 +208,7 @@ function dialogue_add_user_picture_fields(stdClass &$user) {
 }
 
 /**
- * Cache a param for course module instance. Keyed on combination of course module
- * id and name. Return default if null.
- *
- * User experience - display ui controls etc
- *
- * @global stdClass $PAGE
+ * Cache a param for course module instance. Keyed on combination of course module id and name
  * @param string $name
  * @param mixed $value
  * @param mixed $default
@@ -256,8 +242,6 @@ function dialogue_get_cached_param($name, $value, $default) {
 /**
  * Get a users total unread message count for a dialogue course module.
  *
- * @global stdClass $USER
- * @global stdClass $DB
  * @param \mod_dialogue\dialogue $dialogue
  * @return int
  */
@@ -319,6 +303,13 @@ function dialogue_cm_unread_total(\mod_dialogue\dialogue $dialogue) {
     return 0;
 }
 
+/**
+ * Get draft listing
+ * @param \mod_dialogue\dialogue $dialogue
+ * @param null $total
+ * @return array
+ * @throws dml_exception
+ */
 function dialogue_get_draft_listing(\mod_dialogue\dialogue $dialogue, &$total = null) {
     global $PAGE, $DB, $USER;
 
@@ -429,11 +420,7 @@ function dialogue_generate_summary_line($subject, $body, $bodyformat, $length = 
 
 
 /**
- * Counts conversations in a particular dialogue. Can optionally
- * accept a state e.g count open or count closed
- *
- * @global stdClass $USER
- * @global stdClass $DB
+ * Counts conversations in a particular dialogue. Can optionally accept a state e.g count open or count closed
  * @param type $cm
  * @param type $state
  * @return int count
@@ -567,7 +554,6 @@ function dialogue_shorten_html($html, $ideal = 30, $exact = false, $ending = '..
 /**
  * Helper function, check if draftid contains any files
  *
- * @global type $USER
  * @param type $draftid
  * @return boolean
  */

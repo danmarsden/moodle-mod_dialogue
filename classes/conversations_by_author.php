@@ -20,24 +20,45 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class to build a list of conversations grouped by author of last message
- *
+ * @package mod_dialogue
  */
 class conversations_by_author extends conversations {
-
+    /**
+     * @var array
+     */
     protected $params  = array();
-
+    /**
+     * @var array
+     */
     protected $fields  = array();
-
+    /**
+     * @var null
+     */
     protected $basesql = null;
-
+    /**
+     * @var array
+     */
     protected $wheresql = array();
-
+    /**
+     * @var string
+     */
     protected $orderbysql = '';
-
+    /**
+     * @var null
+     */
     protected $recordset = null;
-
+    /**
+     * @var array
+     */
     protected $states = array();
 
+    /**
+     * Setup
+     * @return mixed|void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function setup() {
         global $DB, $USER;
 
@@ -86,6 +107,10 @@ class conversations_by_author extends conversations {
         $this->set_unread_field();
     }
 
+    /**
+     * Set state
+     * @param string $state
+     */
     public function set_state($state) {
         $validstates = array(dialogue::STATE_OPEN, dialogue::STATE_CLOSED);
         if (!in_array($state, $validstates)) {
@@ -94,6 +119,11 @@ class conversations_by_author extends conversations {
         $this->states = $state;
     }
 
+    /**
+     * Set unread field
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     protected function set_unread_field() {
         global $USER, $DB;
 
@@ -117,7 +147,13 @@ class conversations_by_author extends conversations {
         $this->params['unreaduserid'] = $USER->id;
     }
 
-
+    /**
+     * Records
+     * @return array
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function records() {
         global $DB;
 
@@ -142,7 +178,13 @@ class conversations_by_author extends conversations {
         return $records;
     }
 
-
+    /**
+     * Rows matched
+     * @return int|mixed
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function rows_matched() {
         global $DB;
 
@@ -189,13 +231,11 @@ class conversations_by_author extends conversations {
 
     /**
      * Sets up the ORDER BY SQL on the passed in field option and and direction.
-     * This is used in fetch_page method.
      *
-     * @global stdClass $DB
      * @param string $name
      * @param string $direction
      * @return string $orderbysql
-     * @throws moodle_exception
+     * @throws \moodle_exception
      */
     public function set_order($name, $direction = 'asc') {
         global $DB;
@@ -227,4 +267,4 @@ class conversations_by_author extends conversations {
         return $this->orderbysql = $orderby;
     }
 
-} // end of class
+}

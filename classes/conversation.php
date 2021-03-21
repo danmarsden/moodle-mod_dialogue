@@ -20,20 +20,41 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../../../lib/filelib.php');
 
+/**
+ * Class conversation
+ * @package mod_dialogue
+ */
 class conversation extends message {
 
+    /**
+     * @var int|null
+     */
     protected $_conversationid = null;
+    /**
+     * @var string
+     */
     protected $_subject = '';
+    /**
+     * @var null
+     */
     protected $_participants = null;
+    /**
+     * @var array
+     */
     protected $_replies = array();
+    /**
+     * @var null
+     */
     protected $_bulkopenrule = null;
+    /**
+     * @var null
+     */
     protected $_receivedby = null;
 
     /**
-     *
-     * @global type $DB
+     * Construct
      * @param dialogue $dialogue
-     * @param type $conversationid
+     * @param int $conversationid
      */
     public function __construct(dialogue $dialogue, $conversationid = null) {
         global $DB;
@@ -51,12 +72,21 @@ class conversation extends message {
         }
     }
 
+    /**
+     * Add participant.
+     * @param int $userid
+     * @return \type
+     */
     public function add_participant($userid) {
         $dialogue = $this->dialogue;
         $participant = dialogue_get_user_details($dialogue, $userid);
         return $this->_participants[$userid] = $participant;
     }
 
+    /**
+     * Clear participants.
+     * @return null
+     */
     public function clear_participants() {
         return $this->_participants = null;
     }
@@ -104,6 +134,13 @@ class conversation extends message {
         return $copy;
     }
 
+    /**
+     * Close
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function close() {
         global $DB, $USER;
 
@@ -131,6 +168,13 @@ class conversation extends message {
         return true;
     }
 
+    /**
+     * Delete
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function delete() {
         global $DB, $USER;
 
@@ -169,8 +213,7 @@ class conversation extends message {
     /**
      * Load DB record data onto Class, conversationid needed.
      *
-     * @global stdClass $DB
-     * @throws coding_exception
+     * @throws \coding_exception
      */
     protected function load() {
         global $DB;
@@ -198,6 +241,10 @@ class conversation extends message {
         $this->_timemodified = $record->timemodified;
     }
 
+    /**
+     * Load bulk open rule
+     * @throws \dml_exception
+     */
     protected function load_bulkopenrule() {
         global $DB;
 
@@ -209,6 +256,11 @@ class conversation extends message {
         }
     }
 
+    /**
+     * Load participants
+     * @return array|null
+     * @throws \dml_exception
+     */
     protected function load_participants() {
         global $DB;
 
@@ -225,10 +277,9 @@ class conversation extends message {
     }
 
     /**
-     *
-     * @global type $CFG
+     * Initialise form
      * @return \mod_dialogue_conversation_form
-     * @throws moodle_exception
+     * @throws \moodle_exception
      */
     public function initialise_form() {
         global $CFG, $USER, $PAGE;
@@ -260,7 +311,7 @@ class conversation extends message {
         // Setup nonjs person selector.
         $options = array();
         $selected = array();
-        // Get participants - @todo.
+        // Get participants - todo.
         $participants = $this->participants; // Insure loaded by using magic.
         if ($participants) {
             foreach ($participants as $participant) {
@@ -316,7 +367,6 @@ class conversation extends message {
     /**
      * Do not call this method directly
      *
-     * @global stdClass $DB
      * @return stdClass | boolean bulkopenrule record or false
      */
     protected function magic_get_bulkopenrule() {
@@ -326,10 +376,19 @@ class conversation extends message {
         return $this->_bulkopenrule;
     }
 
+    /**
+     * Magic get conversationid.
+     * @return int|null
+     */
     protected function magic_get_conversationid() {
         return $this->_conversationid;
     }
 
+    /**
+     * magic get participants
+     * @return null
+     * @throws \dml_exception
+     */
     protected function magic_get_participants() {
         if (is_null($this->_participants)) {
             $this->load_participants();
@@ -337,6 +396,11 @@ class conversation extends message {
         return $this->_participants;
     }
 
+    /**
+     * Magic get recievedby.
+     * @return array|null
+     * @throws \dml_exception
+     */
     protected function magic_get_receivedby() {
         global $DB;
 
@@ -370,6 +434,13 @@ class conversation extends message {
         return new reply($this->_dialogue, $this);
     }
 
+    /**
+     * Replies
+     * @param null $index
+     * @return array|mixed|reply
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function replies($index = null) {
         global $DB;
 
@@ -406,6 +477,13 @@ class conversation extends message {
         return $this->_replies;
     }
 
+    /**
+     * Save
+     * @return bool|void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function save() {
         global $DB, $USER;
 
@@ -442,6 +520,10 @@ class conversation extends message {
         parent::save();
     }
 
+    /**
+     * Save bulk open rule
+     * @throws \dml_exception
+     */
     protected function save_bulk_open_rule() {
         global $DB;
 
@@ -484,11 +566,17 @@ class conversation extends message {
         $this->load_bulkopenrule(); // Refresh.
     }
 
+    /**
+     * Save form data
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function save_form_data() {
         // Incoming form data.
         $data = $this->_form->get_submitted_data();
 
-        // Shortcut set of participants for now @todo - make better.
+        // Shortcut set of participants for now todo - make better.
         $this->clear_participants();
         if (!empty($data->people)) {
             $participants = (array) $data->people; // May be single value.
@@ -521,7 +609,11 @@ class conversation extends message {
         $this->_formdatasaved = true;
     }
 
-    // Tidy up handle removes @todo.
+    /**
+     * Save participants
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     protected function save_participants() {
         global $DB;
 
@@ -551,6 +643,12 @@ class conversation extends message {
         $this->load_participants();
     }
 
+    /**
+     * Send
+     * @return bool
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function send() {
         global $USER, $DB;
 
@@ -576,6 +674,13 @@ class conversation extends message {
         parent::send();
     }
 
+    /**
+     * Set bulk open rule
+     * @param null $type
+     * @param null $sourceid
+     * @param false $includefuturemembers
+     * @param int $cutoffdate
+     */
     protected function set_bulk_open_rule($type = null, $sourceid = null, $includefuturemembers = false, $cutoffdate = 0) {
         $rule = array();
         /* Must have type (course, group) and sourceid (course->id, group->id) to
@@ -590,6 +695,10 @@ class conversation extends message {
         $this->_bulkopenrule = $rule;
     }
 
+    /**
+     * Set subject
+     * @param string $subject
+     */
     public function set_subject($subject) {
         $this->_subject = format_string($subject);
     }

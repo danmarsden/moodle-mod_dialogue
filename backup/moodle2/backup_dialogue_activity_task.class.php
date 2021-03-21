@@ -15,8 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package moodlecore
- * @subpackage backup-moodle2
+ * Dialogue backup class
+ *
+ * @package mod_dialogue
  * @copyright 2010 -
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,8 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/mod/dialogue/backup/moodle2/backup_dialogue_stepslib.php');
 
 /**
- * backup task that provides all the settings and steps to perform one
- * complete backup of the activity
+ * Class backup_dialogue_activity_task
  */
 class backup_dialogue_activity_task extends backup_activity_task {
 

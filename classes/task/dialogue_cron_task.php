@@ -18,6 +18,7 @@ namespace mod_dialogue\task;
 
 /**
  * Simple task to run the cron.
+ * @package mod_dialogue
  */
 class dialogue_cron_task extends \core\task\scheduled_task {
 

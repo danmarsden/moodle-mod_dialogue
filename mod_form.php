@@ -74,6 +74,10 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
+    /**
+     * Get data
+     * @return false|object
+     */
     public function get_data() {
         $data = parent::get_data();
         if (!$data) {

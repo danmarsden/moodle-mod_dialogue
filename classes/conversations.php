@@ -35,11 +35,22 @@ defined('MOODLE_INTERNAL') || die();
 abstract class conversations implements \renderable {
     /** @var The dialogue this list of conversations belongs **/
     protected $_dialogue = null;
-
+    /**
+     * @var int|mixed
+     */
     protected $_page = 0;
-
+    /**
+     * @var int|mixed
+     */
     protected $_limit = dialogue::PAGINATION_PAGE_SIZE;
 
+    /**
+     * Construct
+     * conversations constructor.
+     * @param dialogue $dialogue
+     * @param int $page
+     * @param int $limit
+     */
     public function __construct(dialogue $dialogue, $page = 0, $limit = dialogue::PAGINATION_MAX_RESULTS) {
 
         $this->_dialogue = $dialogue;
@@ -100,8 +111,22 @@ abstract class conversations implements \renderable {
         return $this->_limit;
     }
 
+    /**
+     * Abstract setup
+     * @return mixed
+     */
     public abstract function setup();
+
+    /**
+     * Abstract records
+     * @return mixed
+     */
     public abstract function records();
+
+    /**
+     * Abstract rows matched.
+     * @return mixed
+     */
     public abstract function rows_matched();
 }
 

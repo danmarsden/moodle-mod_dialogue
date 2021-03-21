@@ -89,8 +89,6 @@ class mod_dialogue_message_form extends moodleform {
 
     /**
      * Intercept the display of form so can format errors as notifications
-     *
-     * @global type $OUTPUT
      */
     public function display() {
         global $OUTPUT;

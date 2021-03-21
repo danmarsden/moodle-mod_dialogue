@@ -15,8 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package moodlecore
- * @subpackage backup-moodle2
+ * Dialogue restore class
+ *
+ * @package mod_dialogue
  * @copyright 2010 onwards -
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -31,7 +32,12 @@ defined('MOODLE_INTERNAL') || die();
  * Structure step to restore one dialogue activity
  */
 class restore_dialogue_activity_structure_step extends restore_activity_structure_step {
-
+    /**
+     * Define structure
+     *
+     * @return mixed
+     * @throws base_step_exception
+     */
     protected function define_structure() {
 
         $paths = array();
@@ -66,6 +72,13 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         return $this->prepare_activity_structure($paths);
     }
 
+    /**
+     * Process dialogue
+     *
+     * @param stdClass $data
+     * @throws base_step_exception
+     * @throws dml_exception
+     */
     protected function process_dialogue($data) {
         global $DB;
 
@@ -80,13 +93,24 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         $this->apply_activity_instance($newitemid);
     }
 
+    /**
+     * Process bullopenerrule
+     *
+     * @param stdClass $data
+     */
     protected function process_bulkopenerrule($data) {
-        global $DB;
-
         $data = (object)$data;
         $oldid = $data->id;
     }
 
+    /**
+     * Process conversation
+     *
+     * @param stdClass $data
+     * @throws base_step_exception
+     * @throws dml_exception
+     * @throws restore_step_exception
+     */
     protected function process_conversation($data) {
         global $DB;
 
@@ -99,6 +123,14 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         $this->set_mapping('dialogue_conversation', $oldid, $newitemid);
     }
 
+    /**
+     * Process conversation legacy
+     *
+     * @param stdClass $data
+     * @throws base_step_exception
+     * @throws dml_exception
+     * @throws restore_step_exception
+     */
     protected function process_conversation_legacy($data) {
         global $DB;
 
@@ -125,6 +157,13 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         }
     }
 
+    /**
+     * Process entry legacy
+     *
+     * @param stdClass $data
+     * @throws dml_exception
+     * @throws restore_step_exception
+     */
     protected function process_entry_legacy($data) {
         global $CFG, $DB;
         require_once($CFG->dirroot.'/mod/dialogue/locallib.php');
@@ -161,6 +200,13 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         }
     }
 
+    /**
+     * Process message
+     *
+     * @param stdClass $data
+     * @throws dml_exception
+     * @throws restore_step_exception
+     */
     protected function process_message($data) {
         global $DB;
 
@@ -173,6 +219,11 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         $this->set_mapping('dialogue_message', $oldid, $newitemid, true);
     }
 
+    /**
+     * Process flag
+     * @param stdClass $data
+     * @throws dml_exception
+     */
     protected function process_flag($data) {
         global $DB;
 
@@ -184,6 +235,11 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         $newitemid = $DB->insert_record('dialogue_flags', $data);
     }
 
+    /**
+     * Process participant
+     * @param stdClass $data
+     * @throws dml_exception
+     */
     protected function process_participant($data) {
         global $DB;
 
@@ -200,6 +256,11 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         }
     }
 
+    /**
+     * Process read legacy
+     * @param stdClass $data
+     * @throws dml_exception
+     */
     protected function process_read_legacy($data) {
         global $CFG, $DB;
         require_once($CFG->dirroot.'/mod/dialogue/locallib.php');
@@ -214,7 +275,18 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         $this->process_flag($data);
     }
 
-
+    /**
+     * Add related legacy files
+     * @param string $component
+     * @param string $filearea
+     * @param string $mappingitemname
+     * @return array
+     * @throws dml_exception
+     * @throws file_exception
+     * @throws restore_dbops_exception
+     * @throws restore_step_exception
+     * @throws stored_file_creation_exception
+     */
     public function add_related_legacy_files($component, $filearea, $mappingitemname) {
         global $CFG, $DB;
 
@@ -352,6 +424,10 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         return $results;
     }
 
+    /**
+     * Build conversation index
+     * @throws dml_exception
+     */
     protected function build_missing_conversation_index() {
         global $DB;
         $dialogueid = $this->get_new_parentid('dialogue');
@@ -370,6 +446,14 @@ class restore_dialogue_activity_structure_step extends restore_activity_structur
         }
     }
 
+    /**
+     * After execute
+     * @throws dml_exception
+     * @throws file_exception
+     * @throws restore_dbops_exception
+     * @throws restore_step_exception
+     * @throws stored_file_creation_exception
+     */
     protected function after_execute() {
         // Add entry related files.
         $this->add_related_files('mod_dialogue', 'intro', null);

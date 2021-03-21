@@ -44,10 +44,9 @@ class reply extends message {
     }
 
     /**
-     * Load DB record data onto Class, messageid needed.
-     *
-     * @global stdClass $DB
-     * @throws coding_exception
+     * Load record.
+     * @param \stdClass|null $record
+     * @throws \dml_exception
      */
     public function load(\stdClass $record = null) {
         global $DB;

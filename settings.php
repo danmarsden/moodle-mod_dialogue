@@ -25,6 +25,7 @@
  * posts count
  *
  * @package mod_dialogue
+ * @copyright 2013 Troy Williams
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  */
 defined('MOODLE_INTERNAL') || die;

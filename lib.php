@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Lists all dialogue acitivites.
+ *
+ * @package mod_dialogue
+ * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -329,12 +337,7 @@ function dialogue_user_complete($course, $user, $mod, $dialogue) {
 }
 
 /**
- * Given a course and a date, prints a summary of all the new
- * messages posted in the course since that date
- *
- * @global object
- * @global object
- * @global object
+ * Given a course and a date, prints a summary of all the new messages
  * @uses CONTEXT_MODULE
  * @uses VISIBLEGROUPS
  * @param object $course
@@ -380,7 +383,7 @@ function dialogue_get_extra_capabilities() {
  * for trackread which is a similar requirement/preference so we treat them
  * as equals. This is closely modelled on similar function from course/lib.php
  *
- * @todo needs work
+ * todo needs work
  * @param mixed $userid The user object to check for (optional).
  * @return boolean
  */
@@ -485,11 +488,8 @@ function dialogue_reset_course_form_defaults($course) {
 }
 
 /**
- * Actual implementation of the reset course functionality, delete all the
- * data responses for course $data->courseid.
+ * Actual implementation of the reset course functionality, delete all the data
  *
- * @global object
- * @global object
  * @param object $data the data submitted from the reset course.
  * @return array status array
  */
