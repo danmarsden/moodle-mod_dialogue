@@ -68,14 +68,11 @@ final class provider implements
                 'conversationindex' => 'privacy:metadata:conversationindex',
                 'authorid' => 'privacy:metadata:authorid',
                 'body' => 'privacy:metadata:body',
-                'bodyformat' => 'privacy:metadata:bodyformat',
-                'bodytrust' => 'privacy:metadata:bodytrust',
-                'attachments' => 'privacy:metadata:attachments',
                 'state' => 'privacy:metadata:state',
                 'timecreated' => 'privacy:metadata:timecreated',
                 'timemodified' => 'privacy:metadata:timemodified'
             ],
-            'privacy:metadata:dialoguesessions'
+            'privacy:metadata:dialogue_messages'
         );
 
         $collection->add_database_table(
@@ -88,7 +85,7 @@ final class provider implements
                 'flag' => 'privacy:metadata:flag',
                 'userid' => 'privacy:metadata:userid',
             ],
-            'privacy:metadata:dialoguewarningdone'
+            'privacy:metadata:dialogueflags'
         );
 
         return $collection;
@@ -161,6 +158,7 @@ final class provider implements
 
         $DB->delete_records('dialogue_flags', ['dialogueid' => $cm->instance]);
         $DB->delete_records('dialogue_messages', ['dialogueid' => $cm->instance]);
+        // TODO - Delete attachements.
         $DB->delete_records('dialogue_participants', ['dialogueid' => $cm->instance]);
         $DB->delete_records('dialogue_conversations', ['dialogueid' => $cm->instance]);
     }
@@ -184,6 +182,7 @@ final class provider implements
             }
             $DB->delete_records('dialogue_flags', ['dialogueid' => $cm->instance, 'userid' => $userid]);
             $DB->delete_records('dialogue_messages', ['dialogueid' => $cm->instance, 'authorid' => $userid]);
+            // TODO - Delete attachements.
             $DB->delete_records('dialogue_participants', ['dialogueid' => $cm->instance, 'userid' => $userid]);
         }
     }
