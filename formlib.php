@@ -14,20 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
- * This page builds a ?????? TODO
+ * This page builds a dialogue form.
  *
  * This class extends moodleform overriding the definition() method only
- * @package dialogue
+ * @package mod_dialogue
+ * @copyright 2013 Troy Williams
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  */
+
+defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/repository/lib.php');
 
 /**
  * Class mod_dialogue_message_form
+ * @package mod_dialogue
  */
 class mod_dialogue_message_form extends moodleform {
     /**
@@ -121,10 +123,10 @@ class mod_dialogue_message_form extends moodleform {
 
     /**
      * Helper method
-     * @param type $name
-     * @param type $options
-     * @param type $selected
-     * @return type
+     * @param string $name
+     * @param array $options
+     * @param array $selected
+     * @return array
      */
     public function update_selectgroup($name, $options, $selected=array()) {
         $mform   = $this->_form;
@@ -171,10 +173,10 @@ class mod_dialogue_message_form extends moodleform {
     }
 
     /**
-     *
-     * @param type $data
-     * @param type $files
-     * @return type
+     * Validation
+     * @param array $data
+     * @param array $files
+     * @return array
      */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
@@ -187,7 +189,7 @@ class mod_dialogue_message_form extends moodleform {
     }
 
     /**
-     *
+     * Get submit action
      * @return null
      */
     public function get_submit_action() {
@@ -201,22 +203,44 @@ class mod_dialogue_message_form extends moodleform {
     }
 
 }
+
+/**
+ * Class mod_dialogue_reply_form
+ */
 class mod_dialogue_reply_form extends mod_dialogue_message_form {
+    /**
+     * Definition
+     * @throws coding_exception
+     * @throws dml_exception
+     */
     protected function definition() {
         $mform    = $this->_form;
         $mform->addElement('header', 'messagesection', get_string('reply', 'dialogue'));
         $mform->setExpanded('messagesection', true);
         parent::definition();
     }
+
+    /**
+     * Validation
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         return $errors;
     }
 }
+
 /**
- *
+ * Class mod_dialogue_conversation_form
  */
 class mod_dialogue_conversation_form extends mod_dialogue_message_form {
+    /**
+     * Definition
+     * @throws coding_exception
+     * @throws dml_exception
+     */
     protected function definition() {
         global $PAGE, $OUTPUT;
 
@@ -302,7 +326,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
     }
 
     /**
-     *
+     * Definition after data
      * @return boolean
      */
     public function definition_after_data() {
@@ -342,10 +366,10 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
     }
 
     /**
-     *
-     * @param type $data
-     * @param type $files
-     * @return type
+     * Validation
+     * @param array $data
+     * @param array $files
+     * @return array
      */
     public function validation($data, $files) {
 

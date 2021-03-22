@@ -72,10 +72,8 @@ function dialogue_supports($feature) {
  * of the new instance.
  *
  * @param stdClass $data
- * @param mod_dialogue_mod_form $form
  * @return int The instance id of the new dialogue or false on failure
  */
-
 function dialogue_add_instance($data) {
     global $DB;
 
@@ -94,7 +92,7 @@ function dialogue_add_instance($data) {
  * mod.html) this function will update an existing instance with new data.
  *
  * @param stdClass $data
- * @param mod_dialogue_mod_form $form
+ * @param stdClass $mform
  * @return bool true on success
  */
 function dialogue_update_instance($data, $mform) {
@@ -113,7 +111,7 @@ function dialogue_update_instance($data, $mform) {
  *
  * Given an ID of an instance of this module, this function will permanently
  * delete the instance and any data that depends on it.
- * @param   int     id of the dialogue object to delete
+ * @param int $id     id of the dialogue object to delete
  * @return  bool    true on success, false if not
  */
 function dialogue_delete_instance($id) {
@@ -293,9 +291,10 @@ function dialogue_cm_info_view(cm_info $cm) {
  *  - $return->info = a short text description
  *
  * Used for user activity reports.
- * @param   object  $course
- * @param   object  $user
- * @param   object  $dialogue
+ * @param   stdClass  $course
+ * @param   stdClass  $user
+ * @param   stdClass  $mod
+ * @param   stdClass  $dialogue
  *
  * @return stdClass|null
  */
@@ -383,8 +382,7 @@ function dialogue_get_extra_capabilities() {
  * for trackread which is a similar requirement/preference so we treat them
  * as equals. This is closely modelled on similar function from course/lib.php
  *
- * todo needs work
- * @param mixed $userid The user object to check for (optional).
+ * @param stdClass $user The user object to check for (optional).
  * @return boolean
  */
 function dialogue_can_track_dialogue($user = false) {
@@ -412,13 +410,13 @@ function dialogue_can_track_dialogue($user = false) {
 /**
  * Serves the dialogue attachments. Implements needed access control ;-)
  *
- * @param object $course
- * @param object $cm
- * @param object $context
+ * @param stdClass $course
+ * @param stdClass $cm
+ * @param stdClass $context
  * @param string $filearea
  * @param array $args
- * @param array $options
  * @param bool $forcedownload
+ * @param array $options
  * @return bool false if file not found, does not return if found - justsend the file
  */
 function dialogue_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload = true, $options = array()) {
@@ -468,7 +466,7 @@ function dialogue_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
  * Implementation of the function for printing the form elements that control
  * whether the course reset functionality affects the data.
  *
- * @param $mform form passed by reference
+ * @param moodleform $mform passed by reference
  */
 function dialogue_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'reset_header', get_string('modulenameplural', 'dialogue'));
@@ -478,6 +476,7 @@ function dialogue_reset_course_form_definition(&$mform) {
 
 /**
  * Course reset form defaults.
+ * @param stdClass $course
  * @return array
  */
 function dialogue_reset_course_form_defaults($course) {

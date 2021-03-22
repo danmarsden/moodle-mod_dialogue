@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library of extra functions for the dialogue module not part of the standard add-on module API set
- * but used by scripts in the mod/dialogue folder
+ * Library of extra functions for the dialogue module not part of the standard add-on module API set.
  *
  * @package   mod_dialogue
  * @copyright 2013 Troy Williams
@@ -118,7 +117,6 @@ function dialogue_search_potentials(\mod_dialogue\dialogue $dialogue, $query = '
  * Todo move to application cache, rework code with invalid event or clear
  *  on reply in class.
  *
- * @staticvar null $cache
  * @param \mod_dialogue\dialogue $dialogue
  * @param int $conversationid
  * @return array
@@ -150,10 +148,9 @@ function dialogue_get_conversation_participants(\mod_dialogue\dialogue $dialogue
 
 /**
  * Dialogue get user details.
- * @staticvar type $cache
  * @param \mod_dialogue\dialogue $dialogue
  * @param int $userid
- * @return type
+ * @return array
  */
 function dialogue_get_user_details(\mod_dialogue\dialogue $dialogue, $userid) {
     global $DB, $PAGE;
@@ -351,6 +348,14 @@ function dialogue_get_draft_listing(\mod_dialogue\dialogue $dialogue, &$total = 
     return $records;
 }
 
+/**
+ * Get bulk open rule listing.
+ *
+ * @param \mod_dialogue\dialogue $dialogue
+ * @param null $total
+ * @return array
+ * @throws dml_exception
+ */
 function dialogue_get_bulk_open_rule_listing(\mod_dialogue\dialogue $dialogue, &$total = null) {
      global $PAGE, $DB, $USER;
 
@@ -400,6 +405,7 @@ function dialogue_get_bulk_open_rule_listing(\mod_dialogue\dialogue $dialogue, &
  *
  * @param string $subject
  * @param string $body
+ * @param string $bodyformat
  * @param int $length
  * @param string $separator
  * @return string html
@@ -421,8 +427,8 @@ function dialogue_generate_summary_line($subject, $body, $bodyformat, $length = 
 
 /**
  * Counts conversations in a particular dialogue. Can optionally accept a state e.g count open or count closed
- * @param type $cm
- * @param type $state
+ * @param stdClass $cm
+ * @param string $state
  * @return int count
  * @throws coding_exception
  */
@@ -554,7 +560,7 @@ function dialogue_shorten_html($html, $ideal = 30, $exact = false, $ending = '..
 /**
  * Helper function, check if draftid contains any files
  *
- * @param type $draftid
+ * @param int $draftid
  * @return boolean
  */
 function dialogue_contains_draft_files($draftid) {

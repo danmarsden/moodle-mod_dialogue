@@ -18,25 +18,56 @@ namespace mod_dialogue;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Library of extra functions for the dialogue module not part of the standard add-on module API set
+ * but used by scripts in the mod/dialogue folder
+ *
+ * @package   mod_dialogue
+ * @copyright 2013 Troy Williams
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
+/**
+ * Class message
+ * @package mod_dialogue
+ */
 class message implements \renderable {
-
+    /** @var dialogue|null  */
     protected $_dialogue = null;
+    /** @var conversation|null  */
     protected $_conversation = null;
+    /** @var int  */
     protected $_conversationindex = 0;
+    /** @var null  */
     protected $_messageid = null;
+    /** @var null  */
     protected $_authorid = null;
+    /** @var string  */
     protected $_body = '';
+    /** @var int|null  */
     protected $_bodyformat = null;
+    /** @var null  */
     protected $_bodydraftid = null;
+    /** @var null  */
     protected $_attachmentsdraftid = null;
+    /** @var null  */
     protected $_attachments = null;
+    /** @var string  */
     protected $_state = dialogue::STATE_DRAFT;
+    /** @var int|null  */
     protected $_timecreated = null;
+    /** @var int|null  */
     protected $_timemodified = null;
+    /** @var null  */
     protected $_form = null;
+    /** @var bool  */
     protected $_formdatasaved = false;
 
+    /**
+     * Message constructor.
+     * @param dialogue|null $dialogue
+     * @param conversation|null $conversation
+     */
     public function __construct(dialogue $dialogue = null, conversation $conversation = null) {
         global $USER;
 
@@ -87,6 +118,13 @@ class message implements \renderable {
         return in_array($USER->id, array_keys($participants));
     }
 
+    /**
+     * Delete
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function delete() {
         global $DB, $USER;
 
@@ -111,11 +149,20 @@ class message implements \renderable {
         return true;
     }
 
+    /**
+     * Get author.
+     * @return \type
+     */
     protected function magic_get_author() {
         $dialogue = $this->dialogue;
         return dialogue_get_user_details($dialogue, $this->_authorid);
     }
 
+    /**
+     * Get attachments.
+     * @return array|\stored_file[]
+     * @throws \coding_exception
+     */
     protected function magic_get_attachments() {
         $fs = get_file_storage();
         $contextid = $this->dialogue->context->id;
@@ -125,10 +172,19 @@ class message implements \renderable {
         return array();
     }
 
+    /**
+     * Get messageid
+     * @return null
+     */
     protected function magic_get_messageid() {
         return $this->_messageid;
     }
 
+    /**
+     * Get conversation.
+     * @return conversation|null
+     * @throws \coding_exception
+     */
     protected function magic_get_conversation() {
         if (is_null($this->_conversation)) {
             throw new \coding_exception('Parent conversation is not set');
@@ -136,6 +192,11 @@ class message implements \renderable {
         return $this->_conversation;
     }
 
+    /**
+     * Get Dialogue
+     * @return dialogue|null
+     * @throws \coding_exception
+     */
     protected function magic_get_dialogue() {
         if (is_null($this->_dialogue)) {
             throw new \coding_exception('Parent dialogue is not set');
@@ -143,18 +204,34 @@ class message implements \renderable {
         return $this->_dialogue;
     }
 
+    /**
+     * Get body.
+     * @return string
+     */
     protected function magic_get_body() {
         return $this->_body;
     }
 
+    /**
+     * Get bodydraftid
+     * @return null
+     */
     protected function magic_get_bodydraftid() {
         return $this->_bodydraftid;
     }
 
+    /**
+     * Get body format
+     * @return int|null
+     */
     protected function magic_get_bodyformat() {
         return $this->_bodyformat;
     }
 
+    /**
+     * Get bodyhtml
+     * @return string
+     */
     protected function magic_get_bodyhtml() {
         $contextid = $this->dialogue->context->id;
         $ret = file_rewrite_pluginfile_urls($this->_body,
@@ -162,14 +239,30 @@ class message implements \renderable {
         return format_text($ret, $this->bodyformat);
     }
 
+    /**
+     * Get state.
+     * @return string
+     */
     protected function magic_get_state() {
         return $this->_state;
     }
 
+    /**
+     * Get timemodified
+     * @return int|null
+     */
     protected function magic_get_timemodified() {
         return $this->_timemodified;
     }
 
+    /**
+     * Set flag
+     * @param string $flag
+     * @param \stdClass $user
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function set_flag($flag, $user = null) {
         global $DB, $USER;
 
@@ -202,15 +295,35 @@ class message implements \renderable {
         return true;
     }
 
+    /**
+     * Mark read
+     * @param \stdClass $user
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function mark_read($user = null) {
         // Only mark read if in a open or closed state.
         return $this->set_flag(dialogue::FLAG_READ, $user);
     }
 
+    /**
+     * Mark sent
+     * @param \stdClass $user
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function mark_sent($user = null) {
         return $this->set_flag(dialogue::FLAG_SENT, $user);
     }
 
+    /**
+     * Set body
+     * @param string $body
+     * @param string $format
+     * @param null $itemid
+     */
     public function set_body($body, $format, $itemid = null) {
         $this->_body = $body;
         $this->_bodyformat = $format;
@@ -221,6 +334,10 @@ class message implements \renderable {
         }
     }
 
+    /**
+     * Set attachement draft id.
+     * @param int $attachmentsdraftitemid
+     */
     public function set_attachmentsdraftid($attachmentsdraftitemid) {
         $fileareainfo = file_get_draft_area_info($attachmentsdraftitemid);
         if ($fileareainfo['filecount']) {
@@ -228,6 +345,10 @@ class message implements \renderable {
         }
     }
 
+    /**
+     * Set author
+     * @param int|\stdClass $authorid
+     */
     public function set_author($authorid) {
         if (is_object($authorid)) {
             $authorid = $authorid->id;
@@ -235,10 +356,20 @@ class message implements \renderable {
         $this->_authorid = $authorid;
     }
 
+    /**
+     * Set state
+     * @param string $state
+     */
     public function set_state($state) {
         $this->_state = $state; // Check actual state - todo.
     }
 
+    /**
+     * Save
+     * @return bool
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function save() {
         global $DB, $USER;
 
@@ -296,6 +427,13 @@ class message implements \renderable {
         return true;
     }
 
+    /**
+     * Send
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function send() {
         global $DB;
 
