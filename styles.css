@@ -15,10 +15,6 @@ body.path-mod-dialogue.jsenabled .nonjs-control input {
     display: none;
 }
 
-body.path-mod-dialogue #region-main .clearfix {
-    *zoom: 1;
-}
-
 body.path-mod-dialogue #region-main .clearfix:before,
 body.path-mod-dialogue #region-main .clearfix:after {
     display: table;
@@ -54,8 +50,6 @@ body.path-mod-dialogue #region-main audio,
 body.path-mod-dialogue #region-main canvas,
 body.path-mod-dialogue #region-main video {
     display: inline-block;
-    *display: inline;
-    *zoom: 1;
 }
 
 body.path-mod-dialogue #region-main audio:not([controls]) {
@@ -110,7 +104,6 @@ body.path-mod-dialogue #region-main textarea {
 
 body.path-mod-dialogue #region-main button,
 body.path-mod-dialogue #region-main input {
-    *overflow: visible;
     line-height: normal;
 }
 
@@ -269,7 +262,6 @@ body.path-mod-dialogue #region-main .table-condensed td {
 body.path-mod-dialogue #region-main .table-bordered {
     border: 1px solid #ddd;
     border-collapse: separate;
-    *border-collapse: collapse;
     border-left: 0;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -499,10 +491,6 @@ body.path-mod-dialogue #region-main .dropdown {
     position: relative;
 }
 
-body.path-mod-dialogue #region-main .dropdown-toggle {
-    *margin-bottom: -3px;
-}
-
 body.path-mod-dialogue #region-main .dropdown-toggle:active,
 body.path-mod-dialogue #region-main .open .dropdown-toggle {
     outline: 0;
@@ -538,8 +526,6 @@ body.path-mod-dialogue #region-main .dropdown-menu {
     background-color: #fff;
     border: 1px solid #ccc;
     border: 1px solid rgba(0, 0, 0, 0.2);
-    *border-right-width: 2px;
-    *border-bottom-width: 2px;
     -webkit-border-radius: 6px;
     -moz-border-radius: 6px;
     border-radius: 6px;
@@ -557,10 +543,8 @@ body.path-mod-dialogue #region-main .dropdown-menu.pull-right {
 }
 
 body.path-mod-dialogue #region-main .dropdown-menu .divider {
-    *width: 100%;
     height: 1px;
     margin: 9px 1px;
-    *margin: -5px 0 5px;
     overflow: hidden;
     background-color: #e5e5e5;
     border-bottom: 1px solid #fff;
@@ -618,10 +602,6 @@ body.path-mod-dialogue #region-main .dropdown-menu > .disabled > a:focus {
     cursor: default;
     background-color: transparent;
     background-image: none;
-}
-
-body.path-mod-dialogue #region-main .open {
-    *z-index: 1000;
 }
 
 body.path-mod-dialogue #region-main .open > .dropdown-menu {
@@ -768,7 +748,6 @@ body.path-mod-dialogue #region-main .btn-warning {
     color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #faa732;
-    *background-color: #f89406;
     background-image: -moz-linear-gradient(top, #fbb450, #f89406);
     background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fbb450), to(#f89406));
     background-image: -webkit-linear-gradient(top, #fbb450, #f89406);
@@ -787,7 +766,6 @@ body.path-mod-dialogue #region-main .btn-warning.disabled,
 body.path-mod-dialogue #region-main .btn-warning[disabled] {
     color: #fff;
     background-color: #f89406;
-    *background-color: #df8505;
 }
 
 body.path-mod-dialogue #region-main .btn-warning:active,
@@ -799,7 +777,6 @@ body.path-mod-dialogue #region-main .btn-danger {
     color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #da4f49;
-    *background-color: #bd362f;
     background-image: -moz-linear-gradient(top, #ee5f5b, #bd362f);
     background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ee5f5b), to(#bd362f));
     background-image: -webkit-linear-gradient(top, #ee5f5b, #bd362f);
@@ -818,7 +795,6 @@ body.path-mod-dialogue #region-main .btn-danger.disabled,
 body.path-mod-dialogue #region-main .btn-danger[disabled] {
     color: #fff;
     background-color: #bd362f;
-    *background-color: #a9302a;
 }
 
 body.path-mod-dialogue #region-main .btn-danger:active,
@@ -830,7 +806,6 @@ body.path-mod-dialogue #region-main .btn-success {
     color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #5bb75b;
-    *background-color: #51a351;
     background-image: -moz-linear-gradient(top, #62c462, #51a351);
     background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
     background-image: -webkit-linear-gradient(top, #62c462, #51a351);
@@ -849,7 +824,6 @@ body.path-mod-dialogue #region-main .btn-success.disabled,
 body.path-mod-dialogue #region-main .btn-success[disabled] {
     color: #fff;
     background-color: #51a351;
-    *background-color: #499249;
 }
 
 body.path-mod-dialogue #region-main .btn-success:active,
@@ -857,21 +831,12 @@ body.path-mod-dialogue #region-main .btn-success.active {
     background-color: #408140 \9;
 }
 
-
-
 body.path-mod-dialogue #region-main .btn-group {
     position: relative;
     display: inline-block;
-    *display: inline;
-    *margin-left: .3em;
     font-size: 0;
     white-space: nowrap;
     vertical-align: middle;
-    *zoom: 1;
-}
-
-body.path-mod-dialogue #region-main .btn-group:first-child {
-    *margin-left: 0;
 }
 
 body.path-mod-dialogue #region-main .btn-group + .btn-group {
@@ -968,9 +933,7 @@ body.path-mod-dialogue #region-main .btn-group.open .dropdown-toggle {
 }
 
 body.path-mod-dialogue #region-main .btn-group > .btn + .dropdown-toggle {
-    *padding-top: 5px;
     padding-right: 8px;
-    *padding-bottom: 5px;
     padding-left: 8px;
     -webkit-box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.125), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
     -moz-box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.125), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -978,15 +941,8 @@ body.path-mod-dialogue #region-main .btn-group > .btn + .dropdown-toggle {
 }
 
 body.path-mod-dialogue #region-main .btn-group > .btn-mini + .dropdown-toggle {
-    *padding-top: 2px;
     padding-right: 5px;
-    *padding-bottom: 2px;
     padding-left: 5px;
-}
-
-body.path-mod-dialogue #region-main .btn-group > .btn-small + .dropdown-toggle {
-    *padding-top: 5px;
-    *padding-bottom: 4px;
 }
 
 body.path-mod-dialogue #region-main .btn-group.open .dropdown-toggle {
@@ -1036,10 +992,6 @@ body.path-mod-dialogue #region-main .btn-success .caret {
 
 body.path-mod-dialogue #region-main .btn-group-vertical {
     display: inline-block;
-    *display: inline;
-    /* IE7 inline-block hack */
-
-    *zoom: 1;
 }
 
 body.path-mod-dialogue #region-main .btn-group-vertical > .btn {
@@ -1211,18 +1163,11 @@ body.path-mod-dialogue #region-main .nav-list [class*=" icon-"] {
 }
 
 body.path-mod-dialogue #region-main .nav-list .divider {
-    *width: 100%;
     height: 1px;
     margin: 9px 1px;
-    *margin: -5px 0 5px;
     overflow: hidden;
     background-color: #e5e5e5;
     border-bottom: 1px solid #fff;
-}
-
-body.path-mod-dialogue #region-main .nav-tabs,
-body.path-mod-dialogue #region-main .nav-pills {
-    *zoom: 1;
 }
 
 body.path-mod-dialogue #region-main .nav-tabs:before,
@@ -1412,16 +1357,11 @@ body.path-mod-dialogue #region-main .nav li.dropdown.open a:focus .caret {
     border-top-color: #fff;
     border-bottom-color: #fff;
     opacity: 1;
-    filter: alpha(opacity=100);
 }
 
 body.path-mod-dialogue #region-main .tabs-stacked .open > a:hover,
 body.path-mod-dialogue #region-main .tabs-stacked .open > a:focus {
     border-color: #999;
-}
-
-body.path-mod-dialogue #region-main .tabbable {
-    *zoom: 1;
 }
 
 body.path-mod-dialogue #region-main .tabbable:before,
@@ -1516,7 +1456,6 @@ body.path-mod-dialogue #region-main .tabs-left > .nav-tabs .active > a,
 body.path-mod-dialogue #region-main .tabs-left > .nav-tabs .active > a:hover,
 body.path-mod-dialogue #region-main .tabs-left > .nav-tabs .active > a:focus {
     border-color: #ddd transparent #ddd #ddd;
-    *border-right-color: #fff;
 }
 
 body.path-mod-dialogue #region-main .tabs-right > .nav-tabs {
@@ -1541,7 +1480,6 @@ body.path-mod-dialogue #region-main .tabs-right > .nav-tabs .active > a,
 body.path-mod-dialogue #region-main .tabs-right > .nav-tabs .active > a:hover,
 body.path-mod-dialogue #region-main .tabs-right > .nav-tabs .active > a:focus {
     border-color: #ddd #ddd #ddd transparent;
-    *border-left-color: #fff;
 }
 
 body.path-mod-dialogue #region-main .nav > .disabled > a {
@@ -1558,7 +1496,6 @@ body.path-mod-dialogue #region-main .nav > .disabled > a:focus {
 body.path-mod-dialogue #region-main .thumbnails {
     margin-left: -20px;
     list-style: none;
-    *zoom: 1;
 }
 
 body.path-mod-dialogue #region-main .thumbnails:before,
@@ -1622,7 +1559,6 @@ body.path-mod-dialogue #region-main .thumbnail .caption {
 body.path-mod-dialogue #region-main .media,
 body.path-mod-dialogue #region-main .media-body {
     overflow: hidden;
-    *overflow: visible;
     zoom: 1;
 }
 
@@ -1754,15 +1690,6 @@ body.path-mod-dialogue #region-main .pull-right {
 body.path-mod-dialogue #region-main .pull-left {
     float: left !important;
 }
-
-@font-face {
-    font-family: 'FontAwesome';
-    font-style: normal;
-    font-weight: normal;
-    src: url('//netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.eot?v=4.0.3');
-    src: url('//netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.eot?#iefix&v=4.0.3') format('embedded-opentype'), url('//netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.woff?v=4.0.3') format('woff'), url('//netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.ttf?v=4.0.3') format('truetype'), url('//netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.svg?v=4.0.3#fontawesomeregular') format('svg');
-}
-
 body.path-mod-dialogue #region-main .fa {
     display: inline-block;
     font-family: FontAwesome;
@@ -1882,7 +1809,6 @@ body.path-mod-dialogue #region-main .aclist-participant-item .remove {
 body.path-mod-dialogue #region-main .conversation,
 body.path-mod-dialogue #region-main .conversation-body {
     overflow: hidden;
-    *overflow: visible;
     zoom: 1;
 }
 
@@ -2036,10 +1962,8 @@ body.path-mod-dialogue #region-main span.participant {
 
 body.path-mod-dialogue #region-main .btn-create {
     display: inline-block;
-    *display: inline;
     padding: 4px 12px;
     margin-bottom: 0;
-    *margin-left: .3em;
     font-size: 14px;
     line-height: 20px;
     color: #333;
@@ -2051,8 +1975,6 @@ body.path-mod-dialogue #region-main .btn-create {
     cursor: pointer;
     background-color: #f5f5f5;
     background-color: #006dcc;
-    *background-color: #e6e6e6;
-    *background-color: #04c;
     background-image: -moz-linear-gradient(top, #fff, #e6e6e6);
     background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fff), to(#e6e6e6));
     background-image: -webkit-linear-gradient(top, #fff, #e6e6e6);
@@ -2065,7 +1987,6 @@ body.path-mod-dialogue #region-main .btn-create {
     background-image: linear-gradient(to bottom, #08c, #04c);
     background-repeat: repeat-x;
     border: 1px solid #ccc;
-    *border: 0;
     border-color: #e6e6e6 #e6e6e6 #bfbfbf;
     border-color: #04c #04c #002a80;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
@@ -2073,7 +1994,6 @@ body.path-mod-dialogue #region-main .btn-create {
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
-    *zoom: 1;
     -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
     -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -2087,16 +2007,11 @@ body.path-mod-dialogue #region-main .btn-create.disabled,
 body.path-mod-dialogue #region-main .btn-create[disabled] {
     color: #333;
     background-color: #e6e6e6;
-    *background-color: #d9d9d9;
 }
 
 body.path-mod-dialogue #region-main .btn-create:active,
 body.path-mod-dialogue #region-main .btn-create.active {
     background-color: #ccc \9;
-}
-
-body.path-mod-dialogue #region-main .btn-create:first-child {
-    *margin-left: 0;
 }
 
 body.path-mod-dialogue #region-main .btn-create:hover,
@@ -2130,7 +2045,6 @@ body.path-mod-dialogue #region-main .btn-create[disabled] {
     cursor: default;
     background-image: none;
     opacity: 0.65;
-    filter: alpha(opacity=65);
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
@@ -2149,12 +2063,11 @@ body.path-mod-dialogue #region-main .btn-create.disabled,
 body.path-mod-dialogue #region-main .btn-create[disabled] {
     color: #fff;
     background-color: #04c;
-    *background-color: #003bb3;
 }
 
 body.path-mod-dialogue #region-main .btn-create:active,
 body.path-mod-dialogue #region-main .btn-create.active {
-    background-color: #003399 \9;
+    background-color: #039;
 }
 
 body.path-mod-dialogue #region-main .btn-create .caret {
