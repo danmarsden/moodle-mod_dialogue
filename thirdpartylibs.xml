@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<libraries>
-    <library>
-        <location>yui</location>
-        <name>Old YUI js libs - hack to exclude in grunt.</name>
-        <license>GPL</license>
-        <version>1</version>
-    </library>
-</libraries>
