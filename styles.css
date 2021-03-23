@@ -768,11 +768,6 @@ body.path-mod-dialogue #region-main .btn-warning[disabled] {
     background-color: #f89406;
 }
 
-body.path-mod-dialogue #region-main .btn-warning:active,
-body.path-mod-dialogue #region-main .btn-warning.active {
-    background-color: #c67605 \9;
-}
-
 body.path-mod-dialogue #region-main .btn-danger {
     color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
@@ -795,11 +790,6 @@ body.path-mod-dialogue #region-main .btn-danger.disabled,
 body.path-mod-dialogue #region-main .btn-danger[disabled] {
     color: #fff;
     background-color: #bd362f;
-}
-
-body.path-mod-dialogue #region-main .btn-danger:active,
-body.path-mod-dialogue #region-main .btn-danger.active {
-    background-color: #942a25 \9;
 }
 
 body.path-mod-dialogue #region-main .btn-success {
@@ -825,12 +815,6 @@ body.path-mod-dialogue #region-main .btn-success[disabled] {
     color: #fff;
     background-color: #51a351;
 }
-
-body.path-mod-dialogue #region-main .btn-success:active,
-body.path-mod-dialogue #region-main .btn-success.active {
-    background-color: #408140 \9;
-}
-
 body.path-mod-dialogue #region-main .btn-group {
     position: relative;
     display: inline-block;
@@ -2007,11 +1991,6 @@ body.path-mod-dialogue #region-main .btn-create.disabled,
 body.path-mod-dialogue #region-main .btn-create[disabled] {
     color: #333;
     background-color: #e6e6e6;
-}
-
-body.path-mod-dialogue #region-main .btn-create:active,
-body.path-mod-dialogue #region-main .btn-create.active {
-    background-color: #ccc \9;
 }
 
 body.path-mod-dialogue #region-main .btn-create:hover,
