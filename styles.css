@@ -1,8 +1,3 @@
-body.path-mod-dialogue {
-    /* Ensure all Bootstrap is contained to the main page region and doesn't interfere with the theme outside it */
-
-}
-
 body.path-mod-dialogue .js-control {
     display: none;
 }
@@ -18,39 +13,6 @@ body.path-mod-dialogue.jsenabled .js-control {
 body.path-mod-dialogue.jsenabled .nonjs-control,
 body.path-mod-dialogue.jsenabled .nonjs-control input {
     display: none;
-}
-
-body.path-mod-dialogue #region-main {
-    /** Bootstrap **/
-
-    /* fieldset.hidden vs .hidden
-       *
-       * Moodle uses fieldset.hidden for mforms, to signify a collection of
-       * form elements that don't have a box drawn round them. Bootstrap
-       * uses hidden for stuff that is hidden in various responsive modes.
-       *
-       * Relatedly, there is also fieldset.invisiblefieldset which hides the
-       * border and sets the display to inline.
-       *
-       * Originally this just set block and visible, but it is used
-       * in random question dialogue in Quiz,
-       * that dialogue is hidden and shown, so when hidden the
-       * above workaround leaves you with a button floating around
-       */
-
-    /* move down carets for tabs */
-
-    /* FONT PATH
-   * -------------------------- */
-
-    /** autocomplete **/
-
-    /* listing meta */
-
-    /* dropdown group - contains both js and no-js controls */
-
-    /* Custom buttons */
-
 }
 
 body.path-mod-dialogue #region-main .clearfix {
@@ -69,20 +31,10 @@ body.path-mod-dialogue #region-main .clearfix:after {
 }
 
 body.path-mod-dialogue #region-main .hide-text {
-    font: 0/0 a;
     color: transparent;
     text-shadow: none;
     background-color: transparent;
     border: 0;
-}
-
-body.path-mod-dialogue #region-main .input-block-level {
-    display: block;
-    width: 100%;
-    min-height: 30px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
 }
 
 body.path-mod-dialogue #region-main article,
