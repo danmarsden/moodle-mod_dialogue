@@ -62,17 +62,6 @@ body.path-mod-dialogue #region-main html {
     -ms-text-size-adjust: 100%;
 }
 
-body.path-mod-dialogue #region-main a:focus {
-    outline: thin dotted #333;
-    outline: 5px auto -webkit-focus-ring-color;
-    outline-offset: -2px;
-}
-
-body.path-mod-dialogue #region-main a:hover,
-body.path-mod-dialogue #region-main a:active {
-    outline: 0;
-}
-
 body.path-mod-dialogue #region-main sub,
 body.path-mod-dialogue #region-main sup {
     position: relative;
@@ -92,44 +81,6 @@ body.path-mod-dialogue #region-main sub {
 body.path-mod-dialogue #region-main #map_canvas img,
 body.path-mod-dialogue #region-main .google-maps img {
     max-width: none;
-}
-
-body.path-mod-dialogue #region-main button,
-body.path-mod-dialogue #region-main input,
-body.path-mod-dialogue #region-main select,
-body.path-mod-dialogue #region-main textarea {
-    font-size: 100%;
-    vertical-align: middle;
-}
-
-body.path-mod-dialogue #region-main button,
-body.path-mod-dialogue #region-main input {
-    line-height: normal;
-}
-
-body.path-mod-dialogue #region-main button::-moz-focus-inner,
-body.path-mod-dialogue #region-main input::-moz-focus-inner {
-    padding: 0;
-    border: 0;
-}
-
-body.path-mod-dialogue #region-main button,
-body.path-mod-dialogue #region-main html input[type="button"],
-body.path-mod-dialogue #region-main input[type="reset"],
-body.path-mod-dialogue #region-main input[type="submit"] {
-    cursor: pointer;
-    -webkit-appearance: button;
-}
-
-body.path-mod-dialogue #region-main label,
-body.path-mod-dialogue #region-main select,
-body.path-mod-dialogue #region-main button,
-body.path-mod-dialogue #region-main input[type="button"],
-body.path-mod-dialogue #region-main input[type="reset"],
-body.path-mod-dialogue #region-main input[type="submit"],
-body.path-mod-dialogue #region-main input[type="radio"],
-body.path-mod-dialogue #region-main input[type="checkbox"] {
-    cursor: pointer;
 }
 
 body.path-mod-dialogue #region-main input[type="search"] {
@@ -567,11 +518,6 @@ body.path-mod-dialogue #region-main .dropdown-submenu:focus > a {
     color: #fff;
     text-decoration: none;
     background-color: #0081c2;
-    background-image: -moz-linear-gradient(top, #08c, #0077b3);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#08c), to(#0077b3));
-    background-image: -webkit-linear-gradient(top, #08c, #0077b3);
-    background-image: -o-linear-gradient(top, #08c, #0077b3);
-    background-image: linear-gradient(to bottom, #08c, #0077b3);
     background-repeat: repeat-x;
 }
 
@@ -581,11 +527,6 @@ body.path-mod-dialogue #region-main .dropdown-menu > .active > a:focus {
     color: #fff;
     text-decoration: none;
     background-color: #0081c2;
-    background-image: -moz-linear-gradient(top, #08c, #0077b3);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#08c), to(#0077b3));
-    background-image: -webkit-linear-gradient(top, #08c, #0077b3);
-    background-image: -o-linear-gradient(top, #08c, #0077b3);
-    background-image: linear-gradient(to bottom, #08c, #0077b3);
     background-repeat: repeat-x;
     outline: 0;
 }
@@ -601,7 +542,6 @@ body.path-mod-dialogue #region-main .dropdown-menu > .disabled > a:focus {
     text-decoration: none;
     cursor: default;
     background-color: transparent;
-    background-image: none;
 }
 
 body.path-mod-dialogue #region-main .open > .dropdown-menu {
@@ -748,11 +688,6 @@ body.path-mod-dialogue #region-main .btn-warning {
     color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #faa732;
-    background-image: -moz-linear-gradient(top, #fbb450, #f89406);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fbb450), to(#f89406));
-    background-image: -webkit-linear-gradient(top, #fbb450, #f89406);
-    background-image: -o-linear-gradient(top, #fbb450, #f89406);
-    background-image: linear-gradient(to bottom, #fbb450, #f89406);
     background-repeat: repeat-x;
     border-color: #f89406 #f89406 #ad6704;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
@@ -772,11 +707,6 @@ body.path-mod-dialogue #region-main .btn-danger {
     color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #da4f49;
-    background-image: -moz-linear-gradient(top, #ee5f5b, #bd362f);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ee5f5b), to(#bd362f));
-    background-image: -webkit-linear-gradient(top, #ee5f5b, #bd362f);
-    background-image: -o-linear-gradient(top, #ee5f5b, #bd362f);
-    background-image: linear-gradient(to bottom, #ee5f5b, #bd362f);
     background-repeat: repeat-x;
     border-color: #bd362f #bd362f #802420;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
@@ -796,14 +726,8 @@ body.path-mod-dialogue #region-main .btn-success {
     color: #fff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     background-color: #5bb75b;
-    background-image: -moz-linear-gradient(top, #62c462, #51a351);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
-    background-image: -webkit-linear-gradient(top, #62c462, #51a351);
-    background-image: -o-linear-gradient(top, #62c462, #51a351);
-    background-image: linear-gradient(to bottom, #62c462, #51a351);
     background-repeat: repeat-x;
     border-color: #51a351 #51a351 #387038;
-    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
 }
 
 body.path-mod-dialogue #region-main .btn-success:hover,
@@ -930,7 +854,6 @@ body.path-mod-dialogue #region-main .btn-group > .btn-mini + .dropdown-toggle {
 }
 
 body.path-mod-dialogue #region-main .btn-group.open .dropdown-toggle {
-    background-image: none;
     -webkit-box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
     -moz-box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -1951,29 +1874,13 @@ body.path-mod-dialogue #region-main .btn-create {
     font-size: 14px;
     line-height: 20px;
     color: #333;
-    color: #fff;
     text-align: center;
     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     vertical-align: middle;
     cursor: pointer;
-    background-color: #f5f5f5;
     background-color: #006dcc;
-    background-image: -moz-linear-gradient(top, #fff, #e6e6e6);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fff), to(#e6e6e6));
-    background-image: -webkit-linear-gradient(top, #fff, #e6e6e6);
-    background-image: -o-linear-gradient(top, #fff, #e6e6e6);
-    background-image: linear-gradient(to bottom, #fff, #e6e6e6);
-    background-image: -moz-linear-gradient(top, #08c, #04c);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#08c), to(#04c));
-    background-image: -webkit-linear-gradient(top, #08c, #04c);
-    background-image: -o-linear-gradient(top, #08c, #04c);
-    background-image: linear-gradient(to bottom, #08c, #04c);
     background-repeat: repeat-x;
-    border: 1px solid #ccc;
     border-color: #e6e6e6 #e6e6e6 #bfbfbf;
-    border-color: #04c #04c #002a80;
-    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
     border-bottom-color: #b3b3b3;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -2004,15 +1911,8 @@ body.path-mod-dialogue #region-main .btn-create:focus {
     transition: background-position 0.1s linear;
 }
 
-body.path-mod-dialogue #region-main .btn-create:focus {
-    outline: thin dotted #333;
-    outline: 5px auto -webkit-focus-ring-color;
-    outline-offset: -2px;
-}
-
 body.path-mod-dialogue #region-main .btn-create.active,
 body.path-mod-dialogue #region-main .btn-create:active {
-    background-image: none;
     outline: 0;
     -webkit-box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
     -moz-box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -2022,7 +1922,6 @@ body.path-mod-dialogue #region-main .btn-create:active {
 body.path-mod-dialogue #region-main .btn-create.disabled,
 body.path-mod-dialogue #region-main .btn-create[disabled] {
     cursor: default;
-    background-image: none;
     opacity: 0.65;
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
@@ -2064,99 +1963,6 @@ body.path-mod-dialogue #region-main hr {
     border: 0;
     border-top: 1px solid #eee;
     border-bottom: 1px solid #fff;
-}
-
-body.path-mod-dialogue #region-main .notifyproblem {
-    padding: 8px 35px 8px 14px;
-    margin-bottom: 20px;
-    color: #c09853;
-    color: #b94a48;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    background-color: #fcf8e3;
-    background-color: #f2dede;
-    border: 1px solid #fbeed5;
-    border-color: #eed3d7;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-}
-
-body.path-mod-dialogue #region-main .notifysuccess {
-    padding: 8px 35px 8px 14px;
-    margin-bottom: 20px;
-    color: #c09853;
-    color: #468847;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    background-color: #fcf8e3;
-    background-color: #dff0d8;
-    border: 1px solid #fbeed5;
-    border-color: #d6e9c6;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-}
-
-body.path-mod-dialogue #region-main .notifymessage {
-    padding: 8px 35px 8px 14px;
-    margin-bottom: 20px;
-    color: #c09853;
-    color: #3a87ad;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    background-color: #fcf8e3;
-    background-color: #d9edf7;
-    border: 1px solid #fbeed5;
-    border-color: #bce8f1;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-}
-
-body.path-mod-dialogue #region-main .redirectmessage {
-    padding: 8px 35px 8px 14px;
-    padding-top: 14px;
-    padding-bottom: 14px;
-    margin-bottom: 20px;
-    color: #c09853;
-    color: #3a87ad;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    background-color: #fcf8e3;
-    background-color: #d9edf7;
-    border: 1px solid #fbeed5;
-    border-color: #bce8f1;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-}
-
-body.path-mod-dialogue #region-main .mform fieldset {
-    border: none;
-}
-
-body.path-mod-dialogue #region-main fieldset.hidden {
-    display: inherit;
-    visibility: inherit;
-}
-
-body.path-mod-dialogue #region-main .drop-down-arrow {
-    display: inline-block;
-    width: 0;
-    height: 0;
-    vertical-align: bottom;
-    cursor: pointer;
-    border-top: 4px solid black;
-    border-right: 4px solid transparent;
-    border-left: 4px solid transparent;
-    content: "";
-}
-
-body.path-mod-dialogue #region-main .input-xxlarge {
-    width: 530px;
-}
-
-body.path-mod-dialogue #region-main .img-rounded {
-    -webkit-border-radius: 6px;
-    -moz-border-radius: 6px;
-    border-radius: 6px;
 }
 
 body.path-mod-dialogue.jsenabled .conversation-list tr:hover,
