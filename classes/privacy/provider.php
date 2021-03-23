@@ -158,9 +158,11 @@ final class provider implements
 
         $DB->delete_records('dialogue_flags', ['dialogueid' => $cm->instance]);
         $DB->delete_records('dialogue_messages', ['dialogueid' => $cm->instance]);
-        // TODO - Delete attachements.
         $DB->delete_records('dialogue_participants', ['dialogueid' => $cm->instance]);
         $DB->delete_records('dialogue_conversations', ['dialogueid' => $cm->instance]);
+
+        $fs = get_file_storage();
+        $fs->delete_area_files($context->id, 'mod_dialogue', 'attachment');
     }
 
     /**
@@ -181,8 +183,15 @@ final class provider implements
                 continue;
             }
             $DB->delete_records('dialogue_flags', ['dialogueid' => $cm->instance, 'userid' => $userid]);
+            // Find all messages and delete any attachments.
+            $messages = $DB->get_records('dialogue_messages', ['dialogueid' => $cm->instance, 'authorid' => $userid]);
+            $fs = get_file_storage();
+            foreach ($messages as $message) {
+                // Delete attachments.
+                $fs->delete_area_files($context->id, 'mod_dialogue', 'attachment', $message->id);
+            }
+
             $DB->delete_records('dialogue_messages', ['dialogueid' => $cm->instance, 'authorid' => $userid]);
-            // TODO - Delete attachements.
             $DB->delete_records('dialogue_participants', ['dialogueid' => $cm->instance, 'userid' => $userid]);
         }
     }
@@ -209,6 +218,16 @@ final class provider implements
             "userid $insql",
             $inparams
         );
+
+        // Delete attachements.
+        $messages = $DB->get_records_select(
+            'dialogue_messages',
+            "authorid $insql",
+            $inparams);
+        $fs = get_file_storage();
+        foreach ($messages as $message) {
+            $fs->delete_area_files($context->id, 'mod_dialogue', 'attachment', $message->id);
+        }
 
         $DB->delete_records_select(
             'dialogue_messages',
