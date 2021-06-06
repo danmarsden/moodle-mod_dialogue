@@ -40,7 +40,9 @@ function dialogue_search_potentials(\mod_dialogue\dialogue $dialogue, $query = '
     $wheres = array();
     $wheresql  = '';
 
-    $userfields = user_picture::fields('u');
+    $userfields = \core_user\fields::for_userpic()
+        ->get_sql('u', false, '', '', false)
+        ->selects;
 
     $cm                 = $dialogue->cm;
     $context            = $dialogue->context;
@@ -157,7 +159,9 @@ function dialogue_get_user_details(\mod_dialogue\dialogue $dialogue, $userid) {
     static $cache;
 
     $context        = $dialogue->context;
-    $requiredfields = user_picture::fields('u');
+    $requiredfields = \core_user\fields::for_userpic()
+        ->get_sql('u', false, '', '', false)
+        ->selects;
 
     if (!isset($cache)) {
         $cache = cache::make('mod_dialogue', 'userdetails');

@@ -200,7 +200,10 @@ function dialogue_process_bulk_openrules() {
 
                 $withcapability = 'mod/dialogue:receive';
                 $groupid = 0; // It either a course or a group, default to course.
-                $requiredfields = user_picture::fields('u');
+                $requiredfields = \core_user\fields::for_userpic()
+                    ->get_sql('u', false, '', '', false)
+                    ->selects;
+
                 if ($record->type == 'group') {
                     $groupid = $record->sourceid;
                 }
