@@ -27,5 +27,5 @@ $plugin->version   = 2017111300;
 $plugin->requires  = 2020061500;
 $plugin->component = 'mod_dialogue';    // Full name of the plugin (used for diagnostics).
 $plugin->release   = '3.9';             // Semantic version name.
-$plugin->maturity  = MATURITY_ALPHA;    // This version's maturity level.
+$plugin->maturity  = MATURITY_STABLE;    // This version's maturity level.
 $plugin->dependencies = [];
