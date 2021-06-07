@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Code fragment to define the module version etc.
+ * Dialogue version.
  *
  * @package mod_dialogue
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
@@ -24,8 +24,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version   = 2017111300;
-$plugin->requires  = 2020061500;
+$plugin->requires  = 2021051700;  // Requires 3.11 or higher.
 $plugin->component = 'mod_dialogue';    // Full name of the plugin (used for diagnostics).
-$plugin->release   = '3.9';             // Semantic version name.
-$plugin->maturity  = MATURITY_ALPHA;    // This version's maturity level.
+$plugin->release   = '3.11';             // Semantic version name.
+$plugin->maturity  = MATURITY_STABLE;    // This version's maturity level.
 $plugin->dependencies = [];
