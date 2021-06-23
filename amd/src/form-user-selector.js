@@ -41,7 +41,7 @@ define(['jquery', 'core/ajax', 'core/templates'], function($, Ajax, Templates) {
             var courseid = $(selector).attr('courseid');
 
             promise = Ajax.call([{
-                methodname: 'core_enrol_search_users',
+                methodname: 'mod_dialogue_search_users',
                 args: {
                     courseid: courseid,
                     search: query,
