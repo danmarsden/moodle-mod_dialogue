@@ -14,18 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Dialogue version.
- *
- * @package mod_dialogue
- * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2021062301;
-$plugin->requires  = 2021051700;  // Requires 3.11 or higher.
-$plugin->component = 'mod_dialogue';    // Full name of the plugin (used for diagnostics).
-$plugin->release   = '3.11';             // Semantic version name.
-$plugin->maturity  = MATURITY_STABLE;    // This version's maturity level.
-$plugin->dependencies = [];
+/**
+ * Dialogue external functions
+ *
+ * @package    mod_dialogue
+ * @copyright  2021 Dan Marsden <dan@danmarsden.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+$functions = [
+    'mod_dialogue_search_users' => [
+        'classname' => 'mod_dialogue\external\search_users',
+        'classpath' => '',
+        'description' => 'Search within the list of course participants',
+        'ajax' => true,
+        'type' => 'read',
+        'capabilities' => 'moodle/course:viewparticipants',
+        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+    ],
+];
