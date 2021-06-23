@@ -115,18 +115,18 @@ abstract class conversations implements \renderable {
      * Abstract setup
      * @return mixed
      */
-    public abstract function setup();
+    abstract public function setup();
 
     /**
      * Abstract records
      * @return mixed
      */
-    public abstract function records();
+    abstract public function records();
 
     /**
      * Abstract rows matched.
      * @return mixed
      */
-    public abstract function rows_matched();
+    abstract public function rows_matched();
 }
 

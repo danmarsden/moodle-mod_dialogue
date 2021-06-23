@@ -27,19 +27,10 @@ require_once(dirname(__FILE__).'/../../../config.php');
 require_once($CFG->dirroot . '/mod/dialogue/locallib.php');
 
 $cmid           = required_param('cmid', PARAM_INT);
+$cm = get_coursemodule_from_id('dialogue', $cmid, 0, false, MUST_EXIST);
 
-$cm = get_coursemodule_from_id('dialogue', $cmid);
-if (! $cm) {
-    print_error('invalidcoursemodule');
-}
-$activityrecord = $DB->get_record('dialogue', array('id' => $cm->instance));
-if (! $activityrecord) {
-    print_error('invalidid', 'dialogue');
-}
-$course = $DB->get_record('course', array('id' => $activityrecord->course));
-if (! $course) {
-    print_error('coursemisconf');
-}
+$activityrecord = $DB->get_record('dialogue', array('id' => $cm->instance), '*', MUST_EXIST);
+$course = $DB->get_record('course', array('id' => $activityrecord->course), '*', MUST_EXIST);
 $context = \context_module::instance($cm->id, MUST_EXIST);
 
 require_login($course, false, $cm);
