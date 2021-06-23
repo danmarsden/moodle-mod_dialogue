@@ -29,19 +29,9 @@ require_once('locallib.php');
 $id         = required_param('id', PARAM_INT);
 $page       = optional_param('page', 0, PARAM_INT);
 
-if ($id) {
-    if (! $cm = get_coursemodule_from_id('dialogue', $id)) {
-        print_error('invalidcoursemodule');
-    }
-    if (! $activityrecord = $DB->get_record("dialogue", array("id" => $cm->instance))) {
-        print_error('invalidid', 'dialogue');
-    }
-    if (! $course = $DB->get_record("course", array("id" => $activityrecord->course))) {
-        print_error('coursemisconf');
-    }
-} else {
-    print_error('missingparameter');
-}
+$cm = get_coursemodule_from_id('dialogue', $id, 0, false, MUST_EXIST);
+$activityrecord = $DB->get_record("dialogue", array("id" => $cm->instance), '*', MUST_EXIST);
+$course = $DB->get_record("course", array("id" => $activityrecord->course), '*', MUST_EXIST);
 
 $context = context_module::instance($cm->id);
 

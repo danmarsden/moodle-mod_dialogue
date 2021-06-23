@@ -31,18 +31,10 @@ $conversationid = optional_param('conversationid', null, PARAM_INT);
 $action         = optional_param('action', 'view', PARAM_ALPHA);
 $confirm        = optional_param('confirm', 0, PARAM_INT);
 
-$cm = get_coursemodule_from_id('dialogue', $id);
-if (! $cm) {
-    print_error('invalidcoursemodule');
-}
-$activityrecord = $DB->get_record('dialogue', array('id' => $cm->instance));
-if (! $activityrecord) {
-    print_error('invalidid', 'dialogue');
-}
-$course = $DB->get_record('course', array('id' => $activityrecord->course));
-if (! $course) {
-    print_error('coursemisconf');
-}
+$cm = get_coursemodule_from_id('dialogue', $id, 0, false, MUST_EXIST);
+
+$activityrecord = $DB->get_record('dialogue', ['id' => $cm->instance], '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $activityrecord->course], '*', MUST_EXIST);
 $context = \context_module::instance($cm->id, MUST_EXIST);
 
 require_login($course, false, $cm);
