@@ -242,7 +242,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
      * @throws dml_exception
      */
     protected function definition() {
-        global $PAGE, $OUTPUT;
+        global $PAGE, $OUTPUT, $COURSE;
 
         $mform    = $this->_form;
         $cm       = $PAGE->cm;
@@ -250,43 +250,24 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
 
         $mform->addElement('header', 'openwithsection', get_string('openwith', 'dialogue'));
 
-        // Autocomplete javascript.
-        $html = '';
-        $html .= html_writer::start_tag('div', array('class' => 'fitem fitem_ftext'));
-        $html .= html_writer::start_tag('div', array( 'class' => 'fitemtitle'));
-        $html .= html_writer::tag('label', get_string('people', 'dialogue'), array('for' => 'people_autocomplete_input'));
-        $html .= html_writer::end_tag('div');
-        $html .= html_writer::start_tag('div', array('class' => 'felement ftext'));
-        $html .= html_writer::start_tag('div', array('id' => 'participant_autocomplete_field',
-            'class' => 'js-control yui3-aclist-field'));
-        $html .= html_writer::tag('input', '',
-            array('id' => 'participant_autocomplete_input', 'class' => 'input-xxlarge',
-                'placeholder' => get_string('searchpotentials', 'dialogue')));
-        $html .= html_writer::tag('span', '', array('class' => 'drop-down-arrow'));
-        $html .= html_writer::end_tag('div');
-        $html .= html_writer::end_tag('div');
-        $html .= html_writer::end_tag('div');
-        // Add to form.
-        $mform->addElement('html', $html);
+        $options = [
+            'ajax' => 'mod_dialogue/form-user-selector',
+            'multiple' => true,
+            'courseid' => $COURSE->id,
+            'valuehtmlcallback' => function($value) {
+                global $OUTPUT;
 
-        // Non javascript.
-        $mform->addElement('html', '<div class="nonjs-control">'); // Non-js wrapper.
-        $mform->addElement('text', 'p_query'); // Person search.
-        $mform->setType('p_query', PARAM_RAW);
-        $psearchbuttongroup = array();
-        $psearchbuttongroup[] = $mform->createElement('submit', 'p_search', get_string('search'));
-        $mform->registerNoSubmitButton('p_search');
-        $psearchbuttongroup[] = $mform->createElement('submit', 'p_clear', get_string('clear'));
-        $mform->registerNoSubmitButton('p_clear');
-        $mform->addGroup($psearchbuttongroup, 'psearchbuttongroup', '', ' ', false);
-        $attributes = array();
-        $attributes['size'] = 5;
-
-        $mform->addElement('selectgroups', 'p_select', get_string('people', 'dialogue'),
-                           array(),
-                           $attributes);
-
-        $mform->addElement('html', '</div>'); // End non-js wrapper.
+                $userfieldsapi = \core_user\fields::for_name();
+                $allusernames = $userfieldsapi->get_sql('', false, '', '', false)->selects;
+                $fields = 'id, ' . $allusernames;
+                $user = \core_user::get_user($value, $fields);
+                $useroptiondata = [
+                    'fullname' => fullname($user),
+                ];
+                return $OUTPUT->render_from_template('mod_dialogue/form-user-selector-suggestion', $useroptiondata);
+            }
+        ];
+        $mform->addElement('autocomplete', 'useridsselected', get_string('users'), [], $options);
 
         // Bulk open rule section.
         if (has_capability('mod/dialogue:bulkopenrulecreate', $context)) {
@@ -326,46 +307,6 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
     }
 
     /**
-     * Definition after data
-     * @return boolean
-     */
-    public function definition_after_data() {
-        global $PAGE;
-        $mform   = $this->_form;
-
-        $q = optional_param('p_query', '', PARAM_TEXT);
-        if (!empty($q)) {
-            $dialogue = new \mod_dialogue\dialogue($PAGE->cm, $PAGE->course, $PAGE->activityrecord);
-            $results = dialogue_search_potentials($dialogue, $q);
-            if (empty($results[0])) {
-                $people = array(get_string('nomatchingpeople', 'dialogue', $q) => array(''));
-            } else {
-                $options = array();
-                foreach ($results[0] as $person) {
-                    $options[$person->id] = fullname($person);
-                }
-                $people = array(get_string('matchingpeople', 'dialogue', count($options)) => $options);
-                if ($mform->getElement('p_select')->getMultiple()) {
-                    $selected = optional_param_array('p_select', array(), PARAM_INT);
-                } else {
-                    $selected = optional_param('p_select', array(), PARAM_INT);
-                }
-                $this->update_selectgroup('p_select', $people, $selected);
-            }
-        }
-        // Clear out query string and selectgroup form data.
-        if (optional_param('p_clear', false, PARAM_BOOL)) {
-            $mform   = $this->_form;
-            $pquery = $mform->getElement('p_query');
-            $pquery->setValue('');
-            $this->update_selectgroup('p_select',
-                                      array(get_string('usesearch', 'dialogue') => array('' => '')));
-
-        }
-        return true;
-    }
-
-    /**
      * Validation
      * @param array $data
      * @param array $files
@@ -374,25 +315,6 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
     public function validation($data, $files) {
 
         $errors = parent::validation($data, $files);
-        if (optional_param_array('p', array(), PARAM_INT)) {
-            // JS people search.
-            $people = optional_param_array('p', array(), PARAM_INT);
-            if (isset($people['clear'])) {
-                $data['people'] = array();
-            } else {
-                $data['people'] = $people;
-            }
-        } else if (optional_param('p_select', array(), PARAM_INT)) {
-            // Non-js people search select.
-            $data['people'] = optional_param('p_select', array(), PARAM_INT);
-        } else {
-            $data['people'] = array();
-        }
-        if (empty($data['groupinformation'])) {
-            if (empty($data['people'])) {
-                $errors['participant_autocomplete_field'] = get_string('errornoparticipant', 'dialogue');
-            }
-        }
         if (empty($data['subject'])) {
             $errors['subject'] = get_string('erroremptysubject', 'dialogue');
         }
@@ -434,21 +356,6 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
         unset($data->cutoffdate);
         unset($data->includefuturemembers);
         unset($data->groupinformation);
-
-        if (optional_param_array('p', array(), PARAM_INT)) {
-            // Js people search.
-            $people = optional_param_array('p', array(), PARAM_INT);
-            if (isset($people['clear'])) {
-                $data->people = array();
-            } else {
-                $data->people = $people;
-            }
-        } else if (optional_param('p_select', array(), PARAM_INT)) {
-            // Non-js people search select.
-            $data->people = optional_param('p_select', array(), PARAM_INT);
-        } else {
-            $data->people = array();
-        }
 
         return $data;
     }

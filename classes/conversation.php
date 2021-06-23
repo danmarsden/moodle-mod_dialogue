@@ -282,7 +282,7 @@ class conversation extends message {
      * @throws \moodle_exception
      */
     public function initialise_form() {
-        global $CFG, $USER, $PAGE;
+        global $CFG, $USER;
         require_once($CFG->dirroot . '/mod/dialogue/formlib.php');
 
         // Form can only be initialise if in draft state.
@@ -308,27 +308,9 @@ class conversation extends message {
         } else {
             $form->set_data(array('action' => 'edit'));
         }
-        // Setup nonjs person selector.
-        $options = array();
-        $selected = array();
         // Get participants - todo.
         $participants = $this->participants; // Insure loaded by using magic.
-        if ($participants) {
-            foreach ($participants as $participant) {
-                $options[$participant->id] = fullname($participant);
-                $selected[] = $participant->id;
-            }
-            $optiongroup = array('' => $options); // Cause formslib selectgroup is stupid.
-        } else {
-            $optiongroup = array(get_string('usesearch', 'dialogue') => array('' => '')); // Cause formslib selectgroup is stupid.
-        }
-
-        $json = json_encode($participants);
-
-        $PAGE->requires->yui_module('moodle-mod_dialogue-autocomplete',
-            'M.mod_dialogue.autocomplete.init', array($cm->id, $json));
-
-        $form->update_selectgroup('p_select', $optiongroup, $selected);
+        $form->set_data(['useridsselected' => array_keys($participants)]);
 
         // Set bulk open bulk.
         $bulkopenrule = $this->bulkopenrule; // Insure loaded by using magic.
@@ -578,8 +560,8 @@ class conversation extends message {
 
         // Shortcut set of participants for now todo - make better.
         $this->clear_participants();
-        if (!empty($data->people)) {
-            $participants = (array) $data->people; // May be single value.
+        if (!empty($data->useridsselected)) {
+            $participants = (array) $data->useridsselected; // May be single value.
             foreach ($participants as $userid) {
                 $this->add_participant($userid);
             }
