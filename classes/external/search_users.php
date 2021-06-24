@@ -121,6 +121,10 @@ class search_users extends external_api {
             if ($user->id == $USER->id) {
                 continue;
             }
+            if (!has_capability('mod/dialogue:receive', $context, $user)) {
+                // User does not have the ability to receive so remove them.
+                continue;
+            }
             if ($userdetails = user_get_user_details($user, $course, $requiredfields)) {
                 $results[] = $userdetails;
             }
