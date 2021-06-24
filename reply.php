@@ -53,6 +53,8 @@ $PAGE->set_cm($cm, $course, $activityrecord);
 $PAGE->set_context($context);
 $PAGE->set_cacheable(false);
 $PAGE->set_url($pageurl);
+$PAGE->set_title(format_string($activityrecord->name));
+$PAGE->set_heading(format_string($course->fullname));
 
 $dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
 $conversation = new \mod_dialogue\conversation($dialogue, $conversationid);
