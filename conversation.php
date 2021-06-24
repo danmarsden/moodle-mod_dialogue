@@ -96,7 +96,7 @@ if ($action == 'create' or $action == 'edit') {
 
     // Display form page.
     echo $OUTPUT->header();
-    echo $OUTPUT->heading($activityrecord->name);
+    echo $OUTPUT->heading(format_string($activityrecord->name));
     if (!empty($dialogue->activityrecord->intro)) {
         echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
     }
