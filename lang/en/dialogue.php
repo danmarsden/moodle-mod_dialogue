@@ -207,3 +207,4 @@ $string['week'] = 'week';
 $string['weeks'] = 'weeks';
 $string['year'] = 'year';
 $string['years'] = 'years';
+$string['incompleteconversation'] = 'You must select a recipient for this conversation, please try again.';

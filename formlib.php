@@ -242,7 +242,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
      * @throws dml_exception
      */
     protected function definition() {
-        global $PAGE, $OUTPUT, $COURSE;
+        global $PAGE, $OUTPUT, $COURSE, $USER;
 
         $mform    = $this->_form;
         $cm       = $PAGE->cm;
@@ -300,6 +300,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
 
         $mform->addElement('text', 'subject', get_string('subject', 'dialogue'), array('size' => '100%'));
         $mform->setType('subject', PARAM_TEXT);
+        $mform->addRule('subject', null, 'required', null, 'client');
 
         $mform->setExpanded('messagesection', true);
 
