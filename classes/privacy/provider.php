@@ -250,14 +250,38 @@ final class provider implements
     public static function export_user_data(approved_contextlist $contextlist) {
         global $DB;
 
-        $params = [
-            'modulename' => 'dialogue',
-            'contextlevel' => CONTEXT_MODULE,
-            'studentid' => $contextlist->get_user()->id,
-            'takenby' => $contextlist->get_user()->id
-        ];
+        list($contextsql, $params) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
+        $params['userid'] = $contextlist->get_user()->id;
+        $params['contextlevel'] = CONTEXT_MODULE;
 
-        list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
-        // TODO: NOT implemented yet.
+        $sql = "SELECT dm.*, ctx.id as contextid , d.name as dialoguename, dc.subject
+                  FROM {dialogue_messages} dm
+                  JOIN {dialogue_conversations} dc ON dc.id = dm.conversationid
+                  JOIN {dialogue} d ON d.id = dm.dialogueid
+                  JOIN {modules} m ON m.name = 'dialogue'
+                  JOIN {course_modules} cm ON cm.instance = d.id AND cm.module = m.id
+                  JOIN {context} ctx ON ctx.instanceid = cm.id AND ctx.contextlevel = :contextlevel
+
+                  WHERE dm.authorid = :userid AND ctx.id {$contextsql}";
+
+        $messages = $DB->get_recordset_sql($sql, $params);
+        foreach ($messages as $message) {
+            $context = \context::instance_by_id($message->contextid);
+            $subcontext = [
+                get_string('pluginname', 'mod_dialogue'),
+                format_string($message->dialoguename),
+                $message->id
+            ];
+            $messagedata = (object) [
+                'subject' => format_string($message->subject, true),
+                'body' => format_string($message->body, true),
+                'timecreated' => transform::datetime($message->timecreated),
+                'timemodified' => transform::datetime($message->timemodified),
+            ];
+            // Store the discussion content.
+            writer::with_context($context)
+                ->export_data($subcontext, $messagedata);
+        }
+        $messages->close();
     }
 }
