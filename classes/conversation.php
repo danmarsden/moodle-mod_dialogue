@@ -641,7 +641,7 @@ class conversation extends message {
             empty($this->_subject) or empty($this->_body));
 
         if ($incomplete) {
-            throw new \moodle_exception("Incomplete conversation cannot send!");
+            throw new \moodle_exception("incompleteconversation", 'mod_dialogue');
         }
 
         if (!empty($this->_bulkopenrule)) {
