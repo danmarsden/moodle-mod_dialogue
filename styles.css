@@ -303,8 +303,8 @@ body.path-mod-dialogue #region-main .table-hover tbody tr:hover > th {
 
 body.path-mod-dialogue #region-main table td[class*="span"],
 body.path-mod-dialogue #region-main table th[class*="span"],
-body.path-mod-dialogue #region-main .row-fluid table td[class*="span"],
-body.path-mod-dialogue #region-main .row-fluid table th[class*="span"] {
+body.path-mod-dialogue #region-main .row table td[class*="span"],
+body.path-mod-dialogue #region-main .row table th[class*="span"] {
     display: table-cell;
     float: none;
     margin-left: 0;
@@ -1191,7 +1191,7 @@ body.path-mod-dialogue #region-main .thumbnails:after {
     clear: both;
 }
 
-body.path-mod-dialogue #region-main .row-fluid .thumbnails {
+body.path-mod-dialogue #region-main .row .thumbnails {
     margin-left: 0;
 }
 
