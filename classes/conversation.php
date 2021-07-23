@@ -607,16 +607,25 @@ class conversation extends message {
         }
 
         $participants = $this->_participants;
-        if ($participants) {
+        if (!empty($participants)) {
+            $existingparticipants = $DB->get_records_menu('dialogue_participants',
+                ['conversationid' => $conversationid], '', 'userid, userid as uid');
+
             foreach ($participants as $userid => $participant) {
-                $params = array('conversationid' => $conversationid, 'userid' => $userid);
-                if (!$DB->record_exists('dialogue_participants', $params)) {
+                if (!array_key_exists($userid, $existingparticipants)) {
                     $record = new \stdClass();
                     $record->dialogueid = $dialogueid;
                     $record->conversationid = $conversationid;
                     $record->userid = $userid;
                     $DB->insert_record('dialogue_participants', $record);
                 }
+                // This user exists.
+                unset($existingparticipants[$userid]);
+            }
+            // Deal with removal of any remaining participants.
+            foreach ($existingparticipants as $userid) {
+                $DB->delete_records('dialogue_participants',
+                    ['conversationid' => $conversationid, 'userid' => $userid]);
             }
         } else {
             $DB->delete_records('dialogue_participants', array('conversationid' => $conversationid));
