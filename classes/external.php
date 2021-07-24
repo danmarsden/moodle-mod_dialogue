@@ -132,7 +132,7 @@ class external extends external_api {
      *
      * @return \external_single_structure
      */
-    public static function search_users_returns()  {
+    public static function search_users_returns() {
         global $CFG;
         require_once($CFG->dirroot . '/user/externallib.php');
         return new external_multiple_structure(\core_user_external::user_description());
