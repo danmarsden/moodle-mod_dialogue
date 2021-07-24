@@ -26,7 +26,8 @@ defined('MOODLE_INTERNAL') || die();
 
 $functions = [
     'mod_dialogue_search_users' => [
-        'classname' => 'mod_dialogue\external\search_users',
+        'classname' => 'mod_dialogue\external',
+        'methodname' => 'search_users',
         'classpath' => '',
         'description' => 'Search within the list of course participants',
         'ajax' => true,

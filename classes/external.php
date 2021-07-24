@@ -15,44 +15,39 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This is the external method for getting the list of users for the dialogue conversation form.
+ * This is the external API for this tool.
  *
  * @package    mod_dialogue
- * @copyright  2021 Dan Marsden <dan@danmarsden.com>
+ * @copyright  2021 Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace mod_dialogue\external;
+namespace mod_dialogue;
 
 defined('MOODLE_INTERNAL') || die();
 
-global $CFG;
-require_once($CFG->libdir . '/externallib.php');
+require_once("$CFG->libdir/externallib.php");
 
-use stdClass;
+use core\session\exception;
 use external_api;
 use external_function_parameters;
 use external_value;
 use external_multiple_structure;
-use core_user_external;
-use context_course;
-use moodle_exception;
-use course_enrolment_manager;
-use core\session\exception;
+use core_user\external\user_summary_exporter;
 
 /**
- * This is the external method for getting the information needed to present an attempts report.
+ * This is the external API for this tool.
  *
- * @copyright  2021 Dan Marsden <dan@danmarsden.com>
+ * @copyright  2021 Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class search_users extends external_api {
+class external extends external_api {
+
     /**
-     * Webservice parameters.
+     * Returns the description of external function parameters.
      *
-     * @return external_function_parameters
+     * @return external_function_parameters.
      */
-    public static function execute_parameters(): external_function_parameters {
+    public static function search_users_parameters() {
         return new external_function_parameters(
             [
                 'courseid' => new external_value(PARAM_INT, 'course id'),
@@ -62,10 +57,11 @@ class search_users extends external_api {
                 'perpage' => new external_value(PARAM_INT, 'Number per page'),
             ]
         );
+
     }
 
     /**
-     * Return user attempts information in a h5p activity.
+     * Search users.
      *
      * @param int $courseid Course id
      * @param string $search The query
@@ -74,14 +70,14 @@ class search_users extends external_api {
      * @param int $perpage Max per page
      * @return array report data
      */
-    public static function execute(int $courseid, string $search, bool $searchanywhere, int $page, int $perpage): array {
+    public static function search_users(int $courseid, string $search, bool $searchanywhere, int $page, int $perpage) {
         global $PAGE, $CFG, $USER;
 
         require_once($CFG->dirroot.'/enrol/locallib.php');
         require_once($CFG->dirroot.'/user/lib.php');
 
         $params = self::validate_parameters(
-            self::execute_parameters(),
+            self::search_users_parameters(),
             [
                 'courseid'       => $courseid,
                 'search'         => $search,
@@ -90,19 +86,19 @@ class search_users extends external_api {
                 'perpage'        => $perpage
             ]
         );
-        $context = context_course::instance($params['courseid']);
+        $context = \context_course::instance($params['courseid']);
         try {
             self::validate_context($context);
         } catch (Exception $e) {
             $exceptionparam = new stdClass();
             $exceptionparam->message = $e->getMessage();
             $exceptionparam->courseid = $params['courseid'];
-            throw new moodle_exception('errorcoursecontextnotvalid' , 'webservice', '', $exceptionparam);
+            throw new \moodle_exception('errorcoursecontextnotvalid' , 'webservice', '', $exceptionparam);
         }
         course_require_view_participants($context);
 
         $course = get_course($params['courseid']);
-        $manager = new course_enrolment_manager($PAGE, $course);
+        $manager = new \course_enrolment_manager($PAGE, $course);
 
         $users = $manager->search_users($params['search'],
             $params['searchanywhere'],
@@ -132,13 +128,13 @@ class search_users extends external_api {
     }
 
     /**
-     * Returns description of method result value
+     * Returns description of external function result value.
      *
-     * @return external_multiple_structure
+     * @return \external_single_structure
      */
-    public static function execute_returns(): external_multiple_structure {
+    public static function search_users_returns()  {
         global $CFG;
         require_once($CFG->dirroot . '/user/externallib.php');
-        return new external_multiple_structure(core_user_external::user_description());
+        return new external_multiple_structure(\core_user_external::user_description());
     }
 }
