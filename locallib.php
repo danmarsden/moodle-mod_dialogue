@@ -451,7 +451,8 @@ function dialogue_get_humanfriendly_dates($epoch) {
 
     $customdatetime['datefull'] = $datetime['mday'] . ' ' . $datetime['month'] . ' ' . $datetime['year'];
     $customdatetime['dateshort'] = $datetime['mday'] . ' ' . $datetime['month'];
-    $customdatetime['time'] = date("g:i a", $epoch);
+
+    $customdatetime['time'] = userdate($epoch, get_string('strftimetime', 'langconfig'));
     $customdatetime['today'] = ($epoch >= strtotime("today")) ? true : false;
     $customdatetime['currentyear'] = ($epoch >= strtotime("-1 year")) ? true : false;
 
