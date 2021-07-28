@@ -494,7 +494,7 @@ class conversation extends message {
             $DB->update_record('dialogue_conversations', $record);
         }
 
-        $this->save_participants();
+        $this->save_participants(true);
 
         $this->save_bulk_open_rule();
 
@@ -593,10 +593,11 @@ class conversation extends message {
 
     /**
      * Save participants
+     * @param boolean $deleteremovedparticipants - should participants be deleted if not defined.
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    protected function save_participants() {
+    protected function save_participants($deleteremovedparticipants = false) {
         global $DB;
 
         $dialogueid = $this->dialogue->dialogueid;
@@ -622,13 +623,17 @@ class conversation extends message {
                 // This user exists.
                 unset($existingparticipants[$userid]);
             }
-            // Deal with removal of any remaining participants.
-            foreach ($existingparticipants as $userid) {
-                $DB->delete_records('dialogue_participants',
-                    ['conversationid' => $conversationid, 'userid' => $userid]);
+            if ($deleteremovedparticipants) {
+                // Deal with removal of any remaining participants.
+                foreach ($existingparticipants as $userid) {
+                    $DB->delete_records('dialogue_participants',
+                        ['conversationid' => $conversationid, 'userid' => $userid]);
+                }
             }
         } else {
-            $DB->delete_records('dialogue_participants', array('conversationid' => $conversationid));
+            if ($deleteremovedparticipants) {
+                $DB->delete_records('dialogue_participants', array('conversationid' => $conversationid));
+            }
         }
         // Refresh.
         $this->load_participants();
