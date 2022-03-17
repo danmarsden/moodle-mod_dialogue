@@ -57,7 +57,8 @@ function dialogue_supports($feature) {
             return true;
         case FEATURE_COMMENT:
             return false;
-
+        case FEATURE_MOD_PURPOSE:
+            return MOD_PURPOSE_COMMUNICATION;
         default:
             return null;
     }
