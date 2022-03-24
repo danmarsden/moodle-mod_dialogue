@@ -253,7 +253,7 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
         $options = [
             'ajax' => 'mod_dialogue/form-user-selector',
             'multiple' => true,
-            'courseid' => $COURSE->id,
+            'cmid' => $cm->id,
             'valuehtmlcallback' => function($value) {
                 global $OUTPUT;
 
