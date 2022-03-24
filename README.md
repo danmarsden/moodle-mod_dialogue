@@ -12,11 +12,12 @@ Branches
 --------
 The git branches here support the following versions.
 
-| Moodle version     | Branch      |
-| ----------------- | ----------- |
-| Mooodle 3.5 - 3.8 | MOODLE_35_STABLE |
-| Moodle 3.9 - 3.10 | MOODLE_39_STABLE |
-| Moodle 3.11 and higher | MOODLE_311_STABLE |
+| Moodle version        | Branch      |
+| -----------------     | ----------- |
+| Mooodle 3.5 - 3.8     | MOODLE_35_STABLE |
+| Moodle 3.9 - 3.10     | MOODLE_39_STABLE |
+| Moodle 3.11           | MOODLE_311_STABLE |
+| Moodle 4.0 and higher | MOODLE_400_STABLE |
 
 Contributions
 -------------
