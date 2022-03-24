@@ -35,7 +35,7 @@ use external_function_parameters;
 use external_value;
 use external_multiple_structure;
 use core_user_external;
-use context_course;
+use context_module;
 use moodle_exception;
 use course_enrolment_manager;
 use core\session\exception;
@@ -55,7 +55,7 @@ class search_users extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters(
             [
-                'courseid' => new external_value(PARAM_INT, 'course id'),
+                'cmid' => new external_value(PARAM_INT, 'course module id'),
                 'search' => new external_value(PARAM_RAW, 'query'),
                 'searchanywhere' => new external_value(PARAM_BOOL, 'find a match anywhere, or only at the beginning'),
                 'page' => new external_value(PARAM_INT, 'Page number'),
@@ -67,14 +67,14 @@ class search_users extends external_api {
     /**
      * Return user attempts information in a h5p activity.
      *
-     * @param int $courseid Course id
+     * @param int $cmid Course module id
      * @param string $search The query
      * @param bool $searchanywhere Match anywhere in the string
      * @param int $page Page number
      * @param int $perpage Max per page
      * @return array report data
      */
-    public static function execute(int $courseid, string $search, bool $searchanywhere, int $page, int $perpage): array {
+    public static function execute(int $cmid, string $search, bool $searchanywhere, int $page, int $perpage): array {
         global $PAGE, $CFG, $USER;
 
         require_once($CFG->dirroot.'/enrol/locallib.php');
@@ -83,14 +83,15 @@ class search_users extends external_api {
         $params = self::validate_parameters(
             self::execute_parameters(),
             [
-                'courseid'       => $courseid,
+                'cmid'           => $cmid,
                 'search'         => $search,
                 'searchanywhere' => $searchanywhere,
                 'page'           => $page,
                 'perpage'        => $perpage
             ]
         );
-        $context = context_course::instance($params['courseid']);
+        list($course, $cm) = get_course_and_cm_from_cmid($cmid);
+        $context = context_module::instance($cm->id);
         try {
             self::validate_context($context);
         } catch (Exception $e) {
@@ -101,7 +102,6 @@ class search_users extends external_api {
         }
         course_require_view_participants($context);
 
-        $course = get_course($params['courseid']);
         $manager = new course_enrolment_manager($PAGE, $course);
 
         $users = $manager->search_users($params['search'],

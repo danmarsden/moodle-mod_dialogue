@@ -18,7 +18,6 @@
  *
  * @module     mod_dialogue/form-user-selector
  * @class      form-user-selector
- * @package    mod_dialogue
  * @copyright  2019 Shamim Rezaie
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -38,12 +37,12 @@ define(['jquery', 'core/ajax', 'core/templates'], function($, Ajax, Templates) {
 
         transport: function(selector, query, success, failure) {
             var promise;
-            var courseid = $(selector).attr('courseid');
+            var cmid = $(selector).attr('cmid');
 
             promise = Ajax.call([{
                 methodname: 'mod_dialogue_search_users',
                 args: {
-                    courseid: courseid,
+                    cmid: cmid,
                     search: query,
                     searchanywhere: true,
                     page: 0,
