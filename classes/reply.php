@@ -16,8 +16,6 @@
 
 namespace mod_dialogue;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class reply
  * @package mod_dialogue

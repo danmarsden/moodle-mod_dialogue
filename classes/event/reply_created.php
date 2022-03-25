@@ -16,8 +16,6 @@
 
 namespace mod_dialogue\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The mod_dialogue reply created event.
  *

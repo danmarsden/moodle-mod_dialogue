@@ -16,7 +16,6 @@
 
 namespace mod_dialogue;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Provide core functions to any conversation listing classes.
