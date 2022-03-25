@@ -16,8 +16,6 @@
 
 namespace mod_dialogue;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class to build a list of conversations grouped by author of last message
  * @package mod_dialogue

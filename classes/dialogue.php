@@ -16,8 +16,6 @@
 
 namespace mod_dialogue;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Library of extra functions for the dialogue module not part of the standard add-on module API set
  * but used by scripts in the mod/dialogue folder

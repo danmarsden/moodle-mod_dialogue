@@ -17,9 +17,11 @@
 namespace mod_dialogue\local;
 
 /**
- * Class course_enrolment_manager
- * allows search by groups.
+ * This class provides a custom search function with groups.
+ *
  * @package mod_dialogue
+ * @copyright 2022 Dan Marsden
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_enrolment_manager extends \course_enrolment_manager {
     /**
