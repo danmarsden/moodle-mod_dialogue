@@ -75,7 +75,7 @@ class search_users extends external_api {
      * @return array report data
      */
     public static function execute(int $cmid, string $search, bool $searchanywhere, int $page, int $perpage): array {
-        global $PAGE, $CFG, $USER;
+        global $PAGE, $CFG, $USER, $DB;
 
         require_once($CFG->dirroot.'/enrol/locallib.php');
         require_once($CFG->dirroot.'/user/lib.php');
@@ -90,7 +90,7 @@ class search_users extends external_api {
                 'perpage'        => $perpage
             ]
         );
-        list($course, $cm) = get_course_and_cm_from_cmid($cmid);
+        list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'dialogue');
         $context = context_module::instance($cm->id);
         try {
             self::validate_context($context);
@@ -101,13 +101,29 @@ class search_users extends external_api {
             throw new moodle_exception('errorcoursecontextnotvalid' , 'webservice', '', $exceptionparam);
         }
         course_require_view_participants($context);
+        if (!has_capability('moodle/site:accessallgroups', $context) &&
+            $DB->record_exists('dialogue', ['id' => $cm->instance, 'usecoursegroups' => 1])) {
 
-        $manager = new course_enrolment_manager($PAGE, $course);
+            // When a student is in multiple groups, the core filters don't support this easily so we have to check each user
+            // This is in-efficient but hopefully not too nasty.
 
-        $users = $manager->search_users($params['search'],
-            $params['searchanywhere'],
-            $params['page'],
-            $params['perpage']);
+            // Try to filter based on group.
+            $groups = groups_get_activity_allowed_groups($cm);
+
+            $manager = new \mod_dialogue\local\course_enrolment_manager($PAGE, $course);
+            $users = $manager->search_users_with_groups($params['search'],
+                                                        $params['searchanywhere'],
+                                                        $params['page'],
+                                                        $params['perpage'],
+                                                        $groups);
+
+        } else {
+            $manager = new course_enrolment_manager($PAGE, $course);
+            $users = $manager->search_users($params['search'],
+                                            $params['searchanywhere'],
+                                            $params['page'],
+                                            $params['perpage']);
+        }
 
         $results = [];
         // Add also extra user fields.
