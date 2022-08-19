@@ -85,10 +85,11 @@ class conversations_by_author extends conversations {
 
             $this->basesql .= " JOIN (SELECT dp.conversationid
                                         FROM {dialogue_participants} dp
-                                       WHERE dp.userid = :userid) isparticipant
+                                       WHERE dp.userid = :userid AND dp.dialogueid=:dialogueid) isparticipant
                                           ON isparticipant.conversationid = dc.id";
 
             $this->params['userid'] = $USER->id;
+            $this->params['dialogueid'] = $this->dialogue->activityrecord->id;
         }
 
         $this->fields = array('userid' => 'u.id AS userid',
