@@ -54,7 +54,7 @@ class mod_dialogue_message_form extends moodleform {
         }
 
         $mform->addElement('hidden', 'action');
-        $mform->setType('action', PARAM_ACTION);
+        $mform->setType('action', PARAM_ALPHANUMEXT);
         $mform->setDefault('action', 'edit');
 
         $mform->addElement('hidden', 'id');
@@ -268,7 +268,6 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
             }
         ];
         $mform->addElement('autocomplete', 'useridsselected', get_string('users'), [], $options);
-        $mform->addRule('useridsselected', null, 'required', null, 'client');
 
         // Bulk open rule section.
         if (has_capability('mod/dialogue:bulkopenrulecreate', $context)) {
@@ -295,6 +294,9 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
                 $mform->setDefault('cutoffdate', time() + 3600 * 24 * 7);
                 $mform->disabledIf('cutoffdate', 'includefuturemembers', 'notchecked');
             }
+        } else {
+            // Bulk option not available - userid must be selected to save.
+            $mform->addRule('useridsselected', null, 'required', null, 'client');
         }
 
         $mform->addElement('header', 'messagesection', get_string('message', 'dialogue'));
@@ -325,7 +327,9 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
                 $errors['cutoffdate'] = get_string('errorcutoffdateinpast', 'dialogue');
             }
         }
-
+        if (empty($data['useridsselected']) && empty($data['groupinformation'])) {
+            $errors['useridsselected'] = get_string('errornoparticipant', 'dialogue');
+        }
         return $errors;
     }
 
