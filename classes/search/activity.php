@@ -15,17 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Dialogue version.
+ * Search area for mod_dialogue activities.
  *
- * @package mod_dialogue
- * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    mod_dialogue
+ * @copyright  2022 Pramith dayananda <<pramithd@catalyst.net.nz>>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace mod_dialogue\search;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2023021000;
-$plugin->requires  = 2022032200;  // Requires 4.0 or higher.
-$plugin->component = 'mod_dialogue';    // Full name of the plugin (used for diagnostics).
-$plugin->release   = '4.0';             // Semantic version name.
-$plugin->maturity  = MATURITY_STABLE;    // This version's maturity level.
-$plugin->dependencies = [];
+/**
+ * Search area for mod_dialogue activities.
+ *
+ * @package    mod_dialogue
+ * @copyright  2022 Pramith dayananda <<pramithd@catalyst.net.nz>>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class activity extends \core_search\base_activity {
+
+    /**
+     * Returns true if this area uses file indexing.
+     *
+     * @return bool
+     */
+    public function uses_file_indexing() {
+        return true;
+    }
+}
