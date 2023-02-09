@@ -23,6 +23,8 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
+$plugin->version   = 2022020200;
+$plugin->requires  = 2020061500;
 $plugin->version   = 2023021000;
 $plugin->requires  = 2022032200;  // Requires 4.0 or higher.
 $plugin->component = 'mod_dialogue';    // Full name of the plugin (used for diagnostics).

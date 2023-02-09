@@ -18,7 +18,8 @@
  * Search area for mod_dialogue activities.
  *
  * @package    mod_dialogue
- * @copyright  2022 Pramith dayananda <<pramithd@catalyst.net.nz>>
+ * @copyright  Catalyst IT Ltd
+ * @author     Pramith dayananda <<pramithd@catalyst.net.nz>>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,7 +31,8 @@ defined('MOODLE_INTERNAL') || die();
  * Search area for mod_dialogue activities.
  *
  * @package    mod_dialogue
- * @copyright  2022 Pramith dayananda <<pramithd@catalyst.net.nz>>
+ * @copyright  Catalyst IT Ltd
+ * @author     Pramith dayananda <<pramithd@catalyst.net.nz>>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class activity extends \core_search\base_activity {
