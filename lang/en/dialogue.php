@@ -182,7 +182,6 @@ $string['replydeleted'] = 'Reply has been deleted';
 $string['replysent'] = 'Your reply has been sent';
 $string['runsuntil'] = 'Runs until ';
 $string['savedraft'] = 'Save draft';
-$string['search:activity'] = 'Dialogue - activity information';
 $string['searchpotentials'] = ' Search potentials...';
 $string['second'] = 'second';
 $string['seconds'] = 'seconds';
@@ -209,3 +208,6 @@ $string['weeks'] = 'weeks';
 $string['year'] = 'year';
 $string['years'] = 'years';
 $string['incompleteconversation'] = 'You must select a recipient for this conversation, please try again.';
+
+$string['search:activity'] = 'Dialogue - activity information';
+$string['search:conversations'] =  'Dialogue - conversation and message information';
