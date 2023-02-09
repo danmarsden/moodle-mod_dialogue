@@ -356,6 +356,8 @@ class mod_dialogue_renderer extends plugin_renderer_base {
      * @return string
      */
     public function render_attachments(array $attachments) {
+        global $CFG;
+
         $html = '';
 
         if ($attachments) {
@@ -373,7 +375,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                 $filesize = $file->get_filesize();
                 $mimetype = $file->get_mimetype();
 
-                $viewurl = new moodle_url('/pluginfile.php/' . $contextid .
+                $viewurl = \moodle_url::make_file_url($CFG->wwwroot, '/pluginfile.php/' . $contextid .
                     '/mod_dialogue/attachment/' . $itemid . '/' . $filename);
                 $previewurl = clone($viewurl);
                 $previewurl->param('preview', 'thumb');
