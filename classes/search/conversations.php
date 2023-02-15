@@ -155,8 +155,9 @@ class conversations extends \core_search\base_mod {
      * @return \moodle_url
      */
     public function get_context_url(\core_search\document $doc) {
-        $contextmodule = \context::instance_by_id($doc->get('contextid'));
-        return new \moodle_url('/mod/dialogue/view.php', array('id' => $contextmodule->instanceid));
+        $context = \context::instance_by_id($doc->get('contextid'));
+        $entry = $this->get_dialogue_conversations($doc->get('itemid'));
+        return new \moodle_url('/mod/dialogue/conversation.php', array('id' => $context->instanceid, 'action' => 'view', 'conversationid' => $entry->messageid));
     }
 
     /**
@@ -169,7 +170,7 @@ class conversations extends \core_search\base_mod {
     protected function get_dialogue_conversations($messageid) {
         global $DB;
 
-        return $DB->get_record_sql("SELECT dm.dialogueid, dc.course FROM {dialogue_messages} dm
+        return $DB->get_record_sql("SELECT dm.dialogueid, dc.course, dc.id as messageid FROM {dialogue_messages} dm
                                         LEFT JOIN {dialogue_conversations} dc ON dc.id = dm.conversationid
                                     WHERE dm.id = ?", array('id' => $messageid), MUST_EXIST);
     }
@@ -187,21 +188,20 @@ class conversations extends \core_search\base_mod {
      * Add the forum post attachments.
      *
      * @param document $document The current document
-     * @return null|object  stored file
+     * @return null
      */
     public function attach_files($doc) {
         $fs = get_file_storage();
-    
         $entryid = $doc->get('itemid');
 
         try {
-            $entry = $this->get_entry($entryid);
+            $entry = $this->get_dialogue_conversations($entryid);
         } catch (\dml_missing_record_exception $e) {
             debugging('Could not get record to attach files to '.$doc->get('id'), DEBUG_DEVELOPER);
             return;
         }
 
-        $cm = $this->get_cm('dialogue', $entry->dataid, $doc->get('courseid'));
+        $cm = $this->get_cm('dialogue', $entry->dialogueid, $doc->get('courseid'));
         $context = \context_module::instance($cm->id);
 
         // Get the files and attach them.
@@ -209,7 +209,7 @@ class conversations extends \core_search\base_mod {
         $files = $fs->get_area_files($context->id, 'mod_dialogue', 'attachment', $entryid, 'filename', false);
 
         foreach ($files as $file) {
-            $document->add_stored_file($file);
+            $doc->add_stored_file($file);
         }
     }
 
