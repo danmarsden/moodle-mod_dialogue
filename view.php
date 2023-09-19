@@ -76,7 +76,8 @@ $renderer = $PAGE->get_renderer('mod_dialogue');
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($activityrecord->name));
-if (!empty($dialogue->activityrecord->intro)) {
+// Display description in intro only if moodle version < 4.0 is used.
+if (!empty($dialogue->activityrecord->intro) && $CFG->version < 2022041900) {
     echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
 }
 
