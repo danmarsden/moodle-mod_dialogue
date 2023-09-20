@@ -88,8 +88,5 @@ if ($form->is_submitted()) {
 // Display form page.
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($activityrecord->name));
-if (!empty($dialogue->activityrecord->intro)) {
-    echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
-}
 $form->display();
 echo $OUTPUT->footer($course);

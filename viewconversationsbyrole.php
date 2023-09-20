@@ -81,9 +81,6 @@ $renderer = $PAGE->get_renderer('mod_dialogue');
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($activityrecord->name));
-if (!empty($dialogue->activityrecord->intro)) {
-    echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
-}
 
 // Render tab navigation, toggle button groups and order by dropdown.
 echo $renderer->tab_navigation($dialogue);
