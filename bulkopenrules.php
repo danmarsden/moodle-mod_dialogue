@@ -61,9 +61,6 @@ $pagination = new \paging_bar($total, $page, \mod_dialogue\dialogue::PAGINATION_
 $renderer = $PAGE->get_renderer('mod_dialogue');
 
 echo $OUTPUT->header();
-if (!empty($dialogue->activityrecord->intro)) {
-    echo $OUTPUT->box(format_module_intro('dialogue', $dialogue->activityrecord, $cm->id), 'generalbox', 'intro');
-}
 
 echo $renderer->tab_navigation($dialogue);
 
