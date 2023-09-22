@@ -17,7 +17,8 @@ The git branches here support the following versions.
 | Mooodle 3.5 - 3.8     | MOODLE_35_STABLE |
 | Moodle 3.9 - 3.10     | MOODLE_39_STABLE |
 | Moodle 3.11           | MOODLE_311_STABLE |
-| Moodle 4.0 and higher | MOODLE_400_STABLE |
+| Moodle 4.0            | MOODLE_400_STABLE |
+| Moodle 4.1            | MOODLE_401_STABLE |
 
 Contributions
 -------------
