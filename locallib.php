@@ -447,9 +447,8 @@ function dialogue_get_humanfriendly_dates($epoch) {
         break; // Leave on first, this will be largest unit.
     }
 
-    $customdatetime['datefull'] = $datetime['mday'] . ' ' . $datetime['month'] . ' ' . $datetime['year'];
-    $customdatetime['dateshort'] = $datetime['mday'] . ' ' . $datetime['month'];
-
+    $customdatetime['datefull'] = userdate($epoch, get_string('strftimedate', 'langconfig'));
+    $customdatetime['dateshort'] = userdate($epoch, get_string('strftimedateshort', 'langconfig'));
     $customdatetime['time'] = userdate($epoch, get_string('strftimetime', 'langconfig'));
     $customdatetime['today'] = ($epoch >= strtotime("today")) ? true : false;
     $customdatetime['currentyear'] = ($epoch >= strtotime("-1 year")) ? true : false;
