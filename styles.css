@@ -1354,14 +1354,6 @@ body.path-mod-dialogue #region-main .btn .badge {
 body.path-mod-dialogue #region-main .pull-left {
     float: left;
 }
-body.path-mod-dialogue #region-main .fa {
-    display: inline-block;
-    font-family: FontAwesome;
-    -webkit-font-smoothing: antialiased;
-    font-style: normal;
-    line-height: 1;
-    -moz-osx-font-smoothing: grayscale;
-}
 
 body.path-mod-dialogue #region-main .fa-sort-alpha-asc:before {
     content: "\f15d";
