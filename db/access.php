@@ -188,5 +188,17 @@ $capabilities = array(
             'manager' => CAP_PREVENT
         )
     ),
+    
+    'mod/dialogue:opengroup' => array(
+        'riskbitmask' => RISK_SPAM,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+	    )
+    ),
 
 );
