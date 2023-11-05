@@ -74,6 +74,7 @@ $string['dialogue:closeany'] = 'Close any';
 $string['dialogue:delete'] = 'Delete own';
 $string['dialogue:deleteany'] = 'Delete any';
 $string['dialogue:open'] = 'Open a conversation';
+$string['dialogue:opengroup'] = 'Open a conversation with multiple participants';
 $string['dialogue:receive'] = 'Receive, who can be the recipient when opening a conversation';
 $string['dialogue:reply'] = 'Reply';
 $string['dialogue:replyany'] = 'Reply any';

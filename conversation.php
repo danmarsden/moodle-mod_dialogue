@@ -69,6 +69,11 @@ if ($action == 'create' or $action == 'edit') {
             case 'send':
                 if ($form->is_validated()) {
                     $conversation->save_form_data();
+
+                    if (count($conversation->participants) > 1) {
+                        require_capability('mod/dialogue:opengroup', $context);
+                    }
+
                     $conversation->send();
                     if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
                         $sendmessage = get_string('conversationopenedcron', 'dialogue');
