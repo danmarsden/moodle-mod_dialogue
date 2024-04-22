@@ -207,7 +207,7 @@ function dialogue_cm_unread_total(\mod_dialogue\dialogue $dialogue) {
 
     // Get user's total unread count for a dialogue.
     $record = (array) $DB->get_record_sql($sql, $params);
-    if (isset($record['unread']) and $record['unread'] > 0) {
+    if (isset($record['unread']) && $record['unread'] > 0) {
         return (int) $record['unread'];
     }
     return 0;
@@ -329,7 +329,7 @@ function dialogue_generate_summary_line($subject, $body, $bodyformat, $length = 
     $body    = html_to_text($body, 0, false);
 
     $diff = $length - (strlen($subject) + strlen($separator));
-    if (\core_text::strlen($subject) > $length or ! $diff) {
+    if (\core_text::strlen($subject) > $length || ! $diff) {
         return html_writer::tag('strong', shorten_text($subject, $length));
     }
 

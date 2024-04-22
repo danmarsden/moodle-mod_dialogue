@@ -125,12 +125,12 @@ class reply extends message {
         }
 
         // Remove any unecessary buttons.
-        if (($USER->id != $this->author->id) or is_null($this->messageid)) {
+        if (($USER->id != $this->author->id) || is_null($this->messageid)) {
             $form->remove_from_group('delete', 'actionbuttongroup');
         }
 
         // Remove any unecessary buttons.
-        if (($USER->id != $this->author->id) or is_null($this->messageid)) {
+        if (($USER->id != $this->author->id) || is_null($this->messageid)) {
             $form->remove_from_group('trash', 'actionbuttongroup');
         }
 
@@ -168,7 +168,7 @@ class reply extends message {
         $conversationid = $this->conversation->conversationid;
 
         // Check permission.
-        if ($USER->id != $this->_authorid or !has_capability('mod/dialogue:reply', $context)) {
+        if ($USER->id != $this->_authorid || !has_capability('mod/dialogue:reply', $context)) {
             throw new \moodle_exception("This doesn't belong to you!");
         }
 

@@ -153,7 +153,7 @@ class conversation extends message {
             throw new \moodle_exception('cannotclosedraftconversation', 'dialogue');
         }
         // Permission check.
-        $canclose = (($this->_authorid == $USER->id) or has_capability('mod/dialogue:closeany', $context));
+        $canclose = (($this->_authorid == $USER->id) || has_capability('mod/dialogue:closeany', $context));
         if (!$canclose) {
             throw new \moodle_exception('nopermissiontoclose', 'dialogue');
         }
@@ -187,7 +187,7 @@ class conversation extends message {
             return true;
         }
         // Permission to delete conversation.
-        $candelete = ((has_capability('mod/dialogue:delete', $context) and $USER->id == $this->_authorid) or
+        $candelete = ((has_capability('mod/dialogue:delete', $context) && $USER->id == $this->_authorid) ||
             has_capability('mod/dialogue:deleteany', $context));
 
         if (!$candelete) {
@@ -315,7 +315,7 @@ class conversation extends message {
         // Set bulk open bulk.
         $bulkopenrule = $this->bulkopenrule; // Insure loaded by using magic.
 
-        if (!empty($bulkopenrule) and has_capability('mod/dialogue:bulkopenrulecreate', $context)) {
+        if (!empty($bulkopenrule) && has_capability('mod/dialogue:bulkopenrulecreate', $context)) {
             // Format for option item e.g. course-1, group-1.
             $groupinformation = $bulkopenrule['type'] . '-' . $bulkopenrule['sourceid'];
             $form->set_data(array('groupinformation' => $groupinformation));
@@ -339,7 +339,7 @@ class conversation extends message {
         // Set attachments.
         $form->set_data(array('attachments[itemid]' => $this->_attachmentsdraftid));
         // Remove any unecessary buttons.
-        if (($USER->id != $this->author->id) or is_null($this->conversationid)) {
+        if (($USER->id != $this->author->id) || is_null($this->conversationid)) {
             $form->remove_from_group('trash', 'actionbuttongroup');
         }
         // Attach initialised form to conversation class and return.
@@ -470,7 +470,7 @@ class conversation extends message {
         global $DB, $USER;
 
         $admin = get_admin(); // Possible cronjob.
-        if ($USER->id != $admin->id and $USER->id != $this->_authorid) {
+        if ($USER->id != $admin->id && $USER->id != $this->_authorid) {
             throw new \moodle_exception("This conversation doesn't belong to you!");
         }
 
@@ -651,8 +651,8 @@ class conversation extends message {
         $cm      = $this->dialogue->cm;
         $course  = $this->dialogue->course;
 
-        $incomplete = ((empty($this->_bulkopenrule) and empty($this->_participants)) or
-            empty($this->_subject) or empty($this->_body));
+        $incomplete = ((empty($this->_bulkopenrule) && empty($this->_participants)) ||
+            empty($this->_subject) || empty($this->_body));
 
         if ($incomplete) {
             throw new \moodle_exception("incompleteconversation", 'mod_dialogue');
@@ -682,7 +682,7 @@ class conversation extends message {
         /* Must have type (course, group) and sourceid (course->id, group->id) to
          * be a rule, else is empty.
          */
-        if (!is_null($type) and !is_null($sourceid)) {
+        if (!is_null($type) && !is_null($sourceid)) {
             $rule['type'] = (string) $type;
             $rule['sourceid'] = (int) $sourceid;
             $rule['includefuturemembers'] = (int) $includefuturemembers;

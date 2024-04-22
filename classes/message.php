@@ -133,7 +133,7 @@ class message implements \renderable {
             return true;
         }
         // Permission to delete conversation.
-        $candelete = ((has_capability('mod/dialogue:delete', $context) and $USER->id == $this->_authorid) or
+        $candelete = ((has_capability('mod/dialogue:delete', $context) && $USER->id == $this->_authorid) ||
             has_capability('mod/dialogue:deleteany', $context));
 
         if (!$candelete) {
@@ -326,7 +326,7 @@ class message implements \renderable {
         $this->_body = $body;
         $this->_bodyformat = $format;
 
-        if ($format == FORMAT_HTML and isset($itemid)) {
+        if ($format == FORMAT_HTML && isset($itemid)) {
             $this->_bodydraftid = $itemid;
             $this->_body = file_rewrite_urls_to_pluginfile($this->_body, $this->_bodydraftid);
         }
@@ -372,7 +372,7 @@ class message implements \renderable {
         global $DB, $USER;
 
         $admin = get_admin(); // Possible cronjob.
-        if ($USER->id != $admin->id and $USER->id != $this->_authorid) {
+        if ($USER->id != $admin->id && $USER->id != $this->_authorid) {
             throw new \moodle_exception("This doesn't belong to you!");
         }
 

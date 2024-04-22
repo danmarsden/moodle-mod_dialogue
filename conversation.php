@@ -58,7 +58,7 @@ $PAGE->set_heading(format_string($course->fullname));
 $dialogue = new \mod_dialogue\dialogue($cm, $course, $activityrecord);
 $conversation = new \mod_dialogue\conversation($dialogue, $conversationid);
 
-if ($action == 'create' or $action == 'edit') {
+if ($action == 'create' || $action == 'edit') {
     require_capability('mod/dialogue:open', $context);
     $form = $conversation->initialise_form();
     if ($form->is_submitted()) {
@@ -156,13 +156,13 @@ if ($conversation->state == \mod_dialogue\dialogue::STATE_DRAFT) {
 }
 
 if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
-    if (!has_capability('mod/dialogue:bulkopenruleeditany', $context) and $conversation->author->id != $USER->id) {
+    if (!has_capability('mod/dialogue:bulkopenruleeditany', $context) && $conversation->author->id != $USER->id) {
         throw new moodle_exception('nopermission');
     }
 }
 
-if ($conversation->state == \mod_dialogue\dialogue::STATE_OPEN or $conversation->state == \mod_dialogue\dialogue::STATE_CLOSED) {
-    if (!has_capability('mod/dialogue:viewany', $context) and !$conversation->is_participant()) {
+if ($conversation->state == \mod_dialogue\dialogue::STATE_OPEN || $conversation->state == \mod_dialogue\dialogue::STATE_CLOSED) {
+    if (!has_capability('mod/dialogue:viewany', $context) && !$conversation->is_participant()) {
         throw new moodle_exception('nopermission');
     }
 }
@@ -181,11 +181,11 @@ if ($conversation->replies()) {
 }
 
 // Output reply form if meets criteria.
-$hasreplycapability = (has_capability('mod/dialogue:reply', $context) or
+$hasreplycapability = (has_capability('mod/dialogue:reply', $context) ||
                        has_capability('mod/dialogue:replyany', $context));
 
 // Conversation is open and user can reply... then output reply form.
-if ($hasreplycapability and $conversation->state == \mod_dialogue\dialogue::STATE_OPEN) {
+if ($hasreplycapability && $conversation->state == \mod_dialogue\dialogue::STATE_OPEN) {
     $reply = $conversation->reply();
     $form = $reply->initialise_form();
     $form->display();

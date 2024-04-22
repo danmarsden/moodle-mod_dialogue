@@ -38,7 +38,7 @@ class course_enrolment_manager extends \course_enrolment_manager {
      *      boolean moreusers True if there are still more users, otherwise is False.
      */
     public function search_users_with_groups(string $search = '', bool $searchanywhere = false, int $page = 0, int $perpage = 25,
-            array $groups) {
+            array $groups = []) {
         global $DB;
 
         [$ufields, $joins, $params, $wherecondition] = $this->get_basic_search_conditions($search, $searchanywhere);

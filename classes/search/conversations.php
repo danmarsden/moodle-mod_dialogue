@@ -25,8 +25,6 @@
 
 namespace mod_dialogue\search;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Search area for mod_dialogue conversatoins and messages.
  *
@@ -96,7 +94,7 @@ class conversations extends \core_search\base_mod {
         $doc->set('owneruserid', \core_search\manager::NO_OWNER_ID);
         $doc->set('modified', $record->timemodified);
 
-        // // Check if this document should be considered new.
+        // Check if this document should be considered new.
         if (isset($options['lastindexedtime']) && ($options['lastindexedtime'] < $record->timemodified)) {
             // If the document was created after the last index time, it must be new.
             $doc->set_is_new(true);
@@ -157,7 +155,8 @@ class conversations extends \core_search\base_mod {
     public function get_context_url(\core_search\document $doc) {
         $context = \context::instance_by_id($doc->get('contextid'));
         $entry = $this->get_dialogue_conversations($doc->get('itemid'));
-        return new \moodle_url('/mod/dialogue/conversation.php', array('id' => $context->instanceid, 'action' => 'view', 'conversationid' => $entry->messageid));
+        return new \moodle_url('/mod/dialogue/conversation.php',
+            ['id' => $context->instanceid, 'action' => 'view', 'conversationid' => $entry->messageid]);
     }
 
     /**

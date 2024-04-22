@@ -25,8 +25,6 @@
 
 namespace mod_dialogue\search;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Search area for mod_dialogue activities.
  *
