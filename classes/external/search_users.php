@@ -100,7 +100,7 @@ class search_users extends external_api {
             $exceptionparam->courseid = $params['courseid'];
             throw new moodle_exception('errorcoursecontextnotvalid' , 'webservice', '', $exceptionparam);
         }
-        course_require_view_participants($context);
+
         if (!has_capability('moodle/site:accessallgroups', $context) &&
             $DB->record_exists('dialogue', ['id' => $cm->instance, 'usecoursegroups' => 1])) {
 
