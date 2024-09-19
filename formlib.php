@@ -254,15 +254,14 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
             'ajax' => 'mod_dialogue/form-user-selector',
             'multiple' => true,
             'cmid' => $cm->id,
-            'valuehtmlcallback' => function($value) {
+            'valuehtmlcallback' => function($value, $USER, $cm) {
                 global $OUTPUT;
-
                 $userfieldsapi = \core_user\fields::for_name();
                 $allusernames = $userfieldsapi->get_sql('', false, '', '', false)->selects;
                 $fields = 'id, ' . $allusernames;
                 $user = \core_user::get_user($value, $fields);
                 $useroptiondata = [
-                    'fullname' => fullname($user),
+                    'fullname' => dialogue_add_user_fullname($user, $USER, $cm),
                 ];
                 return $OUTPUT->render_from_template('mod_dialogue/form-user-selector-suggestion', $useroptiondata);
             }

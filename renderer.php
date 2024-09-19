@@ -71,7 +71,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $html .= html_writer::start_div('conversation-body');
 
         $datestrings = (object) dialogue_get_humanfriendly_dates($conversation->timemodified);
-        $datestrings->fullname = fullname($conversation->author);
+        $datestrings->fullname = dialogue_add_user_fullname($conversation->author, $USER, $cm);
         if ($conversation->timemodified >= $today) {
             $openedbyheader = get_string('openedbytoday', 'dialogue', $datestrings);
         } else if ($conversation->timemodified >= $yearago) {
@@ -145,7 +145,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                     $html .= html_writer::start_tag('tr');
                     $picture = $this->output->user_picture($person, array('class' => 'userpicture img-rounded', 'size' => 20));
                     $html .= html_writer::tag('td', $picture);
-                    $html .= html_writer::tag('td', fullname($person));
+                    $html .= html_writer::tag('td', dialogue_add_user_fullname($person, $USER, $cm));
                     $html .= html_writer::tag('td', $sentonstring . userdate($receivedby->timemodified));
                     $html .= html_writer::end_tag('tr');
                 }
@@ -162,7 +162,8 @@ class mod_dialogue_renderer extends plugin_renderer_base {
             $html .= '&nbsp;' . get_string('participants', 'dialogue');
             foreach ($participants as $participant) {
                 $picture = $this->output->user_picture($participant, array('class' => 'userpicture img-rounded', 'size' => 20));
-                $html .= html_writer::tag('span', $picture . '&nbsp;' . fullname($participant), array('class' => 'participant'));
+                $html .= html_writer::tag('span', $picture . '&nbsp;'
+                . dialogue_add_user_fullname($participant, $USER, $cm), array('class' => 'participant'));
             }
             $html .= html_writer::end_div();
         }
@@ -179,6 +180,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
      * @return string
      */
     public function conversation_listing(\mod_dialogue\conversations $conversations) {
+        global $USER;
         $dialogue = $conversations->dialogue;
         $cm       = $conversations->dialogue->cm;
 
@@ -241,7 +243,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                     $displayuser = dialogue_get_user_details($dialogue, $record->userid);
                     $avatar = $this->output->user_picture($displayuser, array('class' => 'userpicture img-rounded', 'size' => 48));
                     $html .= html_writer::tag('td', $avatar);
-                    $html .= html_writer::tag('td', fullname($displayuser));
+                    $html .= html_writer::tag('td', dialogue_add_user_fullname($displayuser, $USER, $cm));
                 }
 
                 if (isset($record->subject) && isset($record->body)) {
@@ -257,7 +259,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                         $participant = dialogue_get_user_details($dialogue, $participantid);
                         $picture = $this->output->user_picture($participant,
                             array('class' => 'userpicture img-rounded', 'size' => 16));
-                        $html .= html_writer::tag('span', $picture.' '.fullname($participant),
+                        $html .= html_writer::tag('span', $picture.' '.dialogue_add_user_fullname($participant, $USER, $cm),
                                                     array('class' => 'participant'));
 
                     }
@@ -306,7 +308,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
      * @return string
      */
     public function render_reply(\mod_dialogue\reply $reply) {
-
+        global $USER;
         $context        = $reply->dialogue->context; // Fetch context from parent dialogue.
         $cm             = $reply->dialogue->cm; // Fetch course module from parent dialogue.
         $conversation   = $reply->conversation; // Fetch parent conversation.
@@ -326,7 +328,7 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $html .= html_writer::start_div('conversation-body');
 
         $datestrings = (object) dialogue_get_humanfriendly_dates($reply->timemodified);
-        $datestrings->fullname = fullname($reply->author);
+        $datestrings->fullname = dialogue_add_user_fullname($reply->author, $USER, $cm);
         if ($reply->timemodified >= $today) {
             $repliedbyheader = get_string('repliedbytoday', 'dialogue', $datestrings);
         } else if ($reply->timemodified >= $yearago) {

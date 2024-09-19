@@ -450,16 +450,10 @@ class message implements \renderable {
         $context = $this->dialogue->context;
         $userfrom = $DB->get_record('user', array('id' => $this->_authorid), '*', MUST_EXIST);
         $subject = format_string($this->conversation->subject, true, array('context' => $context));
-
         $a = new \stdClass();
-        $a->userfrom = fullname($userfrom);
         $a->subject = $subject;
         $url = new \moodle_url('/mod/dialogue/view.php', array('id' => $cm->id));
         $a->url = $url->out(false);
-
-        $posthtml = get_string('messageapibasicmessage', 'dialogue', $a);
-        $posttext = html_to_text($posthtml);
-        $smallmessage = get_string('messageapismallmessage', 'dialogue', fullname($userfrom));
 
         $contexturlparams = array('id' => $cm->id, 'conversationid' => $conversationid);
         $contexturl = new \moodle_url('/mod/dialogue/conversation.php', $contexturlparams);
@@ -477,6 +471,14 @@ class message implements \renderable {
             $this->set_flag(dialogue::FLAG_SENT, $participant);
 
             $userto = $DB->get_record('user', array('id' => $participant->id), '*', MUST_EXIST);
+
+            $a->userfrom = dialogue_add_user_fullname($userfrom, $userto, $cm);
+            $a->course = $course->shortname;
+
+            $posthtml = get_string('messageapibasicmessage', 'dialogue', $a);
+            $posttext = html_to_text($posthtml);
+            $smallmessage = get_string('messageapismallmessage', 'dialogue',
+                dialogue_add_user_fullname($userfrom, $userto, $cm));
 
             $eventdata = new \core\message\message();
             $eventdata->courseid = $course->id;

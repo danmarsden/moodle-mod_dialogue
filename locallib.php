@@ -487,3 +487,19 @@ function dialogue_contains_draft_files($draftid) {
     return (count($draftfiles) > 1) ? true : false;
 }
 
+/**
+ * Get the name for a user - hiding their full name if the required capability
+ * is missing.
+ *
+ * @param stdClass $userviewed the user whose details are being viewed
+ * @param stdClass $userviewedby the user who is viewing these details
+ * @param stdClass $cm  the course module object
+ *
+ * @return string fullname
+ */
+function dialogue_add_user_fullname(stdClass $userviewed, stdClass $userviewedby, stdClass $cm) {
+    $capability = 'moodle/site:viewfullnames';
+    $context = context_module::instance($cm->id);
+    $hasviewfullnames = has_capability($capability, $context, $userviewedby);
+    return fullname($userviewed, $hasviewfullnames);
+}
