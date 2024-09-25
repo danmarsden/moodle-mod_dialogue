@@ -37,7 +37,6 @@ use external_multiple_structure;
 use core_user_external;
 use context_module;
 use moodle_exception;
-use course_enrolment_manager;
 use core\session\exception;
 
 /**
@@ -120,7 +119,7 @@ class search_users extends external_api {
                                                         $groups);
 
         } else {
-            $manager = new course_enrolment_manager($PAGE, $course);
+            $manager = new \mod_dialogue\local\course_enrolment_manager($PAGE, $course);
             $users = $manager->search_users($params['search'],
                                             $params['searchanywhere'],
                                             $params['page'],
@@ -137,10 +136,6 @@ class search_users extends external_api {
         foreach ($users['users'] as $user) {
             // Don't include logged in user as a possible user.
             if ($user->id == $USER->id) {
-                continue;
-            }
-            if (!has_capability('mod/dialogue:receive', $context, $user)) {
-                // User does not have the ability to receive so remove them.
                 continue;
             }
             if ($userdetails = user_get_user_details($user, $course, $requiredfields)) {
