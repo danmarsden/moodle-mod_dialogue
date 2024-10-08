@@ -105,6 +105,28 @@ if ($action == 'create' || $action == 'edit') {
     exit;
 }
 
+// Reopen conversation.
+if ($action == 'reopen') {
+    if (!empty($confirm) && confirm_sesskey()) {
+        $conversation->reopen();
+        // Trigger conversation closed event.
+        $eventparams = array(
+            'context' => $context,
+            'objectid' => $conversation->conversationid
+        );
+        $event = \mod_dialogue\event\conversation_reopened::create($eventparams);
+        $event->trigger();
+        redirect($returnurl, get_string('conversationreopen', 'dialogue',
+                                        $conversation->subject));
+    }
+    echo $OUTPUT->header($activityrecord->name);
+    $pageurl->param('confirm', $conversationid);
+    $message = get_string('conversationreopenconfirm', 'dialogue', $conversation->subject);
+    echo $OUTPUT->confirm($message, $pageurl, $returnurl);
+    echo $OUTPUT->footer();
+    exit;
+}
+
 // Close conversation.
 if ($action == 'close') {
     if (!empty($confirm) && confirm_sesskey()) {

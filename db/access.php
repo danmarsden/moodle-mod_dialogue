@@ -127,6 +127,30 @@ $capabilities = array(
         )
     ),
 
+    'mod/dialogue:reopen' => array(
+
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_PREVENT
+        )
+    ),
+
+    'mod/dialogue:reopenany' => array(
+
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_PREVENT
+        )
+    ),
+
     'mod/dialogue:receive' => array(
 
         'captype' => 'read',

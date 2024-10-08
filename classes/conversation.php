@@ -169,6 +169,39 @@ class conversation extends message {
     }
 
     /**
+     * Reopen
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function reopen() {
+        global $DB, $USER;
+
+        $context = $this->dialogue->context;
+
+        // Is this a draft.
+        if (is_null($this->_conversationid)) {
+            throw new \moodle_exception('cannotreopendraftconversation', 'dialogue');
+        }
+        // Permission check.
+        $canopen = (($this->_authorid == $USER->id) || has_capability('mod/dialogue:reopen', $context) ||
+            has_capability('mod/dialogue:reopenany', $context));
+        if (!$canopen) {
+            throw new \moodle_exception('nopermissiontoreopen', 'dialogue');
+        }
+
+        $openstate = dialogue::STATE_OPEN;
+        $closedstate = dialogue::STATE_CLOSED;
+        $params = array('conversationid' => $this->conversationid, 'state' => $closedstate);
+
+        // Reopen all messages in conversation that have a close state, we don't worry about drafts etc.
+        $DB->set_field('dialogue_messages', 'state', $openstate, $params);
+
+        return true;
+    }
+
+    /**
      * Delete
      * @return bool
      * @throws \coding_exception

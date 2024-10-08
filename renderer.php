@@ -101,6 +101,22 @@ class mod_dialogue_renderer extends plugin_renderer_base {
             }
         }
 
+        if ($conversation->state == \mod_dialogue\dialogue::STATE_CLOSED) {
+            $canreopen = ((has_capability('mod/dialogue:reopen', $context) && $USER->id == $conversation->author->id) ||
+            has_capability('mod/dialogue:reopenany', $context));
+
+            if ($canreopen) {
+                $html .= html_writer::start_tag('li');
+                $trashicon = html_writer::tag('i', '', array('class' => "fa fa-trash-o"));
+                $reopenurl = new moodle_url('/mod/dialogue/conversation.php');
+                $reopenurl->param('id', $cm->id);
+                $reopenurl->param('conversationid', $conversation->conversationid);
+                $reopenurl->param('action', 'reopen');
+                $html .= html_writer::link($reopenurl,  get_string('reopenconversation', 'dialogue') . $trashicon);
+                $html .= html_writer::end_tag('li');
+            }
+        }
+
         $candelete = ((has_capability('mod/dialogue:delete', $context) && $USER->id == $conversation->author->id) ||
                        has_capability('mod/dialogue:deleteany', $context));
 
