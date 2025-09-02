@@ -42,9 +42,20 @@ $context = context_module::instance($cm->id);
 
 require_login($course, false, $cm);
 
-$rolenames = role_fix_names(get_profile_roles($context), $context, ROLENAME_ALIAS, true);
+$profileroles = get_profile_roles($context);
+$shortnameroles = [];
+foreach ($profileroles as $roles) {
+    $shortnameroles[] = $roles->shortname;
+}
+
+$rolenames = role_fix_names($profileroles, $context, ROLENAME_ALIAS, true);
 if (!$roleid) {
-    $roleid  = $DB->get_field('role', 'id', array('shortname' => 'student'), MUST_EXIST);
+    if (array_search('student', $shortnameroles, true)) {
+        $roleid = $DB->get_field('role', 'id', ['shortname' => 'student'], MUST_EXIST);
+    } else {
+        $currentroleobject = current($profileroles);
+        $roleid = $DB->get_field('role', 'id', ['shortname' => $currentroleobject->shortname], MUST_EXIST);
+    }
 }
 
 // Now set params on pageurl will later be set on $PAGE.
