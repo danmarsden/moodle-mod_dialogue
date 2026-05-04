@@ -619,6 +619,8 @@ class mod_dialogue_renderer extends plugin_renderer_base {
      * @throws moodle_exception
      */
     public function tab_navigation(\mod_dialogue\dialogue $dialogue) {
+        global $USER;
+
         $config  = $dialogue->config;
         $context = $dialogue->context;
         $cm      = $dialogue->cm;
@@ -656,7 +658,11 @@ class mod_dialogue_renderer extends plugin_renderer_base {
             $html .= html_writer::end_tag('li');
         }
         // Open discussion button.
-        if (has_capability('mod/dialogue:open', $context)) {
+        $showopenbutton = has_capability('mod/dialogue:open', $dialogue->context);
+        if ($showopenbutton && dialogue_has_open_conversations_from_user($cm->instance, $USER->id)) {
+            $showopenbutton = has_capability('mod/dialogue:openconcurrent', $dialogue->context);
+        }
+        if ($showopenbutton) {
             $createurl = new moodle_url('conversation.php', array('id' => $cm->id, 'action' => 'create'));
             $html .= html_writer::link($createurl, get_string('create'), array('class' => 'btn-create pull-right'));
         }

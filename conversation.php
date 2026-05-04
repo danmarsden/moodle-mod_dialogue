@@ -60,6 +60,9 @@ $conversation = new \mod_dialogue\conversation($dialogue, $conversationid);
 
 if ($action == 'create' || $action == 'edit') {
     require_capability('mod/dialogue:open', $context);
+    if (dialogue_has_open_conversations_from_user($cm->instance, $USER->id)) {
+        require_capability('mod/dialogue:openconcurrent', $context);
+    }
     $form = $conversation->initialise_form();
     if ($form->is_submitted()) {
         $submitaction = $form->get_submit_action();

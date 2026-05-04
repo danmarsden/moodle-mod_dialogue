@@ -511,3 +511,23 @@ function dialogue_add_user_fullname(stdClass $userviewed,
     $hasviewfullnames = has_capability($capability, $context, $userviewedby);
     return fullname($userviewed, $hasviewfullnames);
 }
+
+function dialogue_has_open_conversations_from_user($dialogueid, $userid) {
+    global $DB;
+
+    $sql = "SELECT 1
+              FROM {dialogue_participants} dp
+              JOIN {dialogue_messages} dm ON dm.conversationid = dp.conversationid
+                                         AND dm.conversationindex = 1
+                                         AND dm.state = :state
+             WHERE dp.dialogueid = :dialogueid
+               AND dp.userid = :userid";
+
+    $params = array(
+        'state' => \mod_dialogue\dialogue::STATE_OPEN,
+        'dialogueid' => $dialogueid,
+        'userid' => $userid
+    );
+
+    return $DB->record_exists_sql($sql, $params);
+}

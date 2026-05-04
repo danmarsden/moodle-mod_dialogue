@@ -78,6 +78,7 @@ $string['dialogue:closeany'] = 'Close any';
 $string['dialogue:delete'] = 'Delete own';
 $string['dialogue:deleteany'] = 'Delete any';
 $string['dialogue:open'] = 'Open a conversation';
+$string['dialogue:openconcurrent'] = 'Open additional conversations when another conversation is already open';
 $string['dialogue:reopen'] = 'Reopen own';
 $string['dialogue:reopenany'] = 'Reopen any';
 $string['dialogue:receive'] = 'Receive, who can be the recipient when opening a conversation';
