@@ -82,14 +82,36 @@ class conversations_by_author extends conversations {
         $this->params['lastmessagedialogueid'] = $this->dialogue->activityrecord->id;
 
         if (!has_capability('mod/dialogue:viewany', $this->dialogue->context)) {
+            if (has_capability('mod/dialogue:viewgroups', $this->dialogue->context)) {
+                // User can see conversations of groups they are member of, or where they are a direct participant.
+                $this->basesql .= " JOIN (SELECT DISTINCT dp.conversationid
+                                            FROM {dialogue_participants} dp
+                                           WHERE dp.dialogueid = :dialogueid
+                                             AND (
+                                               dp.userid = :userid
+                                               OR dp.userid IN (
+                                                 SELECT gm2.userid
+                                                   FROM {groups_members} gm2
+                                                   JOIN {groups} g ON g.id = gm2.groupid
+                                                   JOIN {groups_members} gm1 ON gm1.groupid = g.id
+                                                  WHERE gm1.userid = :groupsuserid
+                                                    AND g.courseid = :courseid))
+                                         ) isfromgroup ON isfromgroup.conversationid = dc.id";
 
-            $this->basesql .= " JOIN (SELECT dp.conversationid
-                                        FROM {dialogue_participants} dp
-                                       WHERE dp.userid = :userid AND dp.dialogueid=:dialogueid) isparticipant
-                                          ON isparticipant.conversationid = dc.id";
+                $this->params['userid'] = $USER->id;
+                $this->params['dialogueid'] = $this->dialogue->activityrecord->id;
+                $this->params['groupsuserid'] = $USER->id;
+                $this->params['courseid'] = $this->dialogue->course->id;
+            } else {
+                // User can only see conversations where they are a direct participant.
+                $this->basesql .= " JOIN (SELECT dp.conversationid
+                                            FROM {dialogue_participants} dp
+                                        WHERE dp.userid = :userid AND dp.dialogueid=:dialogueid) isparticipant
+                                            ON isparticipant.conversationid = dc.id";
 
-            $this->params['userid'] = $USER->id;
-            $this->params['dialogueid'] = $this->dialogue->activityrecord->id;
+                $this->params['userid'] = $USER->id;
+                $this->params['dialogueid'] = $this->dialogue->activityrecord->id;
+            }
         }
 
         $this->fields = array('userid' => 'u.id AS userid',

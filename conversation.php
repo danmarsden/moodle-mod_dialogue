@@ -185,7 +185,9 @@ if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
 
 if ($conversation->state == \mod_dialogue\dialogue::STATE_OPEN || $conversation->state == \mod_dialogue\dialogue::STATE_CLOSED) {
     if (!has_capability('mod/dialogue:viewany', $context) && !$conversation->is_participant()) {
-        throw new moodle_exception('nopermission');
+        if (!(has_capability('mod/dialogue:viewgroups', $context) && $conversation->has_group_participant())) {
+            throw new moodle_exception('nopermission');
+        }
     }
 }
 // View conversation by default.

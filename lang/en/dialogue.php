@@ -85,6 +85,7 @@ $string['dialogue:reply'] = 'Reply';
 $string['dialogue:replyany'] = 'Reply any';
 $string['dialogue:viewany'] = 'View any';
 $string['dialogue:viewbyrole'] = 'View conversation listing by role, experimental';
+$string['dialogue:viewgroups'] = 'View conversations within user\'s groups';
 $string['dialoguecron'] = 'Dialogue cron';
 $string['dialogueintro'] = 'Dialogue Introduction';
 $string['dialoguename'] = 'Dialogue name';
