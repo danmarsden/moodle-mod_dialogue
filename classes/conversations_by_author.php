@@ -49,6 +49,10 @@ class conversations_by_author extends conversations {
      * @var array
      */
     protected $states = array();
+    /**
+     * @var int
+     */
+    protected $groupid = 0;
 
     /**
      * Setup
@@ -90,6 +94,17 @@ class conversations_by_author extends conversations {
 
             $this->params['userid'] = $USER->id;
             $this->params['dialogueid'] = $this->dialogue->activityrecord->id;
+        }
+
+        if ($this->groupid) {
+            $this->basesql .= " JOIN (SELECT DISTINCT dp.conversationid
+                                        FROM {dialogue_participants} dp
+                                        JOIN {groups_members} gm ON gm.userid = dp.userid
+                                       WHERE dp.dialogueid = :groupdialogueid
+                                         AND gm.groupid = :groupid) groupfilter ON groupfilter.conversationid = dc.id";
+
+            $this->params['groupdialogueid'] = $this->dialogue->activityrecord->id;
+            $this->params['groupid'] = $this->groupid;
         }
 
         $this->fields = array('userid' => 'u.id AS userid',
@@ -264,6 +279,10 @@ class conversations_by_author extends conversations {
                 throw new \moodle_exception("Cannot sort on $name");
         }
         return $this->orderbysql = $orderby;
+    }
+
+    public function set_group($groupid) {
+        $this->groupid = $groupid;
     }
 
 }
