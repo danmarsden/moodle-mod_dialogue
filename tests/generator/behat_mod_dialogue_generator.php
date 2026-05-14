@@ -15,17 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Dialogue version.
+ * Behat data generator for mod_dialogue.
  *
- * @package mod_dialogue
- * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @package   mod_dialogue
+ * @category  test
+ * @copyright 2026 Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->version   = 2026051400;
-$plugin->release   = 2026051400;
-$plugin->requires  = 2024100700;  // Requires 4.5 or higher.
-$plugin->component = 'mod_dialogue';    // Full name of the plugin (used for diagnostics).
-$plugin->maturity  = MATURITY_STABLE;    // This version's maturity level.
-$plugin->supported = [405, 502];
+class behat_mod_dialogue_generator extends behat_generator_base {
+    /**
+     * Returns the list of creatable entities for the mod_dialogue plugin.
+     *
+     * @return array
+     */
+    protected function get_creatable_entities(): array {
+        return [
+            'conversations' => [
+                'singular' => 'conversation',
+                'datagenerator' => 'conversation',
+                'required' => ['dialogue', 'userfrom', 'userto'],
+            ],
+        ];
+    }
+}

@@ -1713,3 +1713,22 @@ body.path-mod-dialogue.jsenabled .draft-list tr:hover,
 body.path-mod-dialogue.jsenabled .bulkopenrule-list tr:hover {
     cursor: pointer;
 }
+
+body.path-mod-dialogue #region-main {
+    :is(.role-indicator, .username-indicator) {
+        display: inline-block;
+        margin-left: 4px;
+        padding: 2px 4px;
+        font-weight: 400;
+        line-height: 14px;
+        white-space: nowrap;
+        vertical-align: baseline;
+        background-color: #0001;
+        font-size: 14px;
+        border-radius: 4px;
+    }
+
+    .username-indicator {
+        background-color: #ffefcaee;
+    }
+}
