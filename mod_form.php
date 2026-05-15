@@ -63,10 +63,6 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->addHelpButton('maxattachments', 'maxattachments', 'dialogue');
         $mform->setDefault('maxattachments', $pluginconfig->maxattachments);
 
-        $mform->addElement('checkbox', 'usecoursegroups', get_string('usecoursegroups', 'dialogue'));
-        $mform->addHelpButton('usecoursegroups', 'usecoursegroups', 'dialogue');
-        $mform->setDefault('usecoursegroups', 0);
-
         $this->standard_grading_coursemodule_elements();
 
         $this->standard_coursemodule_elements();
@@ -82,9 +78,6 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $data = parent::get_data();
         if (!$data) {
             return false;
-        }
-        if (!isset($data->usecoursegroups)) {
-            $data->usecoursegroups = 0;
         }
         return $data;
     }

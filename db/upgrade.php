@@ -30,7 +30,7 @@
  * @return bool
  */
 function xmldb_dialogue_upgrade($oldversion) {
-    global $DB;
+    global $CFG, $DB;
 
     $dbman = $DB->get_manager();
 
@@ -46,6 +46,30 @@ function xmldb_dialogue_upgrade($oldversion) {
 
         // savepoint reached.
         upgrade_mod_savepoint(true, 2024120900, 'dialogue');
+    }
+
+    if ($oldversion >= 2013101501 && $oldversion < 2026051500) {
+        // Migrate the old property usecoursegroups to $cm->groupmode = SEPARATEGROUPS or NOGROUPS.
+        require_once($CFG->dirroot . '/course/lib.php');
+
+        $moduleid = $DB->get_field('modules', 'id', ['name' => 'dialogue']);
+
+        if ($moduleid) {
+            $sql = "SELECT cm.id, d.usecoursegroups
+                      FROM {course_modules} cm
+                      JOIN {dialogue} d ON d.id = cm.instance
+                     WHERE cm.module = :moduleid";
+            $recordset = $DB->get_recordset_sql($sql, ['moduleid' => $moduleid]);
+
+            foreach ($recordset as $record) {
+                $groupmode = $record->usecoursegroups ? SEPARATEGROUPS : NOGROUPS;
+                set_coursemodule_groupmode($record->id, $groupmode);
+            }
+
+            $recordset->close();
+        }
+
+        upgrade_mod_savepoint(true, 2026051500, 'dialogue');
     }
 
     return true;

@@ -34,7 +34,7 @@
 function dialogue_supports($feature) {
     switch($feature) {
         case FEATURE_GROUPS:
-            return false;
+            return true;
         case FEATURE_GROUPINGS:
             return false;
         case FEATURE_MOD_INTRO:
