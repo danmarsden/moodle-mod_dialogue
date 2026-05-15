@@ -72,8 +72,7 @@ $list = new \mod_dialogue\conversations_by_author($dialogue, $page, \mod_dialogu
 $list->set_state($state);
 $list->set_order($sort, $direction);
 
-if ($activityrecord->usecoursegroups) {
-    $cm->groupmode = SEPARATEGROUPS; // For groups_print_activity_menu() to work correctly.
+if ($cm->groupmode == SEPARATEGROUPS) {
     $list->set_group(optional_param('group', 0, PARAM_INT));
 }
 
@@ -86,7 +85,7 @@ echo $OUTPUT->heading(format_string($activityrecord->name));
 echo $renderer->tab_navigation($dialogue);
 echo $renderer->state_button_group();
 echo $renderer->list_sortby(\mod_dialogue\conversations_by_author::get_sort_options(), $sort, $direction);
-if ($activityrecord->usecoursegroups) {
+if ($cm->groupmode == SEPARATEGROUPS) {
     echo groups_print_activity_menu($cm, $pageurl);
 }
 echo $renderer->conversation_listing($list);
