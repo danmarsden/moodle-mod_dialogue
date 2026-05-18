@@ -117,6 +117,33 @@ class message implements \renderable {
     }
 
     /**
+     * Check if the current user shares a group with any
+     * participant of this conversation.
+     *
+     * @return bool
+     */
+    public function has_group_participant() {
+        global $DB, $USER;
+
+        $participantids = array_keys($this->conversation->participants);
+        if (empty($participantids)) {
+            return false;
+        }
+
+        $course = $this->dialogue->course;
+        list($insql, $inparams) = $DB->get_in_or_equal($participantids, SQL_PARAMS_NAMED, 'participant');
+        $sql = "SELECT 1
+                  FROM {groups_members} gm1
+                  JOIN {groups_members} gm2 ON gm2.groupid = gm1.groupid
+                  JOIN {groups} g ON g.id = gm1.groupid
+                 WHERE gm1.userid = :currentuserid
+                   AND gm2.userid $insql
+                   AND g.courseid = :courseid";
+        $params = array_merge($inparams, ['currentuserid' => $USER->id, 'courseid' => $course->id]);
+        return $DB->record_exists_sql($sql, $params);
+    }
+
+    /**
      * Delete
      * @return bool
      * @throws \coding_exception

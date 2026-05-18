@@ -203,6 +203,35 @@ function dialogue_cm_unread_total(\mod_dialogue\dialogue $dialogue) {
                        WHERE df.dialogueid = :undialogueid
                          AND df.userid = :unuserid
                          AND df.flag = :unflag) AS unread";
+    } else if (has_capability('mod/dialogue:viewgroups', $dialogue->context)) {
+        // Restricted by group membership or own participation.
+        $params['courseid'] = $dialogue->course->id;
+        $params['groupuserid'] = $userid;
+        $sql = "SELECT COUNT(1) AS unread
+                FROM {dialogue_messages} dm
+                LEFT JOIN {dialogue_flags} df
+                    ON dm.id = df.messageid
+                    AND df.flag = :unflag
+                    AND df.userid = :unuserid
+                WHERE dm.dialogueid = :todialogueid
+                AND df.id IS NULL
+                AND dm.state $insql
+                AND EXISTS (
+                    SELECT 1
+                    FROM {dialogue_participants} dp
+                    WHERE dm.conversationid = dp.conversationid
+                    AND (
+                        dp.userid = :touserid
+                        OR dp.userid IN (
+                            SELECT gm2.userid
+                            FROM {groups_members} gm2
+                            JOIN {groups} g ON g.id = gm2.groupid
+                            JOIN {groups_members} gm1 ON gm1.groupid = g.id
+                            WHERE gm1.userid = :groupuserid
+                            AND g.courseid = :courseid
+                        )
+                    )
+                )";
     }
 
     // Get user's total unread count for a dialogue.
@@ -380,12 +409,26 @@ function dialogue_get_conversations_count($cm, $state = null) {
     $params = $params + $inparams;
 
     if (!has_capability('mod/dialogue:viewany', $context)) {
-        $joins[] = "JOIN {dialogue_participants} dp ON dp.conversationid = dc.id ";
-        $wheres[] = "dp.userid = :userid";
-        $params['userid'] = $USER->id;
+        if (has_capability('mod/dialogue:viewgroups', $context)) {
+            // Restricted by group membership or own participation.
+            $joins[] = "JOIN {dialogue_participants} dp ON dp.conversationid = dc.id ";
+            $wheres[] = "(dp.userid = :userid OR dp.userid IN (SELECT gm2.userid
+                                                               FROM {groups_members} gm2
+                                                               JOIN {groups} g ON g.id = gm2.groupid
+                                                               JOIN {groups_members} gm1 ON gm1.groupid = g.id
+                                                               WHERE gm1.userid = :groupuserid
+                                                               AND g.courseid = :groupcourseid))";
+            $params['userid'] = $USER->id;
+            $params['groupcourseid'] = $cm->course;
+            $params['groupuserid'] = $USER->id;
+        } else {
+            $joins[] = "JOIN {dialogue_participants} dp ON dp.conversationid = dc.id ";
+            $wheres[] = "dp.userid = :userid";
+            $params['userid'] = $USER->id;
+        }
     }
 
-    $sqlbase = "SELECT COUNT(dc.dialogueid) AS count
+    $sqlbase = "SELECT COUNT(DISTINCT dc.id) AS count
                   FROM {dialogue_conversations} dc";
 
     if ($joins) {
