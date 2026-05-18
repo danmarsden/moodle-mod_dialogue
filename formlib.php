@@ -80,8 +80,7 @@ class mod_dialogue_message_form extends moodleform {
             get_string('send', 'dialogue'), array('class' => 'send-button'));
         $actionbuttongroup[] =& $mform->createElement('submit', 'save',
             get_string('savedraft', 'dialogue'), array('class' => 'savedraft-button'));
-        $actionbuttongroup[] =& $mform->createElement('submit', 'cancel',
-            get_string('cancel'), array('class' => 'cancel-button'));
+        $actionbuttongroup[] =& $mform->createElement('cancel');
 
         $actionbuttongroup[] =& $mform->createElement('submit', 'trash',
             get_string('trashdraft', 'dialogue'), array('class' => 'trashdraft-button pull-right'));
