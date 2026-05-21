@@ -16,6 +16,8 @@
 
 namespace mod_dialogue\local;
 
+require_once($CFG->dirroot . '/enrol/locallib.php');
+
 /**
  * This class provides a custom search function with groups.
  *

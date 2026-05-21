@@ -237,6 +237,16 @@ class mod_dialogue_reply_form extends mod_dialogue_message_form {
  */
 class mod_dialogue_conversation_form extends mod_dialogue_message_form {
     /**
+     * @var stdClass|null
+     */
+    protected $forcerecipient = null;
+
+    public function __construct(stdClass $forcerecipient = null) {
+        $this->forcerecipient = $forcerecipient;
+        parent::__construct();
+    }
+
+    /**
      * Definition
      * @throws coding_exception
      * @throws dml_exception
@@ -266,7 +276,17 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
                 return $OUTPUT->render_from_template('mod_dialogue/form-user-selector-suggestion', $useroptiondata);
             }
         ];
-        $mform->addElement('autocomplete', 'useridsselected', get_string('users'), [], $options);
+
+        if ($this->forcerecipient) {
+            $mform->addElement('static', 'forcerecipient',
+                $OUTPUT->user_picture($this->forcerecipient, ['link' => false]) .
+                dialogue_add_user_fullname($this->forcerecipient));
+            $mform->addElement('hidden', 'useridsselected[]');
+            $mform->setType('useridsselected[]', PARAM_INT);
+            $mform->setDefault('useridsselected[]', $this->forcerecipient->id);
+        } else {
+            $mform->addElement('autocomplete', 'useridsselected', get_string('users'), [], $options);
+        }
 
         // Bulk open rule section.
         if (has_capability('mod/dialogue:bulkopenrulecreate', $context)) {
@@ -293,8 +313,8 @@ class mod_dialogue_conversation_form extends mod_dialogue_message_form {
                 $mform->setDefault('cutoffdate', time() + 3600 * 24 * 7);
                 $mform->disabledIf('cutoffdate', 'includefuturemembers', 'notchecked');
             }
-        } else {
-            // Bulk option not available - userid must be selected to save.
+        } else if (!$this->forcerecipient) {
+            // Bulk option not available and no recipient forced - userid must be selected to save.
             $mform->addRule('useridsselected', null, 'required', null, 'client');
         }
 

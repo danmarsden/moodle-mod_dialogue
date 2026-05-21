@@ -19,6 +19,7 @@ namespace mod_dialogue;
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../../../lib/filelib.php');
+require_once($CFG->dirroot . '/mod/dialogue/classes/local/course_enrolment_manager.php');
 
 /**
  * Class conversation
@@ -315,7 +316,7 @@ class conversation extends message {
      * @throws \moodle_exception
      */
     public function initialise_form() {
-        global $CFG, $USER;
+        global $CFG, $PAGE, $USER;
         require_once($CFG->dirroot . '/mod/dialogue/formlib.php');
 
         // Form can only be initialise if in draft state.
@@ -326,10 +327,26 @@ class conversation extends message {
         $cm = $this->dialogue->cm;
         $context = $this->dialogue->context;
         $dialogueid = $this->dialogue->dialogueid;
+        $activityrecord = $this->dialogue->activityrecord;
 
         require_capability('mod/dialogue:open', $context);
 
-        $form = new \mod_dialogue_conversation_form();
+        $forcerecipient = null;
+        if ($activityrecord->autoselectrecipient) {
+            $manager = new \mod_dialogue\local\course_enrolment_manager($PAGE, $PAGE->course);
+            if ($activityrecord->usecoursegroups && !has_capability('moodle/site:accessallgroups', $context)) {
+                $groups = groups_get_activity_allowed_groups($cm);
+                $users = $manager->search_users_with_groups('', false, 0, 2, $groups);
+            } else {
+                $users = $manager->search_users('', false, 0, 2);
+            }
+            if (count($users['users']) == 1) {
+                $user = reset($users['users']);
+                $forcerecipient = dialogue_get_user_details($this->dialogue, $user->id);
+            }
+        }
+
+        $form = new \mod_dialogue_conversation_form($forcerecipient);
         // Setup important hiddens.
         $form->set_data(array('id' => $cm->id));
         $form->set_data(array('cmid' => $cm->id));
