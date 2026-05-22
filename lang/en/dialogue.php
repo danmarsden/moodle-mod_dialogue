@@ -210,9 +210,6 @@ $string['usecoursegroups'] = 'Use course groups';
 $string['usecoursegroups_help'] = 'If the course has defined groups a further restriction will be added to who a dialogue can
 be opened with. Dialogues can only be opened between group members unless the person opening the dialogue has the "Access all groups"
 capability set.';
-$string['autoselectrecipient'] = 'Auto-select recipient if only one is available';
-$string['autoselectrecipient_help'] = 'If there is only one possible recipient for a dialogue, this option will automatically select that recipient.
-For example, if only teachers are allowed to receive dialogues and there is only one teacher to be listed, that teacher will be automatically selected.';
 $string['usesearch'] = 'Use search to find people to start a dialogue with';
 $string['viewconversations'] = 'View conversations';
 $string['viewconversationsbyrole'] = 'View conversations by role';

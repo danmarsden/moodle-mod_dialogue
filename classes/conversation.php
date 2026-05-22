@@ -332,18 +332,16 @@ class conversation extends message {
         require_capability('mod/dialogue:open', $context);
 
         $forcerecipient = null;
-        if ($activityrecord->autoselectrecipient) {
-            $manager = new \mod_dialogue\local\course_enrolment_manager($PAGE, $PAGE->course);
-            if ($activityrecord->usecoursegroups && !has_capability('moodle/site:accessallgroups', $context)) {
-                $groups = groups_get_activity_allowed_groups($cm);
-                $users = $manager->search_users_with_groups('', false, 0, 2, $groups);
-            } else {
-                $users = $manager->search_users('', false, 0, 2);
-            }
-            if (count($users['users']) == 1) {
-                $user = reset($users['users']);
-                $forcerecipient = dialogue_get_user_details($this->dialogue, $user->id);
-            }
+        $manager = new \mod_dialogue\local\course_enrolment_manager($PAGE, $PAGE->course);
+        if ($activityrecord->usecoursegroups && !has_capability('moodle/site:accessallgroups', $context)) {
+            $groups = groups_get_activity_allowed_groups($cm);
+            $users = $manager->search_users_with_groups('', false, 0, 2, $groups);
+        } else {
+            $users = $manager->search_users('', false, 0, 2);
+        }
+        if (count($users['users']) == 1) {
+            $user = reset($users['users']);
+            $forcerecipient = dialogue_get_user_details($this->dialogue, $user->id);
         }
 
         $form = new \mod_dialogue_conversation_form($forcerecipient);

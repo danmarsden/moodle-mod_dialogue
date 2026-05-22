@@ -19,14 +19,14 @@ Feature: Auto-select recipient is not triggered when multiple recipients exist
       | teacher2 | C1     | editingteacher |
       | student1 | C1     | student        |
     And the following "activities" exist:
-      | activity | name          | course | idnumber  | autoselectrecipient |
-      | dialogue | Test Dialogue | C1     | dialogue1 | 1                   |
+      | activity | name          | course | idnumber  |
+      | dialogue | Test Dialogue | C1     | dialogue1 |
     And the following "permission overrides" exist:
       | capability            | permission | role           | contextlevel | reference |
       | mod/dialogue:receive  | Allow      | editingteacher | Course       | C1        |
       | mod/dialogue:receive  | Prohibit   | student        | Course       | C1        |
 
-  Scenario: Autocomplete selector is shown when multiple recipients are available despite autoselectrecipient being enabled
+  Scenario: Autocomplete selector is shown when multiple recipients are available
     Given I am on the "Test Dialogue" "dialogue activity" page logged in as student1
     When I click on "Create" "link"
     And I open the autocomplete suggestions list

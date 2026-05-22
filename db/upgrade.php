@@ -48,19 +48,5 @@ function xmldb_dialogue_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2024120900, 'dialogue');
     }
 
-    if ($oldversion < 2026052100) {
-        // Define field autoselectrecipient to be added to dialogue.
-        $table = new xmldb_table('dialogue');
-        $field = new xmldb_field('autoselectrecipient', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'usecoursegroups');
-
-        // Conditionally launch add field autoselectrecipient.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // savepoint reached.
-        upgrade_mod_savepoint(true, 2026052100, 'dialogue');
-    }
-
     return true;
 }

@@ -67,10 +67,6 @@ class mod_dialogue_mod_form extends moodleform_mod {
         $mform->addHelpButton('usecoursegroups', 'usecoursegroups', 'dialogue');
         $mform->setDefault('usecoursegroups', 0);
 
-        $mform->addElement('checkbox', 'autoselectrecipient', get_string('autoselectrecipient', 'dialogue'));
-        $mform->addHelpButton('autoselectrecipient', 'autoselectrecipient', 'dialogue');
-        $mform->setDefault('autoselectrecipient', 0);
-
         $this->standard_grading_coursemodule_elements();
 
         $this->standard_coursemodule_elements();
@@ -89,9 +85,6 @@ class mod_dialogue_mod_form extends moodleform_mod {
         }
         if (!isset($data->usecoursegroups)) {
             $data->usecoursegroups = 0;
-        }
-        if (!isset($data->autoselectrecipient)) {
-            $data->autoselectrecipient = 0;
         }
         return $data;
     }

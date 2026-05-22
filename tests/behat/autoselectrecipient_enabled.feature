@@ -17,8 +17,8 @@ Feature: Auto-select recipient when only one is available
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
     And the following "activities" exist:
-      | activity | name          | course | idnumber  | autoselectrecipient |
-      | dialogue | Test Dialogue | C1     | dialogue1 | 1                   |
+      | activity | name          | course | idnumber  |
+      | dialogue | Test Dialogue | C1     | dialogue1 |
     And the following "permission overrides" exist:
       | capability            | permission | role           | contextlevel | reference |
       | mod/dialogue:receive  | Allow      | editingteacher | Course       | C1        |
