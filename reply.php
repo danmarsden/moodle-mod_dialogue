@@ -100,6 +100,8 @@ if ($form->is_submitted()) {
 }
 $renderer = $PAGE->get_renderer('mod_dialogue');
 echo $OUTPUT->header();
+// Render heading.
+echo $renderer->heading($conversation);
 // Render conversation.
 echo $renderer->render($conversation);
 // Render replies.

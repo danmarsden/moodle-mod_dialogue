@@ -73,6 +73,23 @@ class conversation extends message {
     }
 
     /**
+     * Return a structure of possible options that can be used to order replies.
+     *
+     * @return array $options
+     */
+    public static function get_sort_options() {
+        $options = array('latest' => array(
+                             'directional' => false,
+                                          ),
+                         'oldest' => array(
+                             'directional' => false,
+                                          ),
+                        );
+
+        return $options;
+    }
+
+    /**
      * Add participant.
      * @param int $userid
      * @return \type
@@ -452,11 +469,12 @@ class conversation extends message {
     /**
      * Replies
      * @param null $index
+     * @param string $sort (oldest|latest)
      * @return array|mixed|reply
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public function replies($index = null) {
+    public function replies($index = null, $sort = 'oldest') {
         global $DB;
 
         if (empty($this->_replies)) {
@@ -465,6 +483,8 @@ class conversation extends message {
              */
             $items = array(dialogue::STATE_OPEN, dialogue::STATE_CLOSED);
 
+            $direction = $sort == 'latest' ? 'DESC' : 'ASC';
+
             list($insql, $inparams) = $DB->get_in_or_equal($items, SQL_PARAMS_NAMED, 'viewstate');
 
             $sql = "SELECT dm.*
@@ -472,7 +492,7 @@ class conversation extends message {
                      WHERE dm.conversationindex > 1
                        AND dm.state $insql
                        AND dm.conversationid = :conversationid
-                  ORDER BY dm.conversationindex ASC";
+                  ORDER BY dm.conversationindex $direction";
 
             $params = array('conversationid' => $this->conversationid) + $inparams;
 

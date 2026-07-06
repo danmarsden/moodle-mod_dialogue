@@ -40,26 +40,6 @@ class mod_dialogue_renderer extends plugin_renderer_base {
 
         $html = '';
 
-        $html .= html_writer::start_div('conversation-heading');
-        $html .= html_writer::tag('h3', $conversation->subject, array('class' => 'heading'));
-
-        if ($conversation->state == \mod_dialogue\dialogue::STATE_OPEN) {
-            $span = html_writer::tag('span', get_string('open', 'dialogue'), array('class' => "state-indicator state-open"));
-            $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
-        }
-
-        if ($conversation->state == \mod_dialogue\dialogue::STATE_CLOSED) {
-            $span = html_writer::tag('span', get_string('closed', 'dialogue'), array('class' => "state-indicator state-closed"));
-            $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
-        }
-
-        if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
-            $span = html_writer::tag('span', get_string('bulkopener', 'dialogue'), array('class' => "state-indicator state-bulk"));
-            $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
-        }
-
-        $html .= html_writer::end_div(); // Close header.
-
         $html .= html_writer::start_div('conversation');
         $messageid = 'm' . $conversation->messageid;
 
@@ -132,7 +112,6 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         }
 
         $html .= html_writer::end_tag('ul');
-        $html .= html_writer::empty_tag('br');
         $html .= html_writer::end_div();
 
         $html .= html_writer::empty_tag('hr');
@@ -170,10 +149,49 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                 $html .= html_writer::end_div();
             }
         }
+
+        return $html;
+    }
+
+    /**
+     * Render the conversation heading, with subject, state indicator and participants.
+     *
+     * @param mod_dialogue\conversation $conversation
+     * @param string $sort (oldest|latest)
+     * @return string
+     */
+    public function heading(mod_dialogue\conversation $conversation, $sort = 'oldest') {
+        global $USER;
+
+        $cm = $conversation->dialogue->cm; // Fetch course module from parent dialogue.
+
+        $html = '';
+
+        $html .= html_writer::start_div('conversation-heading');
+        $html .= html_writer::tag('h3', $conversation->subject, array('class' => 'heading'));
+
+        if ($conversation->state == \mod_dialogue\dialogue::STATE_OPEN) {
+            $span = html_writer::tag('span', get_string('open', 'dialogue'), array('class' => "state-indicator state-open"));
+            $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
+        }
+
+        if ($conversation->state == \mod_dialogue\dialogue::STATE_CLOSED) {
+            $span = html_writer::tag('span', get_string('closed', 'dialogue'), array('class' => "state-indicator state-closed"));
+            $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
+        }
+
+        if ($conversation->state == \mod_dialogue\dialogue::STATE_BULK_AUTOMATED) {
+            $span = html_writer::tag('span', get_string('bulkopener', 'dialogue'), array('class' => "state-indicator state-bulk"));
+            $html .= html_writer::tag('h3', $span, array('class' => 'heading pull-right'));
+        }
+
+        $html .= html_writer::end_div(); // Close header.
+
+        $html .= html_writer::start_div('participants');
+
         // This should only display on open and closed conversations todo - tidy + css.
         $participants = $conversation->participants;
         if ($participants) {
-            $html .= html_writer::start_div('participants');
             $html .= html_writer::tag('strong', count($participants));
             $html .= '&nbsp;' . get_string('participants', 'dialogue');
             foreach ($participants as $participant) {
@@ -181,10 +199,11 @@ class mod_dialogue_renderer extends plugin_renderer_base {
                 $html .= html_writer::tag('span', $picture . '&nbsp;'
                 . dialogue_add_user_fullname($participant, $USER, $cm), array('class' => 'participant'));
             }
-            $html .= html_writer::end_div();
         }
-        $html .= html_writer::end_div(); // End of main conversation.
-        $html .= html_writer::empty_tag('hr');
+
+        $html .= $this->list_sortby(\mod_dialogue\conversation::get_sort_options(), $sort, '');
+
+        $html .= html_writer::end_div();
 
         return $html;
     }
@@ -362,6 +381,18 @@ class mod_dialogue_renderer extends plugin_renderer_base {
         $html .= html_writer::end_div();
         $html .= html_writer::end_div();
 
+        return $html;
+    }
+
+    /**
+     * Render a link to the reply form, used in latest order to link to the form at the bottom of the page.
+      *
+      * @return string
+     */
+    public function link_to_reply_form() {
+        $html = html_writer::start_div('link-to-reply');
+        $html .= html_writer::link('#id_messagesection', get_string('reply', 'dialogue'));
+        $html .= html_writer::end_div();
         return $html;
     }
 

@@ -1528,13 +1528,17 @@ body.path-mod-dialogue #region-main .conversation > .pull-left {
     margin-right: 10px;
 }
 
-body.path-mod-dialogue #region-main .conversation .participants {
+body.path-mod-dialogue #region-main .participants {
     margin-top: 10px;
-    margin-left: 74px;
 }
 
-body.path-mod-dialogue #region-main .conversation .participants span.participant {
+body.path-mod-dialogue #region-main .participants span.participant {
     margin: 0 5px;
+}
+
+body.path-mod-dialogue #region-main .link-to-reply {
+    margin-left: 74px;
+    padding: 0.8em;
 }
 
 body.path-mod-dialogue #region-main .conversation-list {

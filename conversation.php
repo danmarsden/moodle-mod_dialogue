@@ -30,6 +30,11 @@ $id             = required_param('id', PARAM_INT);
 $conversationid = optional_param('conversationid', null, PARAM_INT);
 $action         = optional_param('action', 'view', PARAM_ALPHA);
 $confirm        = optional_param('confirm', 0, PARAM_INT);
+$sortdefault    = get_user_preferences('mod_dialogue_conversation_sort', 'oldest');
+$sort           = optional_param('sort', $sortdefault, PARAM_ALPHA);
+if (in_array($sort, ['oldest', 'latest']) && $sort !== $sortdefault) {
+    set_user_preference('mod_dialogue_conversation_sort', $sort);
+}
 
 $cm = get_coursemodule_from_id('dialogue', $id, 0, false, MUST_EXIST);
 
@@ -191,15 +196,31 @@ if ($conversation->state == \mod_dialogue\dialogue::STATE_OPEN || $conversation-
 // View conversation by default.
 $renderer = $PAGE->get_renderer('mod_dialogue');
 echo $OUTPUT->header($activityrecord->name);
-echo $renderer->render($conversation);
+echo $renderer->heading($conversation, $sort);
 $conversation->mark_read();
 
+// Don't render conversation at the top if sorting by latest as it will be rendered after replies.
+if ($sort != 'latest') {
+    echo $renderer->render($conversation);
+}
+
 // Render replies.
-if ($conversation->replies()) {
-    foreach ($conversation->replies() as $reply) {
-        echo $renderer->render($reply);
-        $reply->mark_read();
+$firstreply = true;
+foreach ($conversation->replies(null, $sort) as $reply) {
+    echo $renderer->render($reply);
+    $reply->mark_read();
+
+    if ($sort == 'latest' && $firstreply) {
+        // Allow the user to quickly jump to the reply form that comes after all replies.
+        echo $renderer->link_to_reply_form();
     }
+
+    $firstreply = false;
+}
+
+// Render conversation at the bottom if sorting by latest.
+if ($sort == 'latest') {
+    echo $renderer->render($conversation);
 }
 
 // Output reply form if meets criteria.
