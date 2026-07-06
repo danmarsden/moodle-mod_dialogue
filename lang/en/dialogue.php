@@ -176,6 +176,7 @@ $string['privacy:metadata:dialogueflags'] = 'Dialogue flags';
 $string['privacy:metadata:dialogueid'] = 'ID of the dialogue';
 $string['privacy:metadata:flag'] = 'Flag';
 $string['privacy:metadata:messageid'] = 'ID of the message';
+$string['privacy:metadata:preference:mod_dialogue_conversation_sort'] = 'The preferred order (oldest or latest first) for displaying messages within a conversation.';
 $string['privacy:metadata:state'] = 'State';
 $string['privacy:metadata:timecreated'] = 'Time created';
 $string['privacy:metadata:timemodified'] = 'Time modified';

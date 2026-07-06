@@ -39,6 +39,7 @@ use stdClass;
 final class provider implements
     \core_privacy\local\request\plugin\provider,
     \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\user_preference_provider,
     \core_privacy\local\metadata\provider {
 
     /**
@@ -86,7 +87,30 @@ final class provider implements
             'privacy:metadata:dialogueflags'
         );
 
+        $collection->add_user_preference(
+            'mod_dialogue_conversation_sort',
+            'privacy:metadata:preference:mod_dialogue_conversation_sort'
+        );
+
         return $collection;
+    }
+
+    /**
+     * Export all user preferences for the plugin.
+     *
+     * @param int $userid The userid of the user whose data is to be exported.
+     */
+    public static function export_user_preferences(int $userid) {
+        $sort = get_user_preferences('mod_dialogue_conversation_sort', null, $userid);
+        if ($sort !== null) {
+            $description = get_string('privacy:metadata:preference:mod_dialogue_conversation_sort', 'mod_dialogue');
+            writer::export_user_preference(
+                'mod_dialogue',
+                'mod_dialogue_conversation_sort',
+                $sort,
+                $description
+            );
+        }
     }
 
     /**
