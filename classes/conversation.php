@@ -331,14 +331,20 @@ class conversation extends message {
 
         require_capability('mod/dialogue:open', $context);
 
+        // The $manager may return the logged-in user as well, so we search for
+        // at least 3 recipients. If, after filtering out the logged-in user,
+        // only one user remains, we can force the recipient.
+        $searchlimit = 3;
+
         $forcerecipient = null;
         $manager = new \mod_dialogue\local\course_enrolment_manager($PAGE, $PAGE->course);
         if ($activityrecord->usecoursegroups && !has_capability('moodle/site:accessallgroups', $context)) {
             $groups = groups_get_activity_allowed_groups($cm);
-            $users = $manager->search_users_with_groups('', false, 0, 2, $groups);
+            $users = $manager->search_users_with_groups('', false, 0, $searchlimit, $groups);
         } else {
-            $users = $manager->search_users('', false, 0, 2);
+            $users = $manager->search_users('', false, 0, $searchlimit);
         }
+        $users['users'] = array_filter($users['users'], fn($user) => $user->id != $USER->id);
         if (count($users['users']) == 1) {
             $user = reset($users['users']);
             $forcerecipient = dialogue_get_user_details($this->dialogue, $user->id);
