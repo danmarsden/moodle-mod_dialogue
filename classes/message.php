@@ -66,7 +66,7 @@ class message implements \renderable {
      * @param dialogue|null $dialogue
      * @param conversation|null $conversation
      */
-    public function __construct(dialogue $dialogue = null, conversation $conversation = null) {
+    public function __construct(?dialogue $dialogue = null, ?conversation $conversation = null) {
         global $USER;
 
         $this->_dialogue = $dialogue;

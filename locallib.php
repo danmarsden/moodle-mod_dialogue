@@ -498,7 +498,7 @@ function dialogue_contains_draft_files($draftid) {
  * @return string fullname
  */
 function dialogue_add_user_fullname(stdClass $userviewed,
-    stdClass $userviewedby = null, stdClass $cm = null) {
+    ?stdClass $userviewedby = null, ?stdClass $cm = null) {
     global $PAGE, $USER;
     if (!$userviewedby) {
         $userviewedby = $USER;

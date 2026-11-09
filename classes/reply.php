@@ -28,7 +28,7 @@ class reply extends message {
      * @param integer $messageid
      * @throws \coding_exception
      */
-    public function __construct(dialogue $dialogue = null, conversation $conversation = null, $messageid = null) {
+    public function __construct(?dialogue $dialogue = null, ?conversation $conversation = null, $messageid = null) {
 
         parent::__construct($dialogue, $conversation);
 
@@ -46,7 +46,7 @@ class reply extends message {
      * @param \stdClass|null $record
      * @throws \dml_exception
      */
-    public function load(\stdClass $record = null) {
+    public function load(?\stdClass $record = null) {
         global $DB;
 
         if (is_null($record)) {
